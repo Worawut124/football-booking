@@ -1,9 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  experimental: {
-    serverComponentsExternalPackages: ['bcrypt', 'bcryptjs']
-  },
+  serverExternalPackages: ['bcrypt', 'bcryptjs'],
   images: {
     domains: ['localhost'],
     remotePatterns: [

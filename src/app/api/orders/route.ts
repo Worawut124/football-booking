@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient, Prisma, Role } from "@prisma/client";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"; // ปรับ path ตามโครงสร้างโปรเจกต์ของคุณ
+import { authOptions } from "@/lib/authOptions";
 import { uploadFile } from "@/lib/supabaseStorage";
 
 const prisma = new PrismaClient();

@@ -1,13 +1,13 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input"; // ใช้ Input component
 import Swal from "sweetalert2";
 
-export default function PaymentPage() {
+function PageInner() {
   const searchParams = useSearchParams();
   const productId = searchParams.get("productId") ? parseInt(searchParams.get("productId")!) : 0;
   const name = searchParams.get("name") ? decodeURIComponent(searchParams.get("name")!) : "N/A";
@@ -240,5 +240,13 @@ export default function PaymentPage() {
         </Button>
       </form>
     </div>
+  );
+}
+
+export default function PaymentPage() {
+  return (
+    <Suspense fallback={<div className="container mx-auto p-4">กำลังโหลด...</div>}>
+      <PageInner />
+    </Suspense>
   );
 }

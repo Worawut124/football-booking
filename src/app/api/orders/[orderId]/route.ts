@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { PrismaClient, Prisma, Role } from "@prisma/client";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"; // ปรับ path ตามโครงสร้างโปรเจกต์ของคุณ
+import { authOptions } from "@/lib/authOptions";
 
 const prisma = new PrismaClient();
 
-export async function DELETE(req: NextRequest, { params }: { params: { orderId: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ orderId: string }> }) {
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user?.id) {
@@ -15,11 +15,12 @@ export async function DELETE(req: NextRequest, { params }: { params: { orderId: 
 
     const userId = parseInt(session.user.id); // userId ของผู้ล็อกอิน
     const userRole = session.user.role;
-    const orderId = parseInt(params.orderId);
+    const { orderId: orderIdParam } = await params;
+    const orderId = parseInt(orderIdParam);
 
     // ตรวจสอบว่า orderId เป็นตัวเลขที่ถูกต้อง
     if (isNaN(orderId) || orderId <= 0) {
-      console.log("Invalid order ID:", params.orderId);
+      console.log("Invalid order ID:", orderIdParam);
       return NextResponse.json({ message: "Order ID is required and must be a valid number" }, { status: 400 });
     }
 

@@ -1,17 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/authOptions";
 import bcrypt from "bcrypt";
 
 // PUT: อัพเดทข้อมูลผู้ใช้
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
   if (!session || (session.user.role !== "ADMIN" && session.user.role !== "OWNER")) {
     return NextResponse.json({ error: "ไม่มีสิทธิ์เข้าถึง" }, { status: 403 });
   }
 
-  const { id } = params;
+  const { id } = await params;
   if (!id || isNaN(parseInt(id))) {
     return NextResponse.json({ error: "ID ไม่ถูกต้อง" }, { status: 400 });
   }
@@ -53,13 +53,13 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 }
 
 // DELETE: ลบผู้ใช้
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getServerSession(authOptions);
   if (!session || (session.user.role !== "ADMIN" && session.user.role !== "OWNER")) {
     return NextResponse.json({ error: "ไม่มีสิทธิ์เข้าถึง" }, { status: 403 });
   }
 
-  const { id } = params;
+  const { id } = await params;
   if (!id || isNaN(parseInt(id))) {
     return NextResponse.json({ error: "ID ไม่ถูกต้อง" }, { status: 400 });
   }

@@ -2,14 +2,14 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Swal from "sweetalert2";
 
-export default function FootballCompetitionPage() {
+function PageInner() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -200,5 +200,13 @@ export default function FootballCompetitionPage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function FootballCompetitionPage() {
+  return (
+    <Suspense fallback={<div className="container mx-auto p-4">กำลังโหลด...</div>}>
+      <PageInner />
+    </Suspense>
   );
 }
