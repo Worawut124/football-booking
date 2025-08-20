@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
-    "vercel-build": "prisma generate && prisma migrate deploy && next build",
+    "vercel-build": "prisma generate && next build",
     "create-supabase-buckets": "node scripts/create-supabase-buckets.js",
     "create-supabase-buckets-admin": "node scripts/create-supabase-buckets-admin.js",
     "disable-rls": "node scripts/disable-rls-temporarily.js",
