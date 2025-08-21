@@ -32,6 +32,7 @@ function PageInner() {
     registrations: { id: number }[];
   } | null>(null);
   const [categories, setCategories] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     console.log("Competition ID from URL:", competitionId); // Debug
@@ -75,6 +76,7 @@ function PageInner() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
     if (!teamName || !managerName || !contactNumber || !playerCount || !category) {
       Swal.fire({
         icon: "error",
@@ -104,6 +106,7 @@ function PageInner() {
     if (depositFile) formData.append("depositFile", depositFile);
 
     try {
+      setIsSubmitting(true);
       console.log("Submitting to:", `/api/football-competition?competitionId=${competitionId}`); // Debug
       const response = await fetch(`/api/football-competition?competitionId=${competitionId}`, {
         method: "POST",
@@ -135,6 +138,8 @@ function PageInner() {
         text: "เกิดข้อผิดพลาดในการสมัคร",
         confirmButtonText: "ตกลง",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -234,7 +239,7 @@ function PageInner() {
                 accept=".pdf,.jpg,.png"
               />
             </div>
-            <Button type="submit">ยืนยันการสมัคร</Button>
+            <Button type="submit" disabled={isSubmitting} className="disabled:opacity-50 disabled:cursor-not-allowed">ยืนยันการสมัคร</Button>
           </form>
         </CardContent>
       </Card>

@@ -75,9 +75,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "เบอร์ติดต่อไม่ถูกต้อง (ต้องเป็นตัวเลข 10 หลัก)" }, { status: 400 });
     }
 
-    const existingTeam = await prisma.competitionRegistration.findUnique({
-      where: { teamName },
-    });
+    // Idempotency: prevent duplicate teamName or duplicate user registration for same competition
+    const existingTeam = await prisma.competitionRegistration.findUnique({ where: { teamName } });
     if (existingTeam) {
       return NextResponse.json({ error: "ทีมนี้ถูกสมัครไปแล้ว" }, { status: 400 });
     }
@@ -104,22 +103,35 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "ไม่พบการแข่งขันที่ระบุ" }, { status: 400 });
     }
 
-    await prisma.competitionRegistration.create({
-      data: {
-        teamName,
-        managerName,
-        contactNumber,
-        playerCount,
-        category,
-        depositFileName: depositFileUrl,
-        status: "PENDING",
-        competition: { connect: { id: competitionId } },
-        user: { connect: { id: userId } },
-      },
+    await prisma.$transaction(async (tx) => {
+      // Double-check inside transaction for duplicates
+      const dup = await tx.competitionRegistration.findFirst({
+        where: { OR: [ { teamName }, { AND: [{ competitionId }, { userId }] } ] },
+      });
+      if (dup) {
+        throw Object.assign(new Error("ALREADY_REGISTERED"), { code: "ALREADY_REGISTERED" });
+      }
+
+      await tx.competitionRegistration.create({
+        data: {
+          teamName,
+          managerName,
+          contactNumber,
+          playerCount,
+          category,
+          depositFileName: depositFileUrl,
+          status: "PENDING",
+          competition: { connect: { id: competitionId } },
+          user: { connect: { id: userId } },
+        },
+      });
     });
 
     return NextResponse.json({ message: "สมัครการแข่งขันสำเร็จ" });
   } catch (error) {
+    if ((error as any)?.code === "ALREADY_REGISTERED") {
+      return NextResponse.json({ error: "คุณได้สมัคร/ใช้ชื่อทีมนี้ไปแล้ว" }, { status: 409 });
+    }
     console.error("Error registering competition:", error);
     return NextResponse.json({ error: "เกิดข้อผิดพลาดในการสมัคร" }, { status: 500 });
   }
