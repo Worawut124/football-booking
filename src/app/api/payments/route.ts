@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+// import { PrismaClient } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import { uploadFile } from "@/lib/supabaseStorage";
 
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 // ฟังก์ชันคำนวณราคาโดยใช้ paymentConfig
 async function calculateAmount(startTime: Date, endTime: Date) {

@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+// import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
 import nodemailer from "nodemailer";
 
-const prisma = new PrismaClient();
+// Use shared Prisma instance
 
 // สร้าง transporter สำหรับส่งอีเมล
 const transporter = nodemailer.createTransport({

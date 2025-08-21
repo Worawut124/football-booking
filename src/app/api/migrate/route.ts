@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 export async function POST() {
   try {
@@ -31,7 +29,7 @@ export async function POST() {
       error: error instanceof Error ? error.message : "Unknown error" 
     }, { status: 500 });
   } finally {
-    await prisma.$disconnect();
+    // Do not disconnect in serverless to avoid prepared statement issues
   }
 }
 
@@ -57,6 +55,6 @@ export async function GET() {
       error: error instanceof Error ? error.message : "Unknown error" 
     }, { status: 500 });
   } finally {
-    await prisma.$disconnect();
+    // Do not disconnect in serverless to avoid prepared statement issues
   }
 }

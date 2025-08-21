@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient, Prisma, Role } from "@prisma/client";
+import { Prisma, Role } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import { uploadFile } from "@/lib/supabaseStorage";
 
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 export async function GET(req: NextRequest) {
   try {
@@ -125,7 +125,7 @@ export async function GET(req: NextRequest) {
     console.error("Error fetching orders:", error);
     return NextResponse.json({ message: "Error fetching orders", error: (error as Error).message }, { status: 500 });
   } finally {
-    await prisma.$disconnect();
+    // Do not disconnect in serverless to avoid prepared statement issues
   }
 }
 
@@ -200,7 +200,7 @@ export async function POST(req: NextRequest) {
     console.error("Error saving order:", error);
     return NextResponse.json({ message: error instanceof Error ? error.message : "Error saving order" }, { status: 500 });
   } finally {
-    await prisma.$disconnect();
+    // Do not disconnect in serverless to avoid prepared statement issues
   }
 }
 
@@ -272,6 +272,6 @@ export async function PATCH(req: NextRequest) {
     console.error("Error updating status:", error);
     return NextResponse.json({ message: "Error updating status" }, { status: 500 });
   } finally {
-    await prisma.$disconnect();
+    // Do not disconnect in serverless to avoid prepared statement issues
   }
 }

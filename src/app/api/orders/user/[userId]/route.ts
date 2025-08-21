@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient, Prisma, Role } from "@prisma/client";
+import { Prisma, Role } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 export async function GET(req: NextRequest, { params }: { params: Promise<{ userId: string }> }) {
   try {
@@ -85,6 +85,6 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ user
     console.error("Error fetching orders:", error);
     return NextResponse.json({ message: "Error fetching orders" }, { status: 500 });
   } finally {
-    await prisma.$disconnect();
+    // Do not disconnect in serverless to avoid prepared statement issues
   }
 }
