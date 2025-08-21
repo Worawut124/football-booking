@@ -32,9 +32,7 @@ export async function POST(request: Request) {
     const method = formData.get("method") as string;
     const proofFile = formData.get("proof") as File | null;
 
-    const booking = await prisma.booking.findUnique({
-      where: { id: bookingId },
-    });
+    const booking = await prisma.booking.findUnique({ where: { id: bookingId } });
     if (!booking) {
       return NextResponse.json({ error: "ไม่พบการจอง" }, { status: 404 });
     }
@@ -52,24 +50,29 @@ export async function POST(request: Request) {
       proofUrl = uploadResult.url;
     }
 
-    const payment = await prisma.payment.create({
-      data: {
-        bookingId,
-        method,
-        proof: proofUrl,
-        amount,
-      },
-    });
+    // Server-side idempotency: prevent duplicate payments for the same booking
+    const payment = await prisma.$transaction(async (tx) => {
+      const existing = await tx.payment.findUnique({ where: { bookingId } });
+      if (existing) {
+        // Indicate to caller it's already processed
+        throw Object.assign(new Error("ALREADY_PAID"), { code: "ALREADY_PAID" });
+      }
 
-    const newStatus = method === "cash" ? "pending" : "paid"; // เปลี่ยนจาก "pending_confirmation" เป็น "pending"
-    await prisma.booking.update({
-      where: { id: bookingId },
-      data: { status: newStatus },
+      const created = await tx.payment.create({
+        data: { bookingId, method, proof: proofUrl, amount },
+      });
+
+      const newStatus = method === "cash" ? "pending" : "paid";
+      await tx.booking.update({ where: { id: bookingId }, data: { status: newStatus } });
+      return created;
     });
 
     console.log(`Payment created for bookingId ${bookingId}:`, payment); // Log เพื่อตรวจสอบ
     return NextResponse.json(payment, { status: 201 });
   } catch (error) {
+    if ((error as any)?.code === "ALREADY_PAID") {
+      return NextResponse.json({ error: "คำสั่งซื้อนี้ถูกชำระ/อยู่ระหว่างดำเนินการแล้ว" }, { status: 409 });
+    }
     console.error("Error creating payment:", error);
     return NextResponse.json({ error: "เกิดข้อผิดพลาดในการชำระเงิน" }, { status: 500 });
   }
