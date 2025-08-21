@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Swal from "sweetalert2";
+import LoadingCrescent from "@/components/ui/loading-crescent";
 
 interface Competition {
   id: number;
@@ -37,6 +38,10 @@ export default function CompetitionListPage() {
   useEffect(() => {
     fetchCompetitions();
   }, []);
+
+  if (!competitions.length) {
+    return <LoadingCrescent text="กำลังโหลดรายการแข่งขัน..." />;
+  }
 
   return (
     <div className="container mx-auto p-4 min-h-screen bg-gray-50">

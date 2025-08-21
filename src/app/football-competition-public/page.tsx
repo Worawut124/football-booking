@@ -3,6 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
+import LoadingCrescent from "@/components/ui/loading-crescent";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -144,7 +145,7 @@ function PageInner() {
   };
 
   if (!competitionId || !competitionDetails) {
-    return <div className="container mx-auto p-4">กำลังโหลด...</div>;
+    return <LoadingCrescent text="กำลังโหลดข้อมูลการแข่งขัน..." />;
   }
 
   return (

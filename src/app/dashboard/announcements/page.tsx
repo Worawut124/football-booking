@@ -27,6 +27,7 @@ import Swal from "sweetalert2";
 import { format } from "date-fns";
 import { th } from "date-fns/locale";
 import Link from "next/link";
+import LoadingCrescent from "@/components/ui/loading-crescent";
 
 // กำหนด Type สำหรับ Announcement
 interface Announcement {
@@ -243,7 +244,7 @@ export default function ManageAnnouncements() {
   };
 
   if (status === "loading" || loading) {
-    return <div className="container mx-auto p-4">กำลังโหลด...</div>;
+    return <LoadingCrescent text="กำลังโหลดข่าว..." />;
   }
 
   if (!session || (session.user.role !== "ADMIN" && session.user.role !== "OWNER")) {

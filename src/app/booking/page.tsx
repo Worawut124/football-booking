@@ -22,6 +22,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import LoadingCrescent from "@/components/ui/loading-crescent";
 import Swal from "sweetalert2";
 import {
   Pagination,
@@ -462,7 +463,7 @@ export default function BookingPage() {
   };
 
   if (status === "loading" || loading) {
-    return <div className="container mx-auto p-4">กำลังโหลด...</div>;
+    return <LoadingCrescent text="กำลังโหลดข้อมูล..." />;
   }
 
   if (!session) return null;

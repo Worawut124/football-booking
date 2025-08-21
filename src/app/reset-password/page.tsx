@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
+import LoadingCrescent from "@/components/ui/loading-crescent";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -104,7 +105,7 @@ function PageInner() {
   };
 
   if (!token) {
-    return null;
+    return <LoadingCrescent text="กำลังตรวจสอบลิงก์รีเซ็ต..." />;
   }
 
   return (

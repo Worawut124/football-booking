@@ -33,6 +33,7 @@ import { format } from "date-fns";
 import { th } from "date-fns/locale";
 import Swal from "sweetalert2";
 import { Trash2, Edit } from "lucide-react";
+import LoadingCrescent from "@/components/ui/loading-crescent";
 
 interface User {
   id: number;
@@ -254,7 +255,7 @@ export default function ManageUsersPage() {
   };
 
   if (status === "loading" || loading) {
-    return <div className="container mx-auto p-4">กำลังโหลด...</div>;
+    return <LoadingCrescent text="กำลังโหลดผู้ใช้..." />;
   }
 
   if (!session) {

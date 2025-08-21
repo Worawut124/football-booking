@@ -2,6 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
+import LoadingCrescent from "@/components/ui/loading-crescent";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input"; // ใช้ Input component
@@ -116,7 +117,7 @@ function PageInner() {
   };
 
   if (loading) {
-    return <div className="container mx-auto p-4">กำลังโหลด...</div>;
+    return <LoadingCrescent text="กำลังโหลดการตั้งค่าชำระเงิน..." />;
   }
 
   return (

@@ -22,6 +22,7 @@ import { format } from "date-fns";
 import { th } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import LoadingCrescent from "@/components/ui/loading-crescent";
 
 export default function HomePage() {
   const [announcements, setAnnouncements] = useState<any[]>([]);
@@ -86,7 +87,7 @@ export default function HomePage() {
   };
 
   if (loading) {
-    return <div className="container mx-auto p-4">กำลังโหลด...</div>;
+    return <LoadingCrescent text="กำลังโหลดข้อมูล..." />;
   }
 
   return (

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import LoadingCrescent from "@/components/ui/loading-crescent";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import Swal from "sweetalert2";
@@ -69,6 +70,10 @@ export default function AdminOrders() {
     }
     fetchOrders();
   }, [startDate, endDate]);
+
+  if (!orders.length && !error) {
+    return <LoadingCrescent text="กำลังโหลดคำสั่งซื้อ..." />;
+  }
 
   const handleUpdateStatus = async (id: number, currentStatus: string) => {
     const { value: newStatus } = await Swal.fire({
