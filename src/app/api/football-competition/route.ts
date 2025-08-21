@@ -1,11 +1,10 @@
 import { NextResponse } from "next/server";
-// import { PrismaClient } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import { uploadFile, deleteFile } from "@/lib/supabaseStorage";
-
 import { prisma } from "@/lib/prisma";
 
+// ------------------- GET -------------------
 export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
   const { searchParams } = new URL(request.url);
@@ -15,9 +14,8 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "คุณไม่มีสิทธิ์เข้าถึง" }, { status: 403 });
   }
 
-  const userId = parseInt(session.user.id); // แปลง string เป็น number
+  const userId = parseInt(session.user.id);
 
-  // ตรวจสอบสถานะการสมัครของ user
   if (teamName) {
     try {
       const registration = await prisma.competitionRegistration.findFirst({
@@ -33,7 +31,6 @@ export async function GET(request: Request) {
     }
   }
 
-  // ดึงประวัติการสมัครของ user
   try {
     const registrations = await prisma.competitionRegistration.findMany({
       where: { userId },
@@ -45,13 +42,14 @@ export async function GET(request: Request) {
   }
 }
 
+// ------------------- POST -------------------
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
     return NextResponse.json({ error: "คุณไม่มีสิทธิ์เข้าถึง" }, { status: 403 });
   }
 
-  const userId = parseInt(session.user.id); // แปลง string เป็น number
+  const userId = parseInt(session.user.id);
 
   try {
     const formData = await request.formData();
@@ -75,7 +73,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "เบอร์ติดต่อไม่ถูกต้อง (ต้องเป็นตัวเลข 10 หลัก)" }, { status: 400 });
     }
 
-    // Idempotency: prevent duplicate teamName or duplicate user registration for same competition
+    // check duplicate teamName only
     const existingTeam = await prisma.competitionRegistration.findUnique({ where: { teamName } });
     if (existingTeam) {
       return NextResponse.json({ error: "ทีมนี้ถูกสมัครไปแล้ว" }, { status: 400 });
@@ -83,7 +81,7 @@ export async function POST(request: Request) {
 
     let depositFileUrl = null;
     if (depositFile) {
-      const uploadResult = await uploadFile(depositFile, 'competition-registrations', 'deposits');
+      const uploadResult = await uploadFile(depositFile, "competition-registrations", "deposits");
       if (uploadResult.error) {
         return NextResponse.json({ error: `ไม่สามารถอัพโหลดไฟล์ได้: ${uploadResult.error}` }, { status: 500 });
       }
@@ -96,17 +94,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "ไม่พบการแข่งขันที่ระบุ" }, { status: 400 });
     }
 
-    const competition = await prisma.competition.findUnique({
-      where: { id: competitionId },
-    });
+    const competition = await prisma.competition.findUnique({ where: { id: competitionId } });
     if (!competition) {
       return NextResponse.json({ error: "ไม่พบการแข่งขันที่ระบุ" }, { status: 400 });
     }
 
     await prisma.$transaction(async (tx) => {
-      // Double-check inside transaction for duplicates
       const dup = await tx.competitionRegistration.findFirst({
-        where: { OR: [ { teamName }, { AND: [{ competitionId }, { userId }] } ] },
+        where: { teamName },
       });
       if (dup) {
         throw Object.assign(new Error("ALREADY_REGISTERED"), { code: "ALREADY_REGISTERED" });
@@ -130,20 +125,19 @@ export async function POST(request: Request) {
     return NextResponse.json({ message: "สมัครการแข่งขันสำเร็จ" });
   } catch (error) {
     if ((error as any)?.code === "ALREADY_REGISTERED") {
-      return NextResponse.json({ error: "คุณได้สมัคร/ใช้ชื่อทีมนี้ไปแล้ว" }, { status: 409 });
+      return NextResponse.json({ error: "ทีมนี้ถูกสมัครไปแล้ว" }, { status: 409 });
     }
     console.error("Error registering competition:", error);
     return NextResponse.json({ error: "เกิดข้อผิดพลาดในการสมัคร" }, { status: 500 });
   }
 }
 
+// ------------------- PUT -------------------
 export async function PUT(request: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id || (session.user.role !== "ADMIN" && session.user.role !== "OWNER")) {
     return NextResponse.json({ error: "คุณไม่มีสิทธิ์เข้าถึง" }, { status: 403 });
   }
-
-  const userId = parseInt(session.user.id); // แปลง string เป็น number
 
   try {
     const { searchParams } = new URL(request.url);
@@ -154,9 +148,7 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "กรุณาระบุ ID" }, { status: 400 });
     }
 
-    const existingRegistration = await prisma.competitionRegistration.findUnique({
-      where: { id },
-    });
+    const existingRegistration = await prisma.competitionRegistration.findUnique({ where: { id } });
     if (!existingRegistration) {
       return NextResponse.json({ error: "ไม่พบการสมัครที่ระบุ" }, { status: 404 });
     }
@@ -166,14 +158,13 @@ export async function PUT(request: Request) {
       const formData = await request.formData();
       const newDepositFile = formData.get("depositFile") as File | null;
       if (newDepositFile) {
-        // ลบไฟล์เก่าถ้ามี
-        if (existingRegistration.depositFileName && existingRegistration.depositFileName.startsWith('http')) {
-          const urlParts = existingRegistration.depositFileName.split('/');
-          const oldPath = urlParts.slice(-2).join('/'); // deposits/filename
-          await deleteFile('competition-registrations', oldPath);
+        if (existingRegistration.depositFileName && existingRegistration.depositFileName.startsWith("http")) {
+          const urlParts = existingRegistration.depositFileName.split("/");
+          const oldPath = urlParts.slice(-2).join("/");
+          await deleteFile("competition-registrations", oldPath);
         }
 
-        const uploadResult = await uploadFile(newDepositFile, 'competition-registrations', 'deposits');
+        const uploadResult = await uploadFile(newDepositFile, "competition-registrations", "deposits");
         if (uploadResult.error) {
           return NextResponse.json({ error: `ไม่สามารถอัพโหลดไฟล์ได้: ${uploadResult.error}` }, { status: 500 });
         }
@@ -182,8 +173,13 @@ export async function PUT(request: Request) {
     } else {
       const { teamName, managerName, contactNumber, playerCount, category, status } = body;
       if (teamName || managerName || contactNumber || playerCount || category || status) {
-        if (teamName && await prisma.competitionRegistration.findUnique({ where: { teamName } })) {
-          return NextResponse.json({ error: "ทีมนี้ถูกสมัครไปแล้ว" }, { status: 400 });
+        if (teamName) {
+          const dupTeam = await prisma.competitionRegistration.findFirst({
+            where: { teamName, NOT: { id } },
+          });
+          if (dupTeam) {
+            return NextResponse.json({ error: "ทีมนี้ถูกสมัครไปแล้ว" }, { status: 400 });
+          }
         }
         if (playerCount && (playerCount < 10 || playerCount > 20)) {
           return NextResponse.json({ error: "จำนวนผู้เล่นต้องอยู่ระหว่าง 10-20" }, { status: 400 });
@@ -216,13 +212,12 @@ export async function PUT(request: Request) {
   }
 }
 
+// ------------------- DELETE -------------------
 export async function DELETE(request: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id || (session.user.role !== "ADMIN" && session.user.role !== "OWNER")) {
     return NextResponse.json({ error: "คุณไม่มีสิทธิ์เข้าถึง" }, { status: 403 });
   }
-
-  const userId = parseInt(session.user.id); // แปลง string เป็น number
 
   try {
     const { searchParams } = new URL(request.url);
@@ -232,22 +227,18 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "กรุณาระบุ ID" }, { status: 400 });
     }
 
-    const registration = await prisma.competitionRegistration.findUnique({
-      where: { id },
-    });
+    const registration = await prisma.competitionRegistration.findUnique({ where: { id } });
     if (!registration) {
       return NextResponse.json({ error: "ไม่พบการสมัครที่ระบุ" }, { status: 404 });
     }
 
-    if (registration.depositFileName && registration.depositFileName.startsWith('http')) {
-      const urlParts = registration.depositFileName.split('/');
-      const filePath = urlParts.slice(-2).join('/'); // deposits/filename
-      await deleteFile('competition-registrations', filePath);
+    if (registration.depositFileName && registration.depositFileName.startsWith("http")) {
+      const urlParts = registration.depositFileName.split("/");
+      const filePath = urlParts.slice(-2).join("/");
+      await deleteFile("competition-registrations", filePath);
     }
 
-    await prisma.competitionRegistration.delete({
-      where: { id },
-    });
+    await prisma.competitionRegistration.delete({ where: { id } });
 
     return NextResponse.json({ message: "ลบการสมัครสำเร็จ" });
   } catch (error) {
