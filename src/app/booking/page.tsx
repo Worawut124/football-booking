@@ -78,6 +78,7 @@ export default function BookingPage() {
   const [loading, setLoading] = useState(true);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [proofFile, setProofFile] = useState<File | null>(null);
+  const [isPaying, setIsPaying] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
@@ -333,6 +334,8 @@ export default function BookingPage() {
   };
 
   const handlePayment = async (method: string) => {
+    if (isPaying) return;
+    setIsPaying(true);
     if (!selectedBooking) return;
 
     if (!paymentConfig) {
@@ -388,6 +391,7 @@ export default function BookingPage() {
         text: errorData.error || "ไม่สามารถชำระเงินได้",
       });
     }
+    setIsPaying(false);
   };
 
   const handleCancel = async (bookingId: number) => {
@@ -684,7 +688,8 @@ export default function BookingPage() {
                                     </p>
                                     <Button
                                       onClick={() => handlePayment("cash")}
-                                      className="mt-2 w-full bg-blue-600 hover:bg-blue-700 text-white"
+                                      disabled={isPaying}
+                                      className="mt-2 w-full bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                       ยืนยันการชำระด้วยเงินสด
                                     </Button>
@@ -813,7 +818,8 @@ export default function BookingPage() {
                                 </p>
                                 <Button
                                   onClick={() => handlePayment("cash")}
-                                  className="mt-2 w-full bg-blue-600 hover:bg-blue-700 text-white"
+                                  disabled={isPaying}
+                                  className="mt-2 w-full bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                   ยืนยันการชำระด้วยเงินสด
                                 </Button>
