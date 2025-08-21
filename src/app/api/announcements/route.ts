@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { authOptions } from "@/lib/authOptions";
 import { uploadFile, deleteFile, updateFile } from "@/lib/supabaseStorage";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const announcements = await prisma.announcement.findMany({
