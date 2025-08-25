@@ -16,49 +16,58 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+
+  // แยก state loading
+  const [isLoginLoading, setIsLoginLoading] = useState(false);
+  const [isForgotLoading, setIsForgotLoading] = useState(false);
+
   const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
   const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsLoginLoading(true);
 
-    const result = await signIn("credentials", {
-      redirect: false,
-      email,
-      password,
-    });
-
-    if (result?.error) {
-      Swal.fire({
-        icon: "error",
-        title: "ล็อกอินล้มเหลว",
-        text: result.error || "กรุณาตรวจสอบอีเมลและรหัสผ่าน",
+    try {
+      const result = await signIn("credentials", {
+        redirect: false,
+        email,
+        password,
       });
-    } else {
-      const sessionResponse = await fetch("/api/auth/session");
-      const session = await sessionResponse.json();
-      const role = session?.user?.role;
 
-      Swal.fire({
-        icon: "success",
-        title: "ล็อกอินสำเร็จ!",
-        text: "ยินดีต้อนรับกลับมา",
-        timer: 1500,
-        showConfirmButton: false,
-      }).then(() => {
-        if (role === "ADMIN" || role === "OWNER") {
-          router.push("/dashboard");
-        } else {
-          router.push("/booking");
-        }
-      });
+      if (result?.error) {
+        Swal.fire({
+          icon: "error",
+          title: "ล็อกอินล้มเหลว",
+          text: result.error || "กรุณาตรวจสอบอีเมลและรหัสผ่าน",
+        });
+      } else {
+        const sessionResponse = await fetch("/api/auth/session");
+        const session = await sessionResponse.json();
+        const role = session?.user?.role;
+
+        Swal.fire({
+          icon: "success",
+          title: "ล็อกอินสำเร็จ!",
+          text: "ยินดีต้อนรับกลับมา",
+          timer: 1500,
+          showConfirmButton: false,
+        }).then(() => {
+          if (role === "ADMIN" || role === "OWNER") {
+            router.push("/dashboard");
+          } else {
+            router.push("/booking");
+          }
+        });
+      }
+    } finally {
+      setIsLoginLoading(false);
     }
   };
 
   const handleForgotPassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!forgotEmail) {
       Swal.fire({
         icon: "warning",
@@ -69,7 +78,7 @@ export default function LoginPage() {
       return;
     }
 
-    setIsLoading(true);
+    setIsForgotLoading(true);
 
     try {
       const response = await fetch("/api/auth/forgot-password", {
@@ -108,7 +117,7 @@ export default function LoginPage() {
         confirmButtonText: "ตกลง",
       });
     } finally {
-      setIsLoading(false);
+      setIsForgotLoading(false);
     }
   };
 
@@ -116,7 +125,6 @@ export default function LoginPage() {
     <div
       className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-900 via-green-800 to-gray-900"
       style={{
-        // backgroundImage: "url(/images/img11.jpg)", // เปลี่ยนเป็น path ใน public/images/
         backgroundSize: "cover",
         backgroundPosition: "center",
         backgroundBlendMode: "overlay",
@@ -166,12 +174,13 @@ export default function LoginPage() {
             </div>
             <Button
               type="submit"
-              className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-md transition duration-200"
+              disabled={isLoginLoading}
+              className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-md transition duration-200 disabled:opacity-50"
             >
-              ล็อกอิน
+              {isLoginLoading ? "กำลังล็อกอิน..." : "ล็อกอิน"}
             </Button>
           </form>
-          
+
           {/* ลิงก์ลืมรหัสผ่าน */}
           <div className="mt-4 text-center">
             <Dialog open={isForgotPasswordOpen} onOpenChange={setIsForgotPasswordOpen}>
@@ -203,10 +212,10 @@ export default function LoginPage() {
                   <div className="flex gap-3">
                     <Button
                       type="submit"
-                      disabled={isLoading}
+                      disabled={isForgotLoading}
                       className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-md transition duration-200 disabled:opacity-50"
                     >
-                      {isLoading ? "กำลังส่ง..." : "ส่งอีเมลรีเซ็ต"}
+                      {isForgotLoading ? "กำลังส่ง..." : "ส่งอีเมลรีเซ็ต"}
                     </Button>
                     <Button
                       type="button"
@@ -227,7 +236,7 @@ export default function LoginPage() {
               </DialogContent>
             </Dialog>
           </div>
-          
+
           <p className="mt-4 text-center text-sm text-gray-600">
             ยังไม่มีบัญชี?{" "}
             <Link href="/register" className="text-green-600 hover:underline font-medium">

@@ -60,6 +60,9 @@ export default function Navbar() {
           <Link href="/Products">
             <Button variant="ghost" className="w-full justify-start cursor-pointer">สินค้า</Button>
           </Link>
+          <Link href="/contact">
+            <Button variant="ghost" className="w-full justify-start cursor-pointer">ติดต่อ</Button>
+          </Link>
           {(session?.user?.role === "ADMIN" || session?.user?.role === "OWNER") && (
             <Link href="/dashboard">
               <Button variant="ghost" className="cursor-pointer">แดชบอร์ด</Button>
@@ -130,6 +133,9 @@ export default function Navbar() {
                 </Link>
                   <Link href="/Products">
                   <Button variant="ghost" className="w-full justify-start cursor-pointer">สินค้า</Button>
+                  </Link>
+                  <Link href="/contact">
+                    <Button variant="ghost" className="w-full justify-start cursor-pointer">ติดต่อ</Button>
                   </Link>
                 {(session?.user?.role === "ADMIN" || session?.user?.role === "OWNER") && (
                   <Link href="/dashboard">
