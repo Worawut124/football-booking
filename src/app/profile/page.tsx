@@ -101,7 +101,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 min-h-screen bg-gray-50">
+    <div className="container mx-auto p-4 sm:p-6 bg-gray-50">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl sm:text-4xl font-bold text-gray-800">จัดการข้อมูลส่วนตัว</h1>
         <Link href="/">

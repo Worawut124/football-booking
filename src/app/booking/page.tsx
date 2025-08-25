@@ -473,7 +473,7 @@ export default function BookingPage() {
   if (!session) return null;
 
   return (
-    <div className="container mx-auto p-4 min-h-screen bg-gray-50 mt-7">
+    <div className="container mx-auto p-4 bg-gray-50">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800">จองสนามฟุตบอล</h1>
         <Button

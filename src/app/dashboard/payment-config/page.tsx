@@ -204,7 +204,7 @@ export default function PaymentConfigPage() {
   }
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 min-h-screen bg-gray-50 flex justify-end">
+    <div className="container mx-auto p-4 sm:p-6 bg-gray-50 flex justify-end">
       <div className="space-x-6 flex flex-row items-start">
         <Card className="max-w-md">
           <CardHeader>

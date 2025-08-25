@@ -110,7 +110,7 @@ function PageInner() {
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-900 via-green-800 to-gray-900"
+      className="flex items-center justify-center bg-gradient-to-br from-green-900 via-green-800 to-gray-900 min-h-full py-8"
       style={{
         // backgroundImage: "url(/images/img11.jpg)",
         backgroundSize: "cover",

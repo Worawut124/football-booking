@@ -446,7 +446,7 @@ export default function BookingsPage() {
   }
 
   return (
-    <div className="container mx-auto p-4 min-h-screen bg-gray-50">
+    <div className="container mx-auto p-4 bg-gray-50">
       <h1 className="text-3xl font-bold text-gray-800 mb-6">จัดการการจอง</h1>
       <div className="bg-white p-6 rounded-lg shadow-md">
         <div className="mb-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">

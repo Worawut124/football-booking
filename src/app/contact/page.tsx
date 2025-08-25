@@ -1,12 +1,11 @@
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import Footer from "../components/Footer";
 
 export default function ContactPage() {
   return (
     <div
-      className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-900 via-green-800 to-gray-900"
+      className="flex items-center justify-center bg-gradient-to-br from-green-900 via-green-800 to-gray-900 min-h-full py-8"
     >
       <Card className="w-full max-w-md sm:max-w-lg shadow-2xl bg-white/90 backdrop-blur-sm rounded-xl p-4 sm:p-6">
         <CardHeader className="text-center">

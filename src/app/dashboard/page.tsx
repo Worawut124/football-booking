@@ -27,7 +27,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="container mx-auto p-4 min-h-screen bg-gray-50">
+    <div className="container mx-auto p-4 bg-gray-50">
       <h1 className="text-3xl font-bold text-gray-800 mb-6">แดชบอร์ด (Admin/Owner)</h1>
       <div className="bg-white p-6 rounded-lg shadow-md">
         <h2 className="text-xl font-semibold mb-4">เลือกการจัดการ</h2>

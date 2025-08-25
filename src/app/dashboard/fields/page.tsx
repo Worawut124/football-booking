@@ -143,7 +143,7 @@ export default function FieldsPage() {
   }
 
   return (
-    <div className="container mx-auto p-4 min-h-screen bg-gray-50">
+    <div className="container mx-auto p-4 bg-gray-50">
       <h1 className="text-3xl font-bold text-gray-800 mb-6">จัดการสนาม</h1>
       <div className="bg-white p-6 rounded-lg shadow-md">
         <div className="flex gap-4 mb-6">
