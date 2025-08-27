@@ -19,9 +19,12 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Menu, LogOut, User } from "lucide-react";
 import Image from "next/image";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
+import { useCart } from "@/components/CartContext";
+import { ShoppingCart } from "lucide-react";
 
 export default function Navbar() {
   const { data: session, status } = useSession();
+  const { totalQuantity } = useCart();
 
   // ตัวย่อชื่อสำหรับ Avatar
   const getInitials = (name: string | null | undefined) => {
@@ -62,6 +65,16 @@ export default function Navbar() {
           </Link>
           <Link href="/contact">
             <Button variant="ghost" className="w-full justify-start cursor-pointer">ติดต่อ</Button>
+          </Link>
+          <Link href="/cart">
+            <Button variant="ghost" className="relative cursor-pointer">
+              <ShoppingCart className="mr-2 h-4 w-4" /> ตะกร้า
+              {totalQuantity > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-xs text-white">
+                  {totalQuantity}
+                </span>
+              )}
+            </Button>
           </Link>
           {(session?.user?.role === "ADMIN" || session?.user?.role === "OWNER") && (
             <Link href="/dashboard">
@@ -137,6 +150,16 @@ export default function Navbar() {
                   <Link href="/contact">
                     <Button variant="ghost" className="w-full justify-start cursor-pointer">ติดต่อ</Button>
                   </Link>
+                  <Link href="/cart">
+                  <Button variant="ghost" className="w-full justify-start cursor-pointer">
+                    <ShoppingCart className="mr-2 h-4 w-4" /> ตะกร้า
+                    {totalQuantity > 0 && (
+                      <span className="ml-2 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-xs text-white">
+                        {totalQuantity}
+                      </span>
+                    )}
+                  </Button>
+                </Link>
                 {(session?.user?.role === "ADMIN" || session?.user?.role === "OWNER") && (
                   <Link href="/dashboard">
                     <Button variant="ghost" className="w-full justify-start cursor-pointer">แดชบอร์ด</Button>

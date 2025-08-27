@@ -5,6 +5,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import Link from "next/link";
+import { useCart } from "@/components/CartContext";
 
 interface Product {
   id: number;
@@ -22,6 +23,7 @@ export default function ProductDisplay() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const itemsPerPage = 10;
+  const { addItem } = useCart();
 
   useEffect(() => {
     async function fetchProducts() {
@@ -114,23 +116,44 @@ export default function ProductDisplay() {
                 </p>
               </CardContent>
               <CardFooter>
-                <Link
-                  href={{
-                    pathname: "/payment-product",
-                    query: {
-                      productId: product.id, // ส่ง productId แทน name
-                      name: encodeURIComponent(product.name),
-                      price: product.price,
-                      stock: product.stock,
-                      category: encodeURIComponent(product.category?.name || "ไม่มี"),
-                    },
-                  }}
-                  passHref
-                >
-                  <Button className="w-full" disabled={product.stock === 0}>
-                    ซื้อ
+                <div className="grid grid-cols-2 gap-2 w-full">
+                  <Button
+                    variant="outline"
+                    disabled={product.stock === 0}
+                    onClick={() =>
+                      addItem(
+                        {
+                          id: product.id,
+                          name: product.name,
+                          price: product.price,
+                          imageData: product.imageData,
+                          stock: product.stock,
+                          categoryName: product.category?.name || null,
+                        },
+                        1
+                      )
+                    }
+                  >
+                    หยิบใส่ตะกร้า
                   </Button>
-                </Link>
+                  <Link
+                    href={{
+                      pathname: "/payment-product",
+                      query: {
+                        productId: product.id,
+                        name: encodeURIComponent(product.name),
+                        price: product.price,
+                        stock: product.stock,
+                        category: encodeURIComponent(product.category?.name || "ไม่มี"),
+                      },
+                    }}
+                    passHref
+                  >
+                    <Button className="w-full" disabled={product.stock === 0}>
+                      ซื้อทันที
+                    </Button>
+                  </Link>
+                </div>
               </CardFooter>
             </Card>
           ))
