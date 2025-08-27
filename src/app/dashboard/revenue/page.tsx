@@ -83,15 +83,15 @@ export default function RevenuePage() {
   return (
     <div className="container mx-auto p-4 bg-gray-50">
       <h1 className="text-3xl font-bold text-gray-800 mb-6">รายงานรายได้</h1>
-      <div className="flex justify-end mb-4 space-x-4">
+      <div className="flex flex-col sm:flex-row sm:justify-end gap-3 sm:gap-4 mb-4">
         <Input
           type="month"
           value={selectedDate}
           onChange={(e) => setSelectedDate(e.target.value)}
-          className="w-[180px]"
+          className="w-full sm:w-[180px]"
         />
         <Select value={period} onValueChange={(value: "monthly" | "yearly") => setPeriod(value)}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-full sm:w-[180px]">
             <SelectValue placeholder="เลือกช่วงเวลา" />
           </SelectTrigger>
           <SelectContent>

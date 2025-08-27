@@ -263,10 +263,10 @@ export default function ManageAnnouncements() {
 
   return (
     <div className="container mx-auto p-4 bg-gray-50">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
         <h1 className="text-3xl font-bold text-gray-800">จัดการข่าวประชาสัมพันธ์</h1>
         <Link href="/dashboard">
-          <Button className="bg-gray-600 hover:bg-gray-700 text-white">กลับไปแดชบอร์ด</Button>
+          <Button className="bg-gray-600 hover:bg-gray-700 text-white w-full sm:w-auto">กลับไปแดชบอร์ด</Button>
         </Link>
       </div>
 
@@ -363,12 +363,12 @@ export default function ManageAnnouncements() {
       </div>
 
       {/* ตารางจัดการข่าว */}
-      <div className="bg-white p-4 rounded-lg shadow-md">
+      <div className="bg-white p-4 rounded-lg shadow-md overflow-x-auto">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">รายการข่าว</h2>
         {announcements.length === 0 ? (
           <p className="text-gray-600">ยังไม่มีข่าวประชาสัมพันธ์</p>
         ) : (
-          <Table>
+          <Table className="min-w-[900px]">
             <TableHeader>
               <TableRow>
                 {fieldsToDisplay.map((field) => (

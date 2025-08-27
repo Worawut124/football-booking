@@ -264,11 +264,11 @@ export default function ManageUsersPage() {
 
   return (
     <div className="container mx-auto p-4 sm:p-6 bg-gray-50">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6">
         <h1 className="text-3xl sm:text-4xl font-bold text-gray-800">จัดการผู้ใช้</h1>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-green-600 hover:bg-green-700 text-white cursor-pointer">
+            <Button className="bg-green-600 hover:bg-green-700 text-white cursor-pointer w-full sm:w-auto">
               เพิ่มผู้ใช้
             </Button>
           </DialogTrigger>
@@ -344,28 +344,28 @@ export default function ManageUsersPage() {
           </DialogContent>
         </Dialog>
       </div>
-
-      <Table>
+      <div className="overflow-x-auto rounded-md border bg-white">
+      <Table className="min-w-[720px]">
         <TableHeader>
           <TableRow>
-            <TableHead>ชื่อ</TableHead>
-            <TableHead>อีเมล</TableHead>
-            <TableHead>สถานะ</TableHead>
-            <TableHead>วันที่สมัคร</TableHead>
-            <TableHead>การจัดการ</TableHead>
+            <TableHead className="min-w-[160px]">ชื่อ</TableHead>
+            <TableHead className="min-w-[200px]">อีเมล</TableHead>
+            <TableHead className="min-w-[140px]">สถานะ</TableHead>
+            <TableHead className="min-w-[160px]">วันที่สมัคร</TableHead>
+            <TableHead className="min-w-[180px]">การจัดการ</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {users.map((user) => (
             <TableRow key={user.id}>
-              <TableCell>{user.name}</TableCell>
-              <TableCell>{user.email}</TableCell>
+              <TableCell className="whitespace-nowrap">{user.name}</TableCell>
+              <TableCell className="whitespace-nowrap">{user.email}</TableCell>
               <TableCell>
                 <Select
                   value={user.role}
                   onValueChange={(value) => handleRoleChange(user.id, value)}
                 >
-                  <SelectTrigger className="w-[120px]">
+                  <SelectTrigger className="w-[140px]">
                     <SelectValue placeholder="เลือกสถานะ" />
                   </SelectTrigger>
                   <SelectContent>
@@ -411,6 +411,7 @@ export default function ManageUsersPage() {
           ))}
         </TableBody>
       </Table>
+      </div>
 
       {/* Dialog สำหรับแก้ไขผู้ใช้ */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>

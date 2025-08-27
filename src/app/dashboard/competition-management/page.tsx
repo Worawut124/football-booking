@@ -207,8 +207,8 @@ export default function CompetitionManagementPage() {
               <TableBody>
                 {competitions.map((competition) => (
                   <TableRow key={competition.id}>
-                    <TableCell>{competition.title}</TableCell>
-                    <TableCell>{competition.category}</TableCell>
+                    <TableCell className="min-w-[160px]">{competition.title}</TableCell>
+                    <TableCell className="min-w-[140px]">{competition.category}</TableCell>
                     <TableCell>
                       {editMaxTeams?.id === competition.id ? (
                         <div className="flex gap-2">
@@ -231,8 +231,8 @@ export default function CompetitionManagementPage() {
                         </span>
                       )}
                     </TableCell>
-                    <TableCell>{competition.registrations.length}</TableCell>
-                    <TableCell>
+                    <TableCell className="min-w-[100px]">{competition.registrations.length}</TableCell>
+                    <TableCell className="min-w-[140px]">
                       <Button
                         variant="outline"
                         onClick={() => {

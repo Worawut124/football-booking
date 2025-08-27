@@ -341,45 +341,45 @@ export default function ProductManagement() {
             <DialogTitle>เพิ่มสินค้า</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleAddProduct} className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
               <Label htmlFor="add-name">ชื่อสินค้า</Label>
               <Input
                 id="add-name"
                 value={addFormData.name}
                 onChange={(e) => setAddFormData({ ...addFormData, name: e.target.value })}
-                className="col-span-3"
+                className="sm:col-span-3"
                 required
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
               <Label htmlFor="add-price">ราคา</Label>
               <Input
                 id="add-price"
                 type="number"
                 value={addFormData.price}
                 onChange={(e) => setAddFormData({ ...addFormData, price: parseFloat(e.target.value) || 0 })}
-                className="col-span-3"
+                className="sm:col-span-3"
                 required
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
               <Label htmlFor="add-stock">สต็อก</Label>
               <Input
                 id="add-stock"
                 type="number"
                 value={addFormData.stock}
                 onChange={(e) => setAddFormData({ ...addFormData, stock: parseInt(e.target.value) || 0 })}
-                className="col-span-3"
+                className="sm:col-span-3"
                 required
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
               <Label htmlFor="add-categoryId">หมวดหมู่</Label>
               <select
                 id="add-categoryId"
                 value={addFormData.categoryId === null ? "" : addFormData.categoryId}
                 onChange={(e) => setAddFormData({ ...addFormData, categoryId: e.target.value === "" ? null : parseInt(e.target.value) })}
-                className="col-span-3 p-2 border rounded"
+                className="sm:col-span-3 p-2 border rounded"
               >
                 <option value="">เลือกหมวดหมู่</option>
                 {categories.map((cat) => (
@@ -387,14 +387,14 @@ export default function ProductManagement() {
                 ))}
               </select>
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
               <Label htmlFor="add-image">รูปภาพ</Label>
               <Input
                 id="add-image"
                 type="file"
                 accept="image/*"
                 onChange={(e) => setAddImageFile(e.target.files ? e.target.files[0] : null)}
-                className="col-span-3"
+                className="sm:col-span-3"
               />
             </div>
             <Button type="submit">เพิ่ม</Button>
@@ -409,45 +409,45 @@ export default function ProductManagement() {
             <DialogTitle>แก้ไขสินค้า</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleEditProduct} className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
               <Label htmlFor="edit-name">ชื่อสินค้า</Label>
               <Input
                 id="edit-name"
                 value={editFormData.name}
                 onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
-                className="col-span-3"
+                className="sm:col-span-3"
                 required
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
               <Label htmlFor="edit-price">ราคา</Label>
               <Input
                 id="edit-price"
                 type="number"
                 value={editFormData.price}
                 onChange={(e) => setEditFormData({ ...editFormData, price: parseFloat(e.target.value) || 0 })}
-                className="col-span-3"
+                className="sm:col-span-3"
                 required
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
               <Label htmlFor="edit-stock">สต็อก</Label>
               <Input
                 id="edit-stock"
                 type="number"
                 value={editFormData.stock}
                 onChange={(e) => setEditFormData({ ...editFormData, stock: parseInt(e.target.value) || 0 })}
-                className="col-span-3"
+                className="sm:col-span-3"
                 required
               />
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
               <Label htmlFor="edit-categoryId">หมวดหมู่</Label>
               <select
                 id="edit-categoryId"
                 value={editFormData.categoryId === null ? "" : editFormData.categoryId}
                 onChange={(e) => setEditFormData({ ...editFormData, categoryId: e.target.value === "" ? null : parseInt(e.target.value) })}
-                className="col-span-3 p-2 border rounded"
+                className="sm:col-span-3 p-2 border rounded"
               >
                 <option value="">เลือกหมวดหมู่</option>
                 {categories.map((cat) => (
@@ -455,14 +455,14 @@ export default function ProductManagement() {
                 ))}
               </select>
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-4 items-center gap-2 sm:gap-4">
               <Label htmlFor="edit-image">รูปภาพ (ปล่อยว่างเพื่อคงรูปเดิม)</Label>
               <Input
                 id="edit-image"
                 type="file"
                 accept="image/*"
                 onChange={(e) => setEditImageFile(e.target.files ? e.target.files[0] : null)}
-                className="col-span-3"
+                className="sm:col-span-3"
               />
             </div>
             <Button type="submit">บันทึก</Button>
@@ -533,11 +533,11 @@ export default function ProductManagement() {
           <TableBody>
             {currentProducts.map((product) => (
               <TableRow key={product.id}>
-                <TableCell>{product.name}</TableCell>
-                <TableCell>{product.price} บาท</TableCell>
-                <TableCell>{product.stock}</TableCell>
-                <TableCell>{product.category?.name || "ไม่มี"}</TableCell>
-                <TableCell>
+                <TableCell className="min-w-[140px]">{product.name}</TableCell>
+                <TableCell className="min-w-[100px]">{product.price} บาท</TableCell>
+                <TableCell className="min-w-[80px]">{product.stock}</TableCell>
+                <TableCell className="min-w-[120px]">{product.category?.name || "ไม่มี"}</TableCell>
+                <TableCell className="min-w-[140px]">
                   {product.imageData ? (
                     <img 
                       src={product.imageData.startsWith('http') ? product.imageData : `data:image/jpeg;base64,${product.imageData}`} 
@@ -546,8 +546,8 @@ export default function ProductManagement() {
                     />
                   ) : "ไม่มี"}
                 </TableCell>
-                <TableCell>{format(new Date(product.createdAt), "dd/MM/yyyy")}</TableCell>
-                <TableCell>
+                <TableCell className="min-w-[120px]">{format(new Date(product.createdAt), "dd/MM/yyyy")}</TableCell>
+                <TableCell className="min-w-[160px]">
                   <Button
                     variant="outline"
                     onClick={() => {
@@ -615,9 +615,9 @@ export default function ProductManagement() {
           <TableBody>
             {categories.map((category) => (
               <TableRow key={category.id}>
-                <TableCell>{category.name}</TableCell>
-                <TableCell>{format(new Date(category.createdAt), "dd/MM/yyyy")}</TableCell>
-                <TableCell>
+                <TableCell className="min-w-[160px]">{category.name}</TableCell>
+                <TableCell className="min-w-[140px]">{format(new Date(category.createdAt), "dd/MM/yyyy")}</TableCell>
+                <TableCell className="min-w-[160px]">
                   <Button
                     variant="outline"
                     onClick={() => {

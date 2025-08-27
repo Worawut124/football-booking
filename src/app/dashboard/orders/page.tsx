@@ -213,8 +213,8 @@ export default function AdminOrders() {
   };
 
   return (
-    <div className="container mx-auto py-6 px-4">
-      <div className="grid grid-cols-3 gap-4 mb-6">
+    <div className="container mx-auto py-6 px-2 sm:px-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         <div className="bg-white p-4 rounded-md shadow-md text-center">
           <h3 className="text-lg font-semibold text-gray-700">จำนวนสินค้าทั้งหมด</h3>
           <p className="text-2xl font-bold">{stats?.totalProducts || 0}</p>
@@ -230,7 +230,7 @@ export default function AdminOrders() {
       </div>
       <h2 className="text-2xl font-bold mb-6 text-center sm:text-left">จัดการคำสั่งซื้อ</h2>
       {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
-      <div className="mb-4 flex flex-col sm:flex-row gap-4 items-end">
+      <div className="mb-4 flex flex-col sm:flex-row gap-4 items-stretch sm:items-end">
         <div className="flex-1">
           <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">วันที่เริ่มต้น</label>
           <input type="date" id="startDate" value={startDate} onChange={(e) => setStartDate(e.target.value)} className="w-full p-2 border rounded-md" />

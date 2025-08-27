@@ -92,7 +92,7 @@ export default function PaymentConfigPage() {
       if (formData.qrCodeFile) {
         data.append("qrCode", formData.qrCodeFile);
       }
-      data.append("accountName", formData.accountName || ""); // รักษาค่าเดิมเพื่อความครบถ้วน
+      data.append("accountName", formData.accountName || "");
       data.append("bankName", formData.bankName || "");
       data.append("accountNumber", formData.accountNumber || "");
 
@@ -144,7 +144,7 @@ export default function PaymentConfigPage() {
 
     try {
       const data = new FormData();
-      data.append("pricePerHour", formData.pricePerHour.toString()); // รักษาค่าเดิมเพื่อความครบถ้วน
+      data.append("pricePerHour", formData.pricePerHour.toString());
       data.append("pricePerHalfHour", formData.pricePerHalfHour.toString());
       if (formData.qrCodeFile) {
         data.append("qrCode", formData.qrCodeFile);
@@ -204,11 +204,12 @@ export default function PaymentConfigPage() {
   }
 
   return (
-    <div className="container mx-auto p-4 sm:p-6 bg-gray-50 flex justify-end">
-      <div className="space-x-6 flex flex-row items-start">
-        <Card className="max-w-md">
+    <div className="container mx-auto p-4 sm:p-6 bg-gray-50">
+      <div className="flex flex-col sm:flex-row gap-6">
+        {/* การ์ดตั้งค่าราคา */}
+        <Card className="w-full sm:w-1/2">
           <CardHeader>
-            <CardTitle className="text-2xl sm:text-3xl">การตั้งค่าราคาและ QR Code</CardTitle>
+            <CardTitle className="text-xl sm:text-2xl">การตั้งค่าราคาและ QR Code</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmitPriceAndQR} className="space-y-6">
@@ -220,7 +221,9 @@ export default function PaymentConfigPage() {
                     type="number"
                     min="1"
                     value={formData.pricePerHour}
-                    onChange={(e) => setFormData({ ...formData, pricePerHour: parseInt(e.target.value) })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, pricePerHour: parseInt(e.target.value) })
+                    }
                     required
                   />
                 </div>
@@ -231,7 +234,9 @@ export default function PaymentConfigPage() {
                     type="number"
                     min="1"
                     value={formData.pricePerHalfHour}
-                    onChange={(e) => setFormData({ ...formData, pricePerHalfHour: parseInt(e.target.value) })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, pricePerHalfHour: parseInt(e.target.value) })
+                    }
                     required
                   />
                 </div>
@@ -239,17 +244,25 @@ export default function PaymentConfigPage() {
                   <Label htmlFor="qrCode">QR Code ปัจจุบัน</Label>
                   {paymentConfig?.qrCode && (
                     <img
-                      src={paymentConfig.qrCode.startsWith('http') ? paymentConfig.qrCode : `/uploads/${paymentConfig.qrCode}`}
+                      src={
+                        paymentConfig.qrCode.startsWith("http")
+                          ? paymentConfig.qrCode
+                          : `/uploads/${paymentConfig.qrCode}`
+                      }
                       alt="QR Code"
-                      className="w-100 h-100 mx-auto mt-2"
+                      className="w-40 h-40 mx-auto mt-2 rounded-md"
                     />
                   )}
-                  <Label htmlFor="qrCodeFile" className="block mt-2">อัปโหลด QR Code ใหม่</Label>
+                  <Label htmlFor="qrCodeFile" className="block mt-2">
+                    อัปโหลด QR Code ใหม่
+                  </Label>
                   <Input
                     id="qrCodeFile"
                     type="file"
                     accept="image/*"
-                    onChange={(e) => setFormData({ ...formData, qrCodeFile: e.target.files?.[0] || null })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, qrCodeFile: e.target.files?.[0] || null })
+                    }
                   />
                 </div>
               </div>
@@ -263,9 +276,11 @@ export default function PaymentConfigPage() {
             </form>
           </CardContent>
         </Card>
-        <Card className="max-w-md">
+
+        {/* การ์ดข้อมูลบัญชี */}
+        <Card className="w-full sm:w-1/2">
           <CardHeader>
-            <CardTitle className="text-2xl sm:text-3xl">ข้อมูลบัญชี</CardTitle>
+            <CardTitle className="text-xl sm:text-2xl">ข้อมูลบัญชี</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmitAccount} className="space-y-4">
@@ -275,7 +290,9 @@ export default function PaymentConfigPage() {
                   id="accountName"
                   type="text"
                   value={formData.accountName}
-                  onChange={(e) => setFormData({ ...formData, accountName: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, accountName: e.target.value })
+                  }
                   required
                 />
               </div>
@@ -285,7 +302,9 @@ export default function PaymentConfigPage() {
                   id="bankName"
                   type="text"
                   value={formData.bankName}
-                  onChange={(e) => setFormData({ ...formData, bankName: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, bankName: e.target.value })
+                  }
                   required
                 />
               </div>
@@ -295,7 +314,9 @@ export default function PaymentConfigPage() {
                   id="accountNumber"
                   type="text"
                   value={formData.accountNumber}
-                  onChange={(e) => setFormData({ ...formData, accountNumber: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({ ...formData, accountNumber: e.target.value })
+                  }
                   required
                 />
               </div>

@@ -146,27 +146,27 @@ export default function FieldsPage() {
     <div className="container mx-auto p-4 bg-gray-50">
       <h1 className="text-3xl font-bold text-gray-800 mb-6">จัดการสนาม</h1>
       <div className="bg-white p-6 rounded-lg shadow-md">
-        <div className="flex gap-4 mb-6">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6">
           <Input
             value={newFieldName}
             onChange={(e) => setNewFieldName(e.target.value)}
             placeholder="ชื่อสนามใหม่"
-            className="w-full max-w-xs"
+            className="w-full sm:max-w-xs"
           />
           <Input
             value={newFieldLocation}
             onChange={(e) => setNewFieldLocation(e.target.value)}
             placeholder="สถานที่"
-            className="w-full max-w-xs"
+            className="w-full sm:max-w-xs"
           />
-          <Button onClick={handleAddField} className="bg-blue-600 hover:bg-blue-700 text-white">
+          <Button onClick={handleAddField} className="bg-blue-600 hover:bg-blue-700 text-white w-full sm:w-auto">
             เพิ่มสนาม
           </Button>
         </div>
         <ul className="space-y-4">
           {fields.map((field) => (
-            <li key={field.id} className="flex justify-between items-center">
-              <span>
+            <li key={field.id} className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+              <span className="break-words">
                 {field.name} ({field.location})
               </span>
               <div className="flex gap-2">

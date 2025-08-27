@@ -312,29 +312,29 @@ export default function CompetitionListPage() {
         <CardHeader>
           <CardTitle>จัดการรายการแข่งขัน</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="overflow-x-auto">
           {competitions.length === 0 ? (
             <p className="text-gray-600 text-center">ไม่มีรายการแข่งขัน</p>
           ) : (
-            <Table>
+            <Table className="min-w-[900px]">
               <TableHeader>
                 <TableRow>
-                  <TableHead>ชื่อการแข่งขัน</TableHead>
-                  <TableHead>คำอธิบาย</TableHead>
-                  <TableHead>หมวดหมู่</TableHead>
-                  <TableHead>จำนวนทีมสูงสุด</TableHead>
-                  <TableHead>ทีมที่สมัครแล้ว</TableHead>
-                  <TableHead>จัดการ</TableHead>
+                  <TableHead className="min-w-[160px]">ชื่อการแข่งขัน</TableHead>
+                  <TableHead className="min-w-[240px]">คำอธิบาย</TableHead>
+                  <TableHead className="min-w-[140px]">หมวดหมู่</TableHead>
+                  <TableHead className="min-w-[140px]">จำนวนทีมสูงสุด</TableHead>
+                  <TableHead className="min-w-[140px]">ทีมที่สมัครแล้ว</TableHead>
+                  <TableHead className="min-w-[160px]">จัดการ</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {competitions.map((competition) => (
                   <TableRow key={competition.id}>
-                    <TableCell>{competition.title}</TableCell>
+                    <TableCell className="whitespace-nowrap">{competition.title}</TableCell>
                     <TableCell>{competition.description}</TableCell>
-                    <TableCell>{competition.category}</TableCell>
-                    <TableCell>{competition.maxTeams}</TableCell>
-                    <TableCell>{competition.registrations.length}</TableCell>
+                    <TableCell className="whitespace-nowrap">{competition.category}</TableCell>
+                    <TableCell className="whitespace-nowrap">{competition.maxTeams}</TableCell>
+                    <TableCell className="whitespace-nowrap">{competition.registrations.length}</TableCell>
                     <TableCell>
                       <Dialog>
                         <DialogTrigger asChild>
