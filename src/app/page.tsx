@@ -230,7 +230,7 @@ export default function HomePage() {
                     <p className="text-gray-600 text-sm sm:text-base line-clamp-3">{ann.content}</p>
                     <div className="mt-3 sm:mt-4">
                       <Link href={`/announcements/${ann.id}`}>
-                        <Button className="bg-blue-600 hover:bg-blue-700 text-white text-sm sm:text-base py-1 sm:py-2 cursor-pointer">
+                        <Button className="bg-gray-800 hover:bg-gray-900 text-white text-sm sm:text-base py-1 sm:py-2 cursor-pointer">
                           อ่านเพิ่มเติม
                         </Button>
                       </Link>

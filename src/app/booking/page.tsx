@@ -561,7 +561,7 @@ export default function BookingPage() {
           </div>
           <Button
             onClick={handleBooking}
-            className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white"
+            className="mt-4 w-full bg-gray-800 hover:bg-gray-900 text-white"
           >
             ยืนยันการจอง
           </Button>
