@@ -183,7 +183,7 @@ function PageInner() {
                 type="text"
                 value={teamName}
                 onChange={(e) => setTeamName(e.target.value)}
-                placeholder="กรอกชื่อทีม"
+                placeholder="ชื่อทีม"
                 required
               />
             </div>
@@ -193,7 +193,7 @@ function PageInner() {
                 type="text"
                 value={managerName}
                 onChange={(e) => setManagerName(e.target.value)}
-                placeholder="กรอกชื่อผู้จัดการทีม"
+                placeholder="ผู้จัดการทีม"
                 required
               />
             </div>
@@ -203,7 +203,7 @@ function PageInner() {
                 type="text"
                 value={contactNumber}
                 onChange={(e) => setContactNumber(e.target.value)}
-                placeholder="กรอกเบอร์ติดต่อ (เช่น 081-234-5678)"
+                placeholder="เบอร์ติดต่อ "
                 required
               />
             </div>
@@ -213,7 +213,7 @@ function PageInner() {
                 type="number"
                 value={playerCount}
                 onChange={(e) => setPlayerCount(e.target.value)}
-                placeholder="กรอกจำนวนผู้เล่น"
+                placeholder="จำนวนผู้เล่น"
                 min="1"
                 required
               />
@@ -232,7 +232,7 @@ function PageInner() {
               </Select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">อัปโหลดเงินค่าประกันทีม</label>
+              <label className="block text-sm font-medium text-gray-700">อัปโหลดเงินค่าสมัครและค่าประกันทีม</label>
               <Input
                 type="file"
                 onChange={handleDepositFileChange}
