@@ -80,6 +80,7 @@ export default function BookingPage() {
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [isPaying, setIsPaying] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+
   const itemsPerPage = 5;
 
   const timeSlots: string[] = [];
@@ -290,45 +291,37 @@ export default function BookingPage() {
       totalAmount,
     };
 
-    try {
-      const response = await fetch("/api/bookings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(bookingDetails),
-      });
+        const response = await fetch("/api/bookings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(bookingDetails),
+    });
 
-      if (response.ok) {
-        Swal.fire({
-          icon: "success",
-          title: "จองสำเร็จ!",
-          text: "กรุณาดำเนินการชำระเงินเพื่อยืนยันการจอง",
-          timer: 1500,
-          showConfirmButton: false,
-        });
-        const newBooking = await response.json();
-        const updatedBookings = [...bookings, newBooking].sort((a: Booking, b: Booking) => {
-          const dateA = new Date(a.startTime);
-          const dateB = new Date(b.startTime);
-          return dateA.getTime() - dateB.getTime();
-        });
-        setBookings(updatedBookings);
-        setStartTime(undefined);
-        setEndTime(undefined);
-        setCurrentPage(1);
-        await fetchData();
-      } else {
-        const errorData = await response.json();
-        Swal.fire({
-          icon: "error",
-          title: "เกิดข้อผิดพลาด",
-          text: errorData.error || "ไม่สามารถจองได้",
-        });
-      }
-    } catch (error) {
+    if (response.ok) {
+      Swal.fire({
+        icon: "success",
+        title: "จองสำเร็จ!",
+        text: "กรุณาดำเนินการชำระเงินเพื่อยืนยันการจอง",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      const newBooking = await response.json();
+      const updatedBookings = [...bookings, newBooking].sort((a: Booking, b: Booking) => {
+        const dateA = new Date(a.startTime);
+        const dateB = new Date(b.startTime);
+        return dateA.getTime() - dateB.getTime();
+      });
+      setBookings(updatedBookings);
+      setStartTime(undefined);
+      setEndTime(undefined);
+      setCurrentPage(1);
+      await fetchData();
+    } else {
+      const errorData = await response.json();
       Swal.fire({
         icon: "error",
         title: "เกิดข้อผิดพลาด",
-        text: "ไม่สามารถจองได้",
+        text: errorData.error || "ไม่สามารถจองได้",
       });
     }
   };

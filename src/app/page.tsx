@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Carousel,
@@ -32,6 +32,7 @@ export default function HomePage() {
   const [api, setApi] = useState<CarouselApi>();
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
+  const [bookingsToday, setBookingsToday] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchAnnouncements = async () => {
@@ -52,6 +53,28 @@ export default function HomePage() {
       }
     };
     fetchAnnouncements();
+  }, []);
+
+  useEffect(() => {
+    const fetchTodayBookings = async () => {
+      try {
+        const res = await fetch("/api/bookings");
+        const all = await res.json();
+        const startOfToday = new Date();
+        startOfToday.setHours(0, 0, 0, 0);
+        const endOfToday = new Date();
+        endOfToday.setHours(23, 59, 59, 999);
+
+        const todays = (Array.isArray(all) ? all : []).filter((b: any) => {
+          const s = new Date(b.startTime);
+          return s >= startOfToday && s <= endOfToday;
+        });
+        setBookingsToday(todays);
+      } catch (e) {
+        console.error("Error fetching today's bookings", e);
+      }
+    };
+    fetchTodayBookings();
   }, []);
 
   useEffect(() => {
@@ -85,6 +108,7 @@ export default function HomePage() {
       setCurrentPage(page);
     }
   };
+  const todayLabel = format(new Date(), "dd MMMM yyyy", { locale: th });
 
   if (loading) {
     return <LoadingCrescent text="กำลังโหลดข้อมูล..." />;
@@ -95,6 +119,8 @@ export default function HomePage() {
       <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4 sm:mb-6">
         ข่าวประชาสัมพันธ์
       </h1>
+
+      {/* ตำแหน่งปุ่มและหัวข้ออยู่ด้านบนสุดของหน้า */}
 
       {/* Carousel สำหรับข่าวเด่น */}
       {featuredAnnouncements.length > 0 ? (
@@ -140,6 +166,37 @@ export default function HomePage() {
 
       {/* รายการข่าว */}
       <div>
+        {bookingsToday.length > 0 && (
+          <div className="mb-4 sm:mb-6 rounded-md border border-slate-200 bg-green-50 px-3 py-2 text-sm sm:text-base text-gray-900 shadow-sm">
+            <div className="mb-1 font-semibold flex items-center gap-2">
+              <span className="inline-block h-2 w-2 rounded-full bg-red-500"></span>
+              <span>การจองวันที่ {todayLabel}</span>
+            </div>
+            {React.createElement(
+              "marquee",
+              {
+                direction: "left",
+                scrollamount: "6",
+                onMouseOver: (e: any) => e?.currentTarget?.stop?.(),
+                onMouseOut: (e: any) => e?.currentTarget?.start?.(),
+              },
+              bookingsToday
+                .map((b: any) => {
+                  const start = format(new Date(b.startTime), "HH:mm");
+                  const end = format(new Date(b.endTime), "HH:mm");
+                  const fieldName = b.field?.name || `สนาม ${b.fieldId}`;
+                  const userName = b.user?.name || (b.userId ? `User ${b.userId}` : "ไม่ทราบชื่อ");
+                  return `${start}-${end} ${fieldName} จองโดย ${userName}`;
+                })
+                .join("  |  ")
+            )}
+          </div>
+        )}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-4 sm:mb-6 mt-5">
+          <Link href="/booking">
+            <Button className="bg-green-600 hover:bg-green-700 text-white cursor-pointer order-1 sm:order-none">จองตอนนี้</Button>
+          </Link>
+        </div>
         <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-3 sm:mb-4">รายการข่าวทั้งหมด</h2>
         {announcements.length === 0 ? (
           <p className="text-gray-600 text-sm sm:text-base">ยังไม่มีข่าวประชาสัมพันธ์</p>
