@@ -123,7 +123,7 @@ export default function LoginPage() {
 
   return (
     <div
-      className="flex items-center justify-center bg-gradient-to-br from-green-900 via-green-800 to-gray-900 min-h-full py-8"
+      className="flex items-center justify-center bg-gradient-to-br from-green-900 via-green-800 to-gray-900 min-h-screen py-8"
       style={{
         backgroundSize: "cover",
         backgroundPosition: "center",

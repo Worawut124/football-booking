@@ -6,7 +6,7 @@ import { AiOutlineInstagram } from "react-icons/ai";
 
 export default function Footer() {
   return (
-    <footer className="w-full bg-green-900 text-white py-4 mt-6">
+    <footer className="w-full bg-green-900 text-white py-4 mt-0">
       <div className="flex flex-col items-center space-y-2 md:flex-row md:justify-center md:space-y-0 md:space-x-6">
         {/* ข้อความลิขสิทธิ์ */}
         <p className="text-sm text-center md:text-left">
