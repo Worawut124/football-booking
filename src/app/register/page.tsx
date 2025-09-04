@@ -11,7 +11,6 @@ import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline"; // ไอ�
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false); // State สำหรับ toggle รหัส
   const router = useRouter();
@@ -23,7 +22,7 @@ export default function RegisterPage() {
       const response = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, name, phone, password }),
+        body: JSON.stringify({ email, name, password }),
       });
 
       if (response.ok) {
@@ -94,16 +93,6 @@ export default function RegisterPage() {
                 placeholder="กรอกชื่อของคุณ"
               />
             </div>
-            {/* <div>
-              <label className="block text-sm font-medium text-gray-700">เบอร์โทรศัพท์</label>
-              <Input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="mt-1 w-full border-gray-300 rounded-md focus:ring-2 focus:ring-green-500"
-                placeholder="กรอกเบอร์โทรศัพท์ของคุณ"
-              />
-            </div> */}
             <div className="relative">
               <label className="block text-sm font-medium text-gray-700">รหัสผ่าน</label>
               <Input
