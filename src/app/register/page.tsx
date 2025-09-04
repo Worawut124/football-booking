@@ -94,7 +94,7 @@ export default function RegisterPage() {
                 placeholder="กรอกชื่อของคุณ"
               />
             </div>
-            <div>
+            {/* <div>
               <label className="block text-sm font-medium text-gray-700">เบอร์โทรศัพท์</label>
               <Input
                 type="tel"
@@ -103,7 +103,7 @@ export default function RegisterPage() {
                 className="mt-1 w-full border-gray-300 rounded-md focus:ring-2 focus:ring-green-500"
                 placeholder="กรอกเบอร์โทรศัพท์ของคุณ"
               />
-            </div>
+            </div> */}
             <div className="relative">
               <label className="block text-sm font-medium text-gray-700">รหัสผ่าน</label>
               <Input
