@@ -6,9 +6,9 @@ import { prisma } from "@/lib/prisma";
 
 export async function POST(request: Request) {
   try {
-    const { email, name, password, phone } = await request.json();
+    const { email, name, phone, password } = await request.json();
 
-    if (!email || !name || !password || !phone) {
+    if (!email || !name || !password) {
       return NextResponse.json(
         { error: "กรุณากรอกข้อมูลให้ครบถ้วน" },
         { status: 400 }
@@ -28,8 +28,8 @@ export async function POST(request: Request) {
       data: {
         email,
         name,
-        password: hashedPassword,
         phone,
+        password: hashedPassword,
         role: "USER",
       },
     });

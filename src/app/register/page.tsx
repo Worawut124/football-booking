@@ -23,7 +23,7 @@ export default function RegisterPage() {
       const response = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, name, password, phone }),
+        body: JSON.stringify({ email, name, phone, password }),
       });
 
       if (response.ok) {
@@ -100,7 +100,6 @@ export default function RegisterPage() {
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                required
                 className="mt-1 w-full border-gray-300 rounded-md focus:ring-2 focus:ring-green-500"
                 placeholder="กรอกเบอร์โทรศัพท์ของคุณ"
               />
