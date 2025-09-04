@@ -8,17 +8,12 @@ datasource db {
 }
 
 model User {
-  id               Int                       @id @default(autoincrement())
-  email            String                    @unique
-  name             String?
-  password         String
-  role             Role                      @default(USER)
-  createdAt        DateTime                  @default(now())
-  resetToken       String?
-  resetTokenExpiry DateTime?
-  bookings         Booking[]
-  registrations    CompetitionRegistration[]
-  orders           Order[]
+  id       Int       @id @default(autoincrement())
+  email    String    @unique
+  name     String?
+  phone    String?
+  password String
+  bookings Booking[]
 }
 
 model Field {
@@ -29,30 +24,22 @@ model Field {
 }
 
 model Booking {
-  id           Int      @id @default(autoincrement())
-  userId       Int
-  fieldId      Int
-  startTime    DateTime
-  endTime      DateTime
-  status       String   @default("pending")
-  paymentProof String?
-  totalAmount  Int      @default(0)
-  createdAt    DateTime @default(now())
-  field        Field    @relation(fields: [fieldId], references: [id])
-  user         User     @relation(fields: [userId], references: [id])
-  payment      Payment?
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  fieldId   Int
+  startTime DateTime
+  endTime   DateTime
+  status    String   @default("pending")
+  field     Field    @relation(fields: [fieldId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+  payment   Payment?
 }
 
 model Product {
-  id         Int       @id @default(autoincrement())
-  name       String
-  price      Float
-  stock      Int       @default(0)
-  createdAt  DateTime  @default(now())
-  categoryId Int?
-  imageData  String?
-  orders     Order[]
-  category   Category? @relation(fields: [categoryId], references: [id])
+  id    Int    @id @default(autoincrement())
+  name  String
+  price Float
+  stock Int
 }
 
 model Payment {
@@ -66,85 +53,8 @@ model Payment {
 }
 
 model Announcement {
-  id         Int      @id @default(autoincrement())
-  title      String
-  content    String
-  createdAt  DateTime @default(now())
-  image      String?
-  isFeatured Boolean  @default(false)
-  updatedAt  DateTime @updatedAt
-  details    String?
-}
-
-model PaymentConfig {
-  id               Int      @id @default(autoincrement())
-  qrCode           String?
-  pricePerHour     Int
-  updatedAt        DateTime @updatedAt
-  pricePerHalfHour Int      @default(0)
-  accountName      String?
-  accountNumber    String?
-  bankName         String?
-}
-
-model Competition {
-  id            Int                       @id @default(autoincrement())
-  title         String
-  description   String
-  category      String
-  imageName     String?
-  createdAt     DateTime                  @default(now())
-  maxTeams      Int                       @default(10)
-  registrations CompetitionRegistration[]
-}
-
-model CompetitionRegistration {
-  id              Int         @id @default(autoincrement())
-  teamName        String      @unique
-  managerName     String
-  contactNumber   String
-  playerCount     Int
-  depositFileName String?
-  category        String
-  competitionId   Int
-  status          String      @default("PENDING")
-  userId          Int?
-  competition     Competition @relation(fields: [competitionId], references: [id])
-  user            User?       @relation(fields: [userId], references: [id])
-}
-
-model Category {
-  id        Int       @id @default(autoincrement())
-  name      String    @unique
-  createdAt DateTime  @default(now())
-  products  Product[]
-}
-
-model Order {
-  id              Int      @id @default(autoincrement())
-  name            String
-  price           Float
-  stock           Int
-  category        String
-  shippingAddress String
-  orderDate       DateTime @default(now())
-  slipImage       String?
-  status          String   @default("รอชำระ")
-  productId       Int
-  deliveryMethod  String   @default("bankTransfer")
-  userId          Int
-  product         Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-enum RegistrationStatus {
-  PENDING
-  APPROVED
-  REJECTED
-}
-
-enum Role {
-  USER
-  ADMIN
-  OWNER
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  createdAt DateTime @default(now())
 }
