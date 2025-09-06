@@ -83,7 +83,10 @@ function PlayerRegistrationContent() {
         alert("บันทึกรายชื่อนักเตะเรียบร้อยแล้ว");
         router.push("/Competition-history");
       } else {
-        throw new Error("Failed to submit players");
+        const errorData = await response.json();
+        console.error("API Error:", errorData);
+        alert(`เกิดข้อผิดพลาด: ${errorData.error || "ไม่สามารถบันทึกข้อมูลได้"}`);
+        return;
       }
     } catch (error) {
       console.error("Error submitting players:", error);
