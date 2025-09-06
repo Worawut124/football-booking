@@ -44,6 +44,7 @@ interface User {
   id: number;
   name: string;
   email: string;
+  phone?: string;
 }
 
 interface Field {
@@ -634,6 +635,7 @@ export default function BookingsPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead className="min-w-[150px] text-center">ผู้จอง</TableHead>
+                    <TableHead className="min-w-[150px] text-center">เบอร์โทร</TableHead>
                     <TableHead className="min-w-[150px] text-center">สนาม</TableHead>
                     <TableHead className="min-w-[150px] text-center">วันที่</TableHead>
                     <TableHead className="min-w-[150px] text-center">เวลา</TableHead>
@@ -647,6 +649,9 @@ export default function BookingsPage() {
                     <TableRow key={booking.id}>
                       <TableCell className="min-w-[150px] text-center">
                         {booking.user?.name || "ไม่ระบุ"} ({booking.user?.email || "ไม่ระบุ"})
+                      </TableCell>
+                      <TableCell className="min-w-[150px] text-center">
+                        {booking.user?.phone || "ไม่ระบุ"}
                       </TableCell>
                       <TableCell className="min-w-[150px] text-center">
                         {booking.field?.name || "ไม่ระบุ"} ({booking.field?.location || "ไม่ระบุ"})
@@ -855,6 +860,10 @@ export default function BookingsPage() {
                     <div>
                       <span className="font-medium text-gray-700">ผู้จอง:</span>{" "}
                       {booking.user?.name || "ไม่ระบุ"} ({booking.user?.email || "ไม่ระบุ"})
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-700">เบอร์โทร:</span>{" "}
+                      {booking.user?.phone || "ไม่ระบุ"}
                     </div>
                     <div>
                       <span className="font-medium text-gray-700">สนาม:</span>{" "}
