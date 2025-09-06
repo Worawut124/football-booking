@@ -310,22 +310,32 @@ export default function CompetitionDetailPage() {
                     </TableCell>
                     <TableCell>{reg.status}</TableCell>
                     <TableCell>
-                      {reg.status === "PENDING" && (
-                        <>
-                          <Button variant="outline" onClick={() => handleApprove(reg.id)} className="mr-2">
-                            อนุมัติ
-                          </Button>
-                          <Button variant="destructive" onClick={() => handleReject(reg.id)} className="mr-2">
-                            ปฏิเสธ
-                          </Button>
-                        </>
-                      )}
-                      <Button variant="secondary" onClick={() => setEditRegistration(reg)} className="mr-2">
-                        แก้ไข
-                      </Button>
-                      <Button variant="destructive" onClick={() => handleDelete(reg.id)}>
-                        ลบ
-                      </Button>
+                      <div className="flex flex-wrap gap-2">
+                        {reg.status === "PENDING" && (
+                          <>
+                            <Button variant="outline" onClick={() => handleApprove(reg.id)} size="sm">
+                              อนุมัติ
+                            </Button>
+                            <Button variant="destructive" onClick={() => handleReject(reg.id)} size="sm">
+                              ปฏิเสธ
+                            </Button>
+                          </>
+                        )}
+                        <Button variant="secondary" onClick={() => setEditRegistration(reg)} size="sm">
+                          แก้ไข
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          onClick={() => router.push(`/dashboard/team-players/${reg.id}`)}
+                          size="sm"
+                          className="bg-blue-50 hover:bg-blue-100 text-blue-700"
+                        >
+                          ดูรายชื่อนักเตะ
+                        </Button>
+                        <Button variant="destructive" onClick={() => handleDelete(reg.id)} size="sm">
+                          ลบ
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
