@@ -84,11 +84,17 @@ export default function RegistrationHistory() {
       accessorKey: "status",
       header: "สถานะ",
     },
-    // {
-    //   accessorKey: "depositFileName",
-    //   header: "ไฟล์มัดจำ",
-    //   cell: ({ row }) => row.original.depositFileName || "ไม่มี",
-    // },
+    {
+      id: "actions",
+      header: "การดำเนินการ",
+      cell: ({ row }) => (
+        <Link href={`/player-registration?registrationId=${row.original.id}`}>
+          <Button size="sm" className="bg-green-600 hover:bg-green-700">
+            ส่งรายชื่อนักเตะ
+          </Button>
+        </Link>
+      ),
+    },
   ];
 
   const table = useReactTable({
@@ -99,15 +105,10 @@ export default function RegistrationHistory() {
 
   return (
     <div className="container mx-auto py-4 px-2 sm:px-4">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+      <div className="mb-4">
         <h2 className="text-2xl font-bold text-center sm:text-left">
           ประวัติการสมัครการแข่งขัน
         </h2>
-        <Link href="/player-registration">
-          <Button className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700">
-            ส่งรายชื่อนักเตะ
-          </Button>
-        </Link>
       </div>
       <div className="overflow-x-auto rounded-md border">
         <Table className="min-w-[300px]">

@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, Trash2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 type Player = {
   id: string;
@@ -18,6 +18,8 @@ type Player = {
 
 export default function PlayerRegistration() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const registrationId = searchParams.get('registrationId');
   const [players, setPlayers] = useState<Player[]>([
     { id: "1", name: "", jerseyNumber: "", birthYear: "" }
   ]);
@@ -71,7 +73,10 @@ export default function PlayerRegistration() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ players }),
+        body: JSON.stringify({ 
+          players,
+          competitionRegistrationId: registrationId ? parseInt(registrationId) : null
+        }),
       });
 
       if (response.ok) {
@@ -97,7 +102,10 @@ export default function PlayerRegistration() {
             กลับ
           </Button>
         </Link>
-        <h1 className="text-2xl font-bold">ส่งรายชื่อนักเตะ</h1>
+        <h1 className="text-2xl font-bold">
+          ส่งรายชื่อนักเตะ
+          {registrationId && <span className="text-sm text-gray-600 block">รหัสการสมัคร: {registrationId}</span>}
+        </h1>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
