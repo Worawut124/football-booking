@@ -113,6 +113,37 @@ export default function TeamPlayersPage() {
   const handleUpdatePlayer = async () => {
     if (!editingPlayer) return;
 
+    // Validate form data
+    if (!editForm.name.trim()) {
+      Swal.fire({
+        icon: "error",
+        title: "ข้อมูลไม่ครบถ้วน",
+        text: "กรุณากรอกชื่อ-นามสกุล",
+        confirmButtonText: "ตกลง",
+      });
+      return;
+    }
+
+    if (!editForm.jerseyNumber || parseInt(editForm.jerseyNumber) < 1) {
+      Swal.fire({
+        icon: "error",
+        title: "ข้อมูลไม่ถูกต้อง",
+        text: "กรุณากรอกเบอร์เสื้อที่ถูกต้อง",
+        confirmButtonText: "ตกลง",
+      });
+      return;
+    }
+
+    if (!editForm.birthYear || parseInt(editForm.birthYear) < 2400 || parseInt(editForm.birthYear) > 2600) {
+      Swal.fire({
+        icon: "error",
+        title: "ข้อมูลไม่ถูกต้อง",
+        text: "กรุณากรอกปีเกิด (พ.ศ.) ที่ถูกต้อง",
+        confirmButtonText: "ตกลง",
+      });
+      return;
+    }
+
     try {
       const response = await fetch('/api/team-players', {
         method: 'PUT',
@@ -121,7 +152,7 @@ export default function TeamPlayersPage() {
         },
         body: JSON.stringify({
           playerId: editingPlayer.id,
-          name: editForm.name,
+          name: editForm.name.trim(),
           jerseyNumber: editForm.jerseyNumber,
           birthYear: editForm.birthYear,
         }),

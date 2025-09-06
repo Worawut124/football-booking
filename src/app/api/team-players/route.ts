@@ -60,16 +60,24 @@ export async function PUT(request: NextRequest) {
       );
     }
 
+    // Get the current player to check registration ID
+    const currentPlayer = await (prisma as any).player.findUnique({
+      where: { id: parseInt(playerId) },
+      select: { competitionRegistrationId: true }
+    });
+
+    if (!currentPlayer) {
+      return NextResponse.json(
+        { error: "ไม่พบนักเตะที่ระบุ" },
+        { status: 404 }
+      );
+    }
+
     // Check if jersey number is already taken by another player in the same registration
     const existingPlayer = await (prisma as any).player.findFirst({
       where: {
         jerseyNumber: parseInt(jerseyNumber),
-        competitionRegistrationId: {
-          equals: (await (prisma as any).player.findUnique({
-            where: { id: parseInt(playerId) },
-            select: { competitionRegistrationId: true }
-          })).competitionRegistrationId
-        },
+        competitionRegistrationId: currentPlayer.competitionRegistrationId,
         id: {
           not: parseInt(playerId)
         }
