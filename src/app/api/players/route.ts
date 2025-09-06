@@ -12,6 +12,7 @@ interface Player {
 
 interface RequestBody {
   players: Player[];
+  competitionRegistrationId?: number;
 }
 
 export async function POST(request: NextRequest) {
@@ -41,7 +42,7 @@ export async function POST(request: NextRequest) {
 
     // Parse the request body
     const body: RequestBody = await request.json();
-    const { players } = body;
+    const { players, competitionRegistrationId } = body;
 
     if (!players || !Array.isArray(players) || players.length === 0) {
       return NextResponse.json(
@@ -67,6 +68,7 @@ export async function POST(request: NextRequest) {
         jerseyNumber: player.jerseyNumber,
         birthYear: player.birthYear,
         userId: userId,
+        competitionRegistrationId: competitionRegistrationId || null,
       })),
     });
 
