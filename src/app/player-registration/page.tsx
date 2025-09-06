@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,7 +16,7 @@ type Player = {
   birthYear: string;
 };
 
-export default function PlayerRegistration() {
+function PlayerRegistrationContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const registrationId = searchParams.get('registrationId');
@@ -192,5 +192,13 @@ export default function PlayerRegistration() {
         </div>
       </form>
     </div>
+  );
+}
+
+export default function PlayerRegistration() {
+  return (
+    <Suspense fallback={<div className="container mx-auto py-4 px-2 sm:px-4 max-w-4xl"><div className="text-center">กำลังโหลด...</div></div>}>
+      <PlayerRegistrationContent />
+    </Suspense>
   );
 }
