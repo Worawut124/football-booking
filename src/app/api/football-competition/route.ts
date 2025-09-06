@@ -9,12 +9,32 @@ export async function GET(request: Request) {
   const session = await getServerSession(authOptions);
   const { searchParams } = new URL(request.url);
   const teamName = searchParams.get("teamName");
+  const id = searchParams.get("id");
 
   if (!session?.user?.id) {
     return NextResponse.json({ error: "คุณไม่มีสิทธิ์เข้าถึง" }, { status: 403 });
   }
 
   const userId = parseInt(session.user.id);
+
+  // If ID is provided, fetch registration with competition details (for admin/owner)
+  if (id) {
+    try {
+      const registration = await prisma.competitionRegistration.findUnique({
+        where: { id: parseInt(id) },
+        include: {
+          competition: true,
+        },
+      });
+      if (!registration) {
+        return NextResponse.json({ error: "ไม่พบการสมัครที่ระบุ" }, { status: 404 });
+      }
+      return NextResponse.json(registration);
+    } catch (error) {
+      console.error("Error fetching registration by ID:", error);
+      return NextResponse.json({ error: "เกิดข้อผิดพลาดในการดึงข้อมูล" }, { status: 500 });
+    }
+  }
 
   if (teamName) {
     try {

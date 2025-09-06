@@ -1,12 +1,14 @@
 "use client";
 
-import { useSession } from "next-auth/react";
+import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
+import { useSession } from "next-auth/react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ArrowLeft } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ArrowLeft, Edit, Trash2 } from "lucide-react";
 import Swal from "sweetalert2";
 
 interface Player {
@@ -37,10 +39,18 @@ export default function TeamPlayersPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const params = useParams();
-  const registrationId = params.id ? parseInt(params.id as string) : 0;
+  const registrationId = params.id as string;
+
+  const [registration, setRegistration] = useState<any>(null);
   const [players, setPlayers] = useState<Player[]>([]);
-  const [registration, setRegistration] = useState<Registration | null>(null);
   const [loading, setLoading] = useState(true);
+  const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
+  const [editForm, setEditForm] = useState({
+    name: "",
+    jerseyNumber: "",
+    birthYear: ""
+  });
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -90,6 +100,110 @@ export default function TeamPlayersPage() {
     }
   };
 
+  const handleEditPlayer = (player: Player) => {
+    setEditingPlayer(player);
+    setEditForm({
+      name: player.name,
+      jerseyNumber: player.jerseyNumber,
+      birthYear: player.birthYear
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const handleUpdatePlayer = async () => {
+    if (!editingPlayer) return;
+
+    try {
+      const response = await fetch('/api/team-players', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          playerId: editingPlayer.id,
+          name: editForm.name,
+          jerseyNumber: editForm.jerseyNumber,
+          birthYear: editForm.birthYear,
+        }),
+      });
+
+      if (response.ok) {
+        await fetchTeamData(); // Refresh the data
+        setIsEditDialogOpen(false);
+        setEditingPlayer(null);
+        Swal.fire({
+          icon: "success",
+          title: "สำเร็จ",
+          text: "แก้ไขข้อมูลนักเตะเรียบร้อยแล้ว",
+          confirmButtonText: "ตกลง",
+        });
+      } else {
+        const errorData = await response.json();
+        Swal.fire({
+          icon: "error",
+          title: "เกิดข้อผิดพลาด",
+          text: errorData.error || "ไม่สามารถแก้ไขข้อมูลได้",
+          confirmButtonText: "ตกลง",
+        });
+      }
+    } catch (error) {
+      console.error("Error updating player:", error);
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text: "ไม่สามารถแก้ไขข้อมูลได้",
+        confirmButtonText: "ตกลง",
+      });
+    }
+  };
+
+  const handleDeletePlayer = async (player: Player) => {
+    const result = await Swal.fire({
+      title: "ยืนยันการลบ",
+      text: `คุณต้องการลบนักเตะ "${player.name}" หรือไม่?`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "ลบ",
+      cancelButtonText: "ยกเลิก",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        const response = await fetch(`/api/team-players?playerId=${player.id}`, {
+          method: 'DELETE',
+        });
+
+        if (response.ok) {
+          await fetchTeamData(); // Refresh the data
+          Swal.fire({
+            icon: "success",
+            title: "สำเร็จ",
+            text: "ลบนักเตะเรียบร้อยแล้ว",
+            confirmButtonText: "ตกลง",
+          });
+        } else {
+          const errorData = await response.json();
+          Swal.fire({
+            icon: "error",
+            title: "เกิดข้อผิดพลาด",
+            text: errorData.error || "ไม่สามารถลบข้อมูลได้",
+            confirmButtonText: "ตกลง",
+          });
+        }
+      } catch (error) {
+        console.error("Error deleting player:", error);
+        Swal.fire({
+          icon: "error",
+          title: "เกิดข้อผิดพลาด",
+          text: "ไม่สามารถลบข้อมูลได้",
+          confirmButtonText: "ตกลง",
+        });
+      }
+    }
+  };
+
   if (status === "loading" || loading) {
     return <div className="container mx-auto p-4">กำลังโหลด...</div>;
   }
@@ -119,17 +233,28 @@ export default function TeamPlayersPage() {
       </div>
 
       {/* Competition Info */}
-      <Card className="shadow-md mb-6">
+      <Card className="shadow-md">
         <CardHeader>
-          <CardTitle>ข้อมูลการแข่งขันและทีม</CardTitle>
+          <CardTitle>ข้อมูลการแข่งขัน</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <p><strong>การแข่งขัน:</strong> {registration.competition?.title || "ไม่ระบุ"}</p>
-              <p><strong>หมวดหมู่การแข่งขัน:</strong> {registration.competition?.category || "ไม่ระบุ"}</p>
-              <p><strong>คำอธิบาย:</strong> {registration.competition?.description || "ไม่มี"}</p>
+              <p><strong>การแข่งขัน:</strong> {registration?.competition?.title || 'ไม่ระบุ'}</p>
+              <p><strong>หมวดหมู่การแข่งขัน:</strong> {registration?.competition?.category || 'ไม่ระบุ'}</p>
+              <p><strong>คำอธิบาย:</strong> {registration?.competition?.description || 'ไม่ระบุ'}</p>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Team Info */}
+      <Card className="shadow-md mb-6">
+        <CardHeader>
+          <CardTitle>ข้อมูลทีม</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <p><strong>ชื่อทีม:</strong> {registration.teamName}</p>
               <p><strong>ผู้จัดการทีม:</strong> {registration.managerName}</p>
@@ -178,6 +303,7 @@ export default function TeamPlayersPage() {
                   <TableHead className="w-32">เบอร์เสื้อ</TableHead>
                   <TableHead className="w-32">ปีเกิด (พ.ศ.)</TableHead>
                   <TableHead className="w-40">วันที่เพิ่ม</TableHead>
+                  <TableHead className="w-32">จัดการ</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -185,20 +311,38 @@ export default function TeamPlayersPage() {
                   <TableRow key={player.id}>
                     <TableCell className="font-medium">{index + 1}</TableCell>
                     <TableCell>{player.name}</TableCell>
-                    <TableCell className="text-center">
-                      <span className="inline-flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-800 rounded-full font-semibold">
+                    <TableCell>
+                      <div className="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-800 rounded-full font-bold">
                         {player.jerseyNumber}
-                      </span>
+                      </div>
                     </TableCell>
-                    <TableCell className="text-center">{player.birthYear}</TableCell>
-                    <TableCell className="text-sm text-gray-600">
+                    <TableCell>{player.birthYear}</TableCell>
+                    <TableCell>
                       {new Date(player.createdAt).toLocaleDateString('th-TH', {
                         year: 'numeric',
                         month: 'short',
                         day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
                       })}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleEditPlayer(player)}
+                          className="text-blue-600 hover:text-blue-800"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleDeletePlayer(player)}
+                          className="text-red-600 hover:text-red-800"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -207,6 +351,60 @@ export default function TeamPlayersPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Edit Player Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>แก้ไขข้อมูลนักเตะ</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="name" className="text-right">
+                ชื่อ-นามสกุล
+              </label>
+              <Input
+                id="name"
+                value={editForm.name}
+                onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="jerseyNumber" className="text-right">
+                เบอร์เสื้อ
+              </label>
+              <Input
+                id="jerseyNumber"
+                type="number"
+                value={editForm.jerseyNumber}
+                onChange={(e) => setEditForm({ ...editForm, jerseyNumber: e.target.value })}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="birthYear" className="text-right">
+                ปีเกิด (พ.ศ.)
+              </label>
+              <Input
+                id="birthYear"
+                type="number"
+                value={editForm.birthYear}
+                onChange={(e) => setEditForm({ ...editForm, birthYear: e.target.value })}
+                className="col-span-3"
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              ยกเลิก
+            </Button>
+            <Button onClick={handleUpdatePlayer}>
+              บันทึก
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
