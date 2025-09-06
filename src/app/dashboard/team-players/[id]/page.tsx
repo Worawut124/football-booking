@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ArrowLeft, Edit, Trash2 } from "lucide-react";
 import Swal from "sweetalert2";
 
@@ -111,7 +111,13 @@ export default function TeamPlayersPage() {
   };
 
   const handleUpdatePlayer = async () => {
-    if (!editingPlayer) return;
+    if (!editingPlayer) {
+      console.log("No editing player found");
+      return;
+    }
+
+    console.log("Editing player:", editingPlayer);
+    console.log("Edit form data:", editForm);
 
     // Validate form data
     if (!editForm.name.trim()) {
@@ -144,21 +150,30 @@ export default function TeamPlayersPage() {
       return;
     }
 
+    const requestData = {
+      playerId: editingPlayer.id,
+      name: editForm.name.trim(),
+      jerseyNumber: editForm.jerseyNumber,
+      birthYear: editForm.birthYear,
+    };
+
+    console.log("Sending request data:", requestData);
+
     try {
       const response = await fetch('/api/team-players', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          playerId: editingPlayer.id,
-          name: editForm.name.trim(),
-          jerseyNumber: editForm.jerseyNumber,
-          birthYear: editForm.birthYear,
-        }),
+        body: JSON.stringify(requestData),
       });
 
+      console.log("Response status:", response.status);
+      console.log("Response ok:", response.ok);
+
       if (response.ok) {
+        const responseData = await response.json();
+        console.log("Success response:", responseData);
         await fetchTeamData(); // Refresh the data
         setIsEditDialogOpen(false);
         setEditingPlayer(null);
@@ -170,6 +185,7 @@ export default function TeamPlayersPage() {
         });
       } else {
         const errorData = await response.json();
+        console.log("Error response:", errorData);
         Swal.fire({
           icon: "error",
           title: "เกิดข้อผิดพลาด",
@@ -383,59 +399,72 @@ export default function TeamPlayersPage() {
         </CardContent>
       </Card>
 
-      {/* Edit Player Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>แก้ไขข้อมูลนักเตะ</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="name" className="text-right">
-                ชื่อ-นามสกุล
-              </label>
-              <Input
-                id="name"
-                value={editForm.name}
-                onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                className="col-span-3"
-              />
+      {/* Edit Player Modal */}
+      {isEditDialogOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <h2 className="text-xl font-bold mb-4">แก้ไขข้อมูลนักเตะ</h2>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  ชื่อ-นามสกุล
+                </label>
+                <Input
+                  value={editForm.name}
+                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                  placeholder="กรอกชื่อ-นามสกุล"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  เบอร์เสื้อ
+                </label>
+                <Input
+                  type="number"
+                  value={editForm.jerseyNumber}
+                  onChange={(e) => setEditForm({ ...editForm, jerseyNumber: e.target.value })}
+                  placeholder="กรอกเบอร์เสื้อ"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium mb-1">
+                  ปีเกิด (พ.ศ.)
+                </label>
+                <Input
+                  type="number"
+                  value={editForm.birthYear}
+                  onChange={(e) => setEditForm({ ...editForm, birthYear: e.target.value })}
+                  placeholder="กรอกปีเกิด"
+                />
+              </div>
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="jerseyNumber" className="text-right">
-                เบอร์เสื้อ
-              </label>
-              <Input
-                id="jerseyNumber"
-                type="number"
-                value={editForm.jerseyNumber}
-                onChange={(e) => setEditForm({ ...editForm, jerseyNumber: e.target.value })}
-                className="col-span-3"
-              />
-            </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="birthYear" className="text-right">
-                ปีเกิด (พ.ศ.)
-              </label>
-              <Input
-                id="birthYear"
-                type="number"
-                value={editForm.birthYear}
-                onChange={(e) => setEditForm({ ...editForm, birthYear: e.target.value })}
-                className="col-span-3"
-              />
+            
+            <div className="flex justify-end gap-2 mt-6">
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  console.log("Cancel button clicked");
+                  setIsEditDialogOpen(false);
+                }}
+              >
+                ยกเลิก
+              </Button>
+              <Button 
+                onClick={() => {
+                  console.log("Save button clicked");
+                  handleUpdatePlayer();
+                }}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                บันทึก
+              </Button>
             </div>
           </div>
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
-              ยกเลิก
-            </Button>
-            <Button onClick={handleUpdatePlayer}>
-              บันทึก
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+        </div>
+      )}
     </div>
   );
 }

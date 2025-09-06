@@ -42,18 +42,24 @@ export async function GET(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
+    console.log("PUT request received");
     const session = await getServerSession(authOptions);
+    console.log("Session:", session?.user);
     
     if (!session?.user?.id || (session.user.role !== "ADMIN" && session.user.role !== "OWNER")) {
+      console.log("Access denied - insufficient permissions");
       return NextResponse.json(
         { error: "คุณไม่มีสิทธิ์ในการแก้ไขข้อมูล" },
         { status: 403 }
       );
     }
 
-    const { playerId, name, jerseyNumber, birthYear } = await request.json();
+    const requestBody = await request.json();
+    console.log("Request body:", requestBody);
+    const { playerId, name, jerseyNumber, birthYear } = requestBody;
 
     if (!playerId || !name || !jerseyNumber || !birthYear) {
+      console.log("Missing required fields");
       return NextResponse.json(
         { error: "กรุณากรอกข้อมูลให้ครบถ้วน" },
         { status: 400 }
