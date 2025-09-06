@@ -16,6 +16,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 // ตัวอย่างข้อมูลจาก API (จะถูกแทนที่ด้วย fetch)
 type Registration = {
@@ -98,9 +99,16 @@ export default function RegistrationHistory() {
 
   return (
     <div className="container mx-auto py-4 px-2 sm:px-4">
-      <h2 className="text-2xl font-bold mb-4 text-center sm:text-left">
-        ประวัติการสมัครการแข่งขัน
-      </h2>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+        <h2 className="text-2xl font-bold text-center sm:text-left">
+          ประวัติการสมัครการแข่งขัน
+        </h2>
+        <Link href="/player-registration">
+          <Button className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700">
+            ส่งรายชื่อนักเตะ
+          </Button>
+        </Link>
+      </div>
       <div className="overflow-x-auto rounded-md border">
         <Table className="min-w-[300px]">
           <TableHeader>

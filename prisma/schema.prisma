@@ -20,6 +20,7 @@ model User {
   bookings         Booking[]
   registrations    CompetitionRegistration[]
   orders           Order[]
+  players          Player[]
 }
 
 model Field {
@@ -112,6 +113,19 @@ model CompetitionRegistration {
   userId          Int?
   competition     Competition @relation(fields: [competitionId], references: [id])
   user            User?       @relation(fields: [userId], references: [id])
+  players         Player[]
+}
+
+model Player {
+  id                        Int                      @id @default(autoincrement())
+  name                      String
+  jerseyNumber              String
+  birthYear                 String
+  competitionRegistrationId Int?
+  userId                    Int?
+  createdAt                 DateTime                 @default(now())
+  competitionRegistration   CompetitionRegistration? @relation(fields: [competitionRegistrationId], references: [id])
+  user                      User?                    @relation(fields: [userId], references: [id])
 }
 
 model Category {
