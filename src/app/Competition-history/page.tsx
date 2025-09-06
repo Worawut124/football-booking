@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   ColumnDef,
   flexRender,
@@ -16,7 +17,6 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
 
 // ตัวอย่างข้อมูลจาก API (จะถูกแทนที่ด้วย fetch)
 type Registration = {
@@ -32,6 +32,7 @@ type Registration = {
 
 export default function RegistrationHistory() {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchData() {
@@ -86,15 +87,21 @@ export default function RegistrationHistory() {
     },
     {
       id: "actions",
-      header: "การดำเนินการ",
+      header: "การจัดการ",
       cell: ({ row }) => (
-        <Link href={`/player-registration?registrationId=${row.original.id}`}>
-          <Button size="sm" className="bg-green-600 hover:bg-green-700">
-            ส่งรายชื่อนักเตะ
-          </Button>
-        </Link>
+        <Button
+          onClick={() => router.push(`/submit-players/${row.original.id}`)}
+          className="bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm px-2 py-1 sm:px-4 sm:py-2"
+        >
+          ส่งรายชื่อนักเตะ
+        </Button>
       ),
     },
+    // {
+    //   accessorKey: "depositFileName",
+    //   header: "ไฟล์มัดจำ",
+    //   cell: ({ row }) => row.original.depositFileName || "ไม่มี",
+    // },
   ];
 
   const table = useReactTable({
@@ -105,11 +112,9 @@ export default function RegistrationHistory() {
 
   return (
     <div className="container mx-auto py-4 px-2 sm:px-4">
-      <div className="mb-4">
-        <h2 className="text-2xl font-bold text-center sm:text-left">
-          ประวัติการสมัครการแข่งขัน
-        </h2>
-      </div>
+      <h2 className="text-2xl font-bold mb-4 text-center sm:text-left">
+        ประวัติการสมัครการแข่งขัน
+      </h2>
       <div className="overflow-x-auto rounded-md border">
         <Table className="min-w-[300px]">
           <TableHeader>
