@@ -118,48 +118,56 @@ export default function ProductDisplay() {
                 </p>
               </CardContent>
               <CardFooter>
-                <div className="grid grid-cols-2 gap-2 w-full">
-                  <Button
-                    variant={product.stock === 0 ? "outline" : "default"}
-                    disabled={product.stock === 0}
-                    onClick={() =>
-                      addItem(
-                        {
-                          id: product.id,
-                          name: product.name,
-                          price: product.price,
-                          imageData: product.imageData,
-                          stock: product.stock,
-                          categoryName: product.category?.name || null,
-                        },
-                        1
-                      )
-                    }
+                {product.stock === 0 ? (
+                  <Button 
+                    className="w-full" 
+                    variant="outline"
+                    disabled={true}
                   >
-                    {product.stock === 0 ? 'สินค้าหมด' : 'หยิบใส่ตะกร้า'}
+                    สินค้าหมด
                   </Button>
-                  <Link
-                    href={{
-                      pathname: "/payment-product",
-                      query: {
-                        productId: product.id,
-                        name: encodeURIComponent(product.name),
-                        price: product.price,
-                        stock: product.stock,
-                        category: encodeURIComponent(product.category?.name || "ไม่มี"),
-                      },
-                    }}
-                    passHref
-                  >
-                    <Button 
-                      className="w-full" 
-                      variant={product.stock === 0 ? "outline" : "default"}
-                      disabled={product.stock === 0}
+                ) : (
+                  <div className="grid grid-cols-2 gap-2 w-full">
+                    <Button
+                      variant="default"
+                      onClick={() =>
+                        addItem(
+                          {
+                            id: product.id,
+                            name: product.name,
+                            price: product.price,
+                            imageData: product.imageData,
+                            stock: product.stock,
+                            categoryName: product.category?.name || null,
+                          },
+                          1
+                        )
+                      }
                     >
-                      {product.stock === 0 ? 'สินค้าหมด' : 'ซื้อทันที'}
+                      หยิบใส่ตะกร้า
                     </Button>
-                  </Link>
-                </div>
+                    <Link
+                      href={{
+                        pathname: "/payment-product",
+                        query: {
+                          productId: product.id,
+                          name: encodeURIComponent(product.name),
+                          price: product.price,
+                          stock: product.stock,
+                          category: encodeURIComponent(product.category?.name || "ไม่มี"),
+                        },
+                      }}
+                      passHref
+                    >
+                      <Button 
+                        className="w-full" 
+                        variant="default"
+                      >
+                        ซื้อทันที
+                      </Button>
+                    </Link>
+                  </div>
+                )}
               </CardFooter>
             </Card>
           ))
