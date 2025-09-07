@@ -107,7 +107,9 @@ export default function ProductDisplay() {
                   />
                 )}
                 <p className="text-muted-foreground">ราคา: {product.price} บาท</p>
-                <p className="text-muted-foreground">สต็อก: {product.stock}</p>
+                <p className={`text-muted-foreground ${product.stock === 0 ? 'text-red-500' : ''}`}>
+                  สต็อก: {product.stock === 0 ? 'สินค้าหมด' : product.stock}
+                </p>
                 <p className="text-sm text-gray-500">
                   หมวดหมู่: {product.category?.name || "ไม่มี"}
                 </p>
@@ -118,7 +120,7 @@ export default function ProductDisplay() {
               <CardFooter>
                 <div className="grid grid-cols-2 gap-2 w-full">
                   <Button
-                    variant="outline"
+                    variant={product.stock === 0 ? "outline" : "default"}
                     disabled={product.stock === 0}
                     onClick={() =>
                       addItem(
@@ -134,7 +136,7 @@ export default function ProductDisplay() {
                       )
                     }
                   >
-                    หยิบใส่ตะกร้า
+                    {product.stock === 0 ? 'สินค้าหมด' : 'หยิบใส่ตะกร้า'}
                   </Button>
                   <Link
                     href={{
@@ -149,8 +151,12 @@ export default function ProductDisplay() {
                     }}
                     passHref
                   >
-                    <Button className="w-full" disabled={product.stock === 0}>
-                      ซื้อทันที
+                    <Button 
+                      className="w-full" 
+                      variant={product.stock === 0 ? "outline" : "default"}
+                      disabled={product.stock === 0}
+                    >
+                      {product.stock === 0 ? 'สินค้าหมด' : 'ซื้อทันที'}
                     </Button>
                   </Link>
                 </div>

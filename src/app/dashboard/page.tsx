@@ -45,8 +45,8 @@ export default function DashboardPage() {
             <SelectItem value="announcements">จัดการข่าว</SelectItem>
             <SelectItem value="users">จัดการผู้ใช้</SelectItem>
             <SelectItem value="payment-config">จัดการการชำระเงิน</SelectItem>
-            <SelectItem value="competition-management">สมัครแข่งขันฟุตบอล</SelectItem>
-            <SelectItem value="competition-list">รายการแข่งขัน</SelectItem>
+            <SelectItem value="competition-management">จัดการการแข่งขันฟุตบอล</SelectItem>
+            <SelectItem value="competition-list">จัดการรายการแข่งขัน</SelectItem>
             <SelectItem value="revenue">รายงานรายได้การจอง</SelectItem>
             <SelectItem value="booking-report">รายงานการใช้งานสนาม</SelectItem>
             <SelectItem value="ProductManagement">จัดการสินค้า</SelectItem>
@@ -66,8 +66,8 @@ export default function DashboardPage() {
             <SidebarButton label="จัดการข่าว" active={activeKey === "announcements"} onClick={() => setActiveKey("announcements")} />
             <SidebarButton label="จัดการผู้ใช้" active={activeKey === "users"} onClick={() => setActiveKey("users")} />
             <SidebarButton label="จัดการการชำระเงิน" active={activeKey === "payment-config"} onClick={() => setActiveKey("payment-config")} />
-            <SidebarButton label="สมัครแข่งขันฟุตบอล" active={activeKey === "competition-management"} onClick={() => setActiveKey("competition-management")} />
-            <SidebarButton label="รายการแข่งขัน" active={activeKey === "competition-list"} onClick={() => setActiveKey("competition-list")} />
+            <SidebarButton label="จัดการการแข่งขันฟุตบอล" active={activeKey === "competition-management"} onClick={() => setActiveKey("competition-management")} />
+            <SidebarButton label="จัดการรายการแข่งขัน" active={activeKey === "competition-list"} onClick={() => setActiveKey("competition-list")} />
             <SidebarButton label="รายงานรายได้การจอง" active={activeKey === "revenue"} onClick={() => setActiveKey("revenue")} />
             <SidebarButton label="รายงานการใช้งานสนาม" active={activeKey === "booking-report"} onClick={() => setActiveKey("booking-report")} />
             <SidebarButton label="จัดการสินค้า" active={activeKey === "ProductManagement"} onClick={() => setActiveKey("ProductManagement")} />
