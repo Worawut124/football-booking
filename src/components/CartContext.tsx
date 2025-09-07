@@ -28,65 +28,28 @@ const STORAGE_KEY = "fb_cart_v1";
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
-  const [isClient, setIsClient] = useState(false);
 
-  // ตรวจสอบว่าเป็น client-side หรือไม่
+  // Load from localStorage
   useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  // Load from sessionStorage instead of localStorage
-  useEffect(() => {
-    if (!isClient) return;
-    
     try {
-      const currentSession = sessionStorage.getItem('userSession');
-      if (currentSession) {
-        const cached = sessionStorage.getItem(STORAGE_KEY);
-        if (cached) {
-          const parsed: CartItem[] = JSON.parse(cached);
-          setItems(Array.isArray(parsed) ? parsed : []);
-        }
-      } else {
-        // ถ้าไม่มี session ให้ล้างตะกร้า
-        setItems([]);
-      }
-    } catch {
-      setItems([]);
-    }
-  }, [isClient]);
-
-  // Persist to sessionStorage instead of localStorage
-  useEffect(() => {
-    if (!isClient) return;
-    
-    try {
-      const currentSession = sessionStorage.getItem('userSession');
-      if (currentSession) {
-        sessionStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-      } else {
-        sessionStorage.removeItem(STORAGE_KEY);
-        // ถ้าไม่มี session ให้ล้างตะกร้า
-        if (items.length > 0) {
-          setItems([]);
-        }
+      const cached = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEY) : null;
+      if (cached) {
+        const parsed: CartItem[] = JSON.parse(cached);
+        setItems(Array.isArray(parsed) ? parsed : []);
       }
     } catch {}
-  }, [items, isClient]);
+  }, []);
 
-  // ตรวจสอบ session และล้างตะกร้าหากจำเป็น
-  const checkSession = useCallback(() => {
-    if (!isClient) return;
-    
-    const currentSession = sessionStorage.getItem('userSession');
-    if (!currentSession && items.length > 0) {
-      setItems([]);
-    }
-  }, [isClient, items.length]);
+  // Persist
+  useEffect(() => {
+    try {
+      if (typeof window !== "undefined") {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      }
+    } catch {}
+  }, [items]);
 
   const addItem = useCallback((item: Omit<CartItem, "quantity">, quantity: number = 1) => {
-    checkSession(); // ตรวจสอบ session ก่อน
-    
     setItems((prev) => {
       const existing = prev.find((i) => i.id === item.id);
       if (existing) {
@@ -95,23 +58,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
       return [...prev, { ...item, quantity: Math.min(quantity, Math.max(0, item.stock)) }];
     });
-  }, [checkSession]);
+  }, []);
 
   const removeItem = useCallback((productId: number) => {
     setItems((prev) => prev.filter((i) => i.id !== productId));
   }, []);
 
   const updateQuantity = useCallback((productId: number, quantity: number) => {
-    if (quantity < 1) return;
     setItems((prev) => prev.map((i) => (i.id === productId ? { ...i, quantity: Math.max(1, Math.min(quantity, i.stock)) } : i)));
   }, []);
 
-  const clearCart = useCallback(() => {
-    setItems([]);
-    if (isClient) {
-      sessionStorage.removeItem(STORAGE_KEY);
-    }
-  }, [isClient]);
+  const clearCart = useCallback(() => setItems([]), []);
 
   const totalQuantity = useMemo(() => items.reduce((sum, i) => sum + i.quantity, 0), [items]);
   const totalPrice = useMemo(() => items.reduce((sum, i) => sum + i.quantity * i.price, 0), [items]);
@@ -129,22 +86,3 @@ export function useCart() {
   if (!ctx) throw new Error("useCart must be used within a CartProvider");
   return ctx;
 }
-
-// ฟังก์ชันสำหรับจัดการ session (ใช้เมื่อ login/logout)
-export const setUserSession = (sessionId: string) => {
-  if (typeof window !== 'undefined') {
-    sessionStorage.setItem('userSession', sessionId);
-  }
-};
-
-export const clearUserSession = () => {
-  if (typeof window !== 'undefined') {
-    sessionStorage.removeItem('userSession');
-    sessionStorage.removeItem(STORAGE_KEY);
-    // ส่งสัญญาณให้ล้างตะกร้าในทุกแท็บ
-    localStorage.setItem('userSessionCleared', 'true');
-    setTimeout(() => {
-      localStorage.removeItem('userSessionCleared');
-    }, 100);
-  }
-};

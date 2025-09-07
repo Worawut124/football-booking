@@ -52,12 +52,6 @@ export default function CartPage() {
     }
   };
 
-  const handleClearCart = () => {
-    if (confirm("คุณแน่ใจหรือไม่ที่จะล้างตะกร้าสินค้าทั้งหมด?")) {
-      clearCart();
-    }
-  };
-
   return (
     <div className="container mx-auto py-6 px-2 sm:px-4">
       <h2 className="text-2xl font-bold mb-6">ตะกร้าสินค้า</h2>
@@ -65,9 +59,7 @@ export default function CartPage() {
 
       {!items.length ? (
         <Card>
-          <CardContent className="py-6">
-            ตะกร้าว่างเปล่า <Link href="/Products" className="text-blue-600 underline">ไปเลือกซื้อสินค้า</Link>
-          </CardContent>
+          <CardContent className="py-6">ตะกร้าว่างเปล่า <Link href="/Products" className="text-blue-600 underline">ไปเลือกซื้อสินค้า</Link></CardContent>
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -87,44 +79,20 @@ export default function CartPage() {
                     <div className="text-sm text-gray-600">ราคา: {item.price} บาท</div>
                     <div className="text-sm text-gray-600">คงเหลือ: {item.stock}</div>
                     <div className="flex items-center gap-2 mt-2 flex-wrap">
-                      <Button 
-                        onClick={() => updateQuantity(item.id, item.quantity - 1)} 
-                        variant="outline"
-                        disabled={item.quantity <= 1}
-                      >
-                        -
-                      </Button>
+                      <Button onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))} variant="outline">-</Button>
                       <Input
                         value={item.quantity}
-                        onChange={(e) => {
-                          const newQuantity = Number(e.target.value) || 1;
-                          updateQuantity(item.id, newQuantity);
-                        }}
+                        onChange={(e) => updateQuantity(item.id, Number(e.target.value) || 1)}
                         className="w-20 text-center"
                         type="number"
                         min={1}
                         max={item.stock}
                       />
-                      <Button 
-                        onClick={() => updateQuantity(item.id, item.quantity + 1)} 
-                        variant="outline"
-                        disabled={item.quantity >= item.stock}
-                      >
-                        +
-                      </Button>
-                      <Button onClick={() => removeItem(item.id)} variant="destructive" className="ml-2">
-                        ลบ
-                      </Button>
+                      <Button onClick={() => updateQuantity(item.id, Math.min(item.stock, item.quantity + 1))} variant="outline">+</Button>
+                      <Button onClick={() => removeItem(item.id)} variant="destructive" className="ml-2">ลบ</Button>
                     </div>
-                    {item.quantity > item.stock && (
-                      <div className="text-red-500 text-sm mt-1">
-                        จำนวนที่เลือกเกินสต็อกที่มี
-                      </div>
-                    )}
                   </div>
-                  <div className="font-semibold sm:self-center">
-                    {item.price * item.quantity} บาท
-                  </div>
+                  <div className="font-semibold sm:self-center">{item.price * item.quantity} บาท</div>
                 </CardContent>
               </Card>
             ))}
@@ -135,58 +103,27 @@ export default function CartPage() {
                 <CardTitle>สรุปคำสั่งซื้อ</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="flex justify-between">
-                  <span>จำนวนสินค้า</span>
-                  <span>{totalQuantity} ชิ้น</span>
-                </div>
-                <div className="flex justify-between font-semibold">
-                  <span>ราคารวม</span>
-                  <span>{totalPrice} บาท</span>
-                </div>
+                <div className="flex justify-between"><span>จำนวนสินค้า</span><span>{totalQuantity} ชิ้น</span></div>
+                <div className="flex justify-between font-semibold"><span>ราคารวม</span><span>{totalPrice} บาท</span></div>
                 <div>
                   <label className="block text-sm mb-1">ที่อยู่จัดส่ง</label>
-                  <Textarea 
-                    value={shippingAddress} 
-                    onChange={(e) => setShippingAddress(e.target.value)} 
-                    placeholder="ที่อยู่จัดส่ง" 
-                    rows={4} 
-                  />
+                  <Textarea value={shippingAddress} onChange={(e) => setShippingAddress(e.target.value)} placeholder="ที่อยู่จัดส่ง" rows={4} />
                 </div>
                 <div>
                   <label className="block text-sm mb-1">วิธีจัดส่ง/ชำระเงิน</label>
-                  <select 
-                    className="border rounded px-3 py-2 w-full" 
-                    value={deliveryMethod} 
-                    onChange={(e) => setDeliveryMethod(e.target.value)}
-                  >
+                  <select className="border rounded px-3 py-2 w-full" value={deliveryMethod} onChange={(e) => setDeliveryMethod(e.target.value)}>
                     <option value="bankTransfer">โอนผ่านธนาคาร</option>
                     <option value="cash">เงินสด</option>
                   </select>
                 </div>
                 <div>
                   <label className="block text-sm mb-1">แนบสลิป (ถ้ามี)</label>
-                  <Input 
-                    type="file" 
-                    accept="image/*" 
-                    onChange={(e) => setSlipFile(e.target.files?.[0] || null)} 
-                  />
+                  <Input type="file" accept="image/*" onChange={(e) => setSlipFile(e.target.files?.[0] || null)} />
                 </div>
               </CardContent>
               <CardFooter className="flex gap-2">
-                <Button 
-                  variant="outline" 
-                  onClick={handleClearCart} 
-                  disabled={loading}
-                >
-                  ล้างตะกร้า
-                </Button>
-                <Button 
-                  className="ml-auto" 
-                  onClick={handleCheckout} 
-                  disabled={loading || !items.length}
-                >
-                  {loading ? "กำลังดำเนินการ..." : "ชำระเงิน"}
-                </Button>
+                <Button variant="outline" onClick={clearCart} disabled={loading}>ล้างตะกร้า</Button>
+                <Button className="ml-auto" onClick={handleCheckout} disabled={loading || !items.length}>ชำระเงิน</Button>
               </CardFooter>
             </Card>
           </div>
@@ -195,3 +132,4 @@ export default function CartPage() {
     </div>
   );
 }
+
