@@ -17,6 +17,7 @@ export async function GET(req: NextRequest) {
         id: true,
         name: true,
         email: true,
+        phone: true,
         role: true,
         createdAt: true,
       },
@@ -34,7 +35,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "ไม่มีสิทธิ์เข้าถึง" }, { status: 403 });
   }
 
-  const { name, email, password, role } = await req.json();
+  const { name, email, phone, password, role } = await req.json();
   if (!name || !email || !password || !role) {
     return NextResponse.json({ error: "กรุณากรอกข้อมูลให้ครบถ้วน" }, { status: 400 });
   }
@@ -46,13 +47,20 @@ export async function POST(req: NextRequest) {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    const userData: any = {
+      name,
+      email,
+      password: hashedPassword,
+      role,
+    };
+
+    // เพิ่มข้อมูล phone ถ้ามีการส่งมา
+    if (phone) {
+      userData.phone = phone;
+    }
+
     const newUser = await prisma.user.create({
-      data: {
-        name,
-        email,
-        password: hashedPassword,
-        role,
-      },
+      data: userData,
     });
 
     return NextResponse.json(newUser, { status: 201 });

@@ -16,7 +16,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     return NextResponse.json({ error: "ID ไม่ถูกต้อง" }, { status: 400 });
   }
 
-  const { name, email, password, role } = await req.json();
+  const { name, email, phone, password, role } = await req.json();
   if (!name || !email || !role) {
     return NextResponse.json({ error: "กรุณากรอกข้อมูลให้ครบถ้วน" }, { status: 400 });
   }
@@ -36,6 +36,12 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     }
 
     const updateData: any = { name, email, role };
+    
+    // เพิ่มข้อมูล phone ถ้ามีการส่งมา
+    if (phone) {
+      updateData.phone = phone;
+    }
+
     if (password) {
       const hashedPassword = await bcrypt.hash(password, 10);
       updateData.password = hashedPassword;

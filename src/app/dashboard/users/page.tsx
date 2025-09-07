@@ -39,6 +39,7 @@ interface User {
   id: number;
   name: string;
   email: string;
+  phone?: string | null;
   role: string;
   createdAt: string;
 }
@@ -54,6 +55,7 @@ export default function ManageUsersPage() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    phone: "",
     password: "",
     role: "USER",
   });
@@ -110,7 +112,7 @@ export default function ManageUsersPage() {
         const newUser = await response.json();
         setUsers([...users, newUser]);
         setIsAddDialogOpen(false);
-        setFormData({ name: "", email: "", password: "", role: "USER" });
+        setFormData({ name: "", email: "", phone: "", password: "", role: "USER" });
         Swal.fire({
           icon: "success",
           title: "เพิ่มผู้ใช้สำเร็จ!",
@@ -149,7 +151,7 @@ export default function ManageUsersPage() {
         setUsers(users.map((user) => (user.id === selectedUser.id ? updatedUser : user)));
         setIsEditDialogOpen(false);
         setSelectedUser(null);
-        setFormData({ name: "", email: "", password: "", role: "USER" });
+        setFormData({ name: "", email: "", phone: "", password: "", role: "USER" });
         Swal.fire({
           icon: "success",
           title: "อัพเดทผู้ใช้สำเร็จ!",
@@ -299,6 +301,16 @@ export default function ManageUsersPage() {
                 />
               </div>
               <div>
+                <Label htmlFor="phone">เบอร์โทรศัพท์</Label>
+                <Input
+                  id="phone"
+                  type="tel"
+                  value={formData.phone}
+                  onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                  placeholder="กรอกเบอร์โทรศัพท์"
+                />
+              </div>
+              <div>
                 <Label htmlFor="password">รหัสผ่าน</Label>
                 <Input
                   id="password"
@@ -345,11 +357,12 @@ export default function ManageUsersPage() {
         </Dialog>
       </div>
       <div className="overflow-x-auto rounded-md border bg-white">
-      <Table className="min-w-[720px]">
+      <Table className="min-w-[800px]">
         <TableHeader>
           <TableRow>
             <TableHead className="min-w-[160px]">ชื่อ</TableHead>
             <TableHead className="min-w-[200px]">อีเมล</TableHead>
+            <TableHead className="min-w-[140px]">เบอร์โทรศัพท์</TableHead>
             <TableHead className="min-w-[140px]">สถานะ</TableHead>
             <TableHead className="min-w-[160px]">วันที่สมัคร</TableHead>
             <TableHead className="min-w-[180px]">การจัดการ</TableHead>
@@ -360,6 +373,7 @@ export default function ManageUsersPage() {
             <TableRow key={user.id}>
               <TableCell className="whitespace-nowrap">{user.name}</TableCell>
               <TableCell className="whitespace-nowrap">{user.email}</TableCell>
+              <TableCell className="whitespace-nowrap">{user.phone || "-"}</TableCell>
               <TableCell>
                 <Select
                   value={user.role}
@@ -387,6 +401,7 @@ export default function ManageUsersPage() {
                     setFormData({
                       name: user.name,
                       email: user.email,
+                      phone: user.phone || "",
                       password: "",
                       role: user.role,
                     });
@@ -439,6 +454,16 @@ export default function ManageUsersPage() {
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 placeholder="กรอกอีเมล"
                 required
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-phone">เบอร์โทรศัพท์</Label>
+              <Input
+                id="edit-phone"
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                placeholder="กรอกเบอร์โทรศัพท์"
               />
             </div>
             <div>

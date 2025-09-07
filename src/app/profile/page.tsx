@@ -16,6 +16,7 @@ export default function ProfilePage() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    phone: "",
     password: "",
     confirmPassword: "",
   });
@@ -31,6 +32,7 @@ export default function ProfilePage() {
       setFormData({
         name: session.user.name || "",
         email: session.user.email || "",
+        phone: session.user.phone || "",
         password: "",
         confirmPassword: "",
       });
@@ -56,6 +58,7 @@ export default function ProfilePage() {
       const dataToSubmit = {
         name: formData.name,
         email: formData.email,
+        phone: formData.phone,
         ...(formData.password && { password: formData.password }),
       };
 
@@ -136,6 +139,16 @@ export default function ProfilePage() {
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 placeholder="กรอกอีเมลของคุณ"
                 required
+              />
+            </div>
+            <div>
+              <Label htmlFor="phone">เบอร์โทรศัพท์</Label>
+              <Input
+                id="phone"
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                placeholder="กรอกเบอร์โทรศัพท์ของคุณ"
               />
             </div>
             <div>

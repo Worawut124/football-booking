@@ -34,6 +34,7 @@ export const authOptions: AuthOptions = {
           email: user.email,
           name: user.name,
           role: user.role,
+          phone: user.phone,
         } as any;
       },
     }),
@@ -51,15 +52,15 @@ export const authOptions: AuthOptions = {
         // types are augmented in src/next-auth.d.ts
         (token as any).id = (user as any).id;
         (token as any).role = (user as any).role;
+        (token as any).phone = (user as any).phone;
       }
       return token as any;
     },
     async session({ session, token }) {
       if ((token as any)?.id) (session.user as any).id = (token as any).id as string;
       if ((token as any)?.role) (session.user as any).role = (token as any).role as string;
+      if ((token as any)?.phone) (session.user as any).phone = (token as any).phone as string;
       return session;
     },
   },
 };
-
-

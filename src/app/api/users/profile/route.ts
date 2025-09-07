@@ -10,13 +10,18 @@ export async function PUT(req: NextRequest) {
     return NextResponse.json({ error: "ไม่ได้ล็อกอิน" }, { status: 401 });
   }
 
-  const { name, email, password } = await req.json();
+  const { name, email, phone, password } = await req.json();
   if (!name || !email) {
     return NextResponse.json({ error: "กรุณากรอกข้อมูลให้ครบถ้วน" }, { status: 400 });
   }
 
   try {
     const updateData: any = { name, email };
+
+    // เพิ่มข้อมูล phone ถ้ามีการส่งมา
+    if (phone) {
+      updateData.phone = phone;
+    }
 
     // ถ้ามีการส่งรหัสผ่านใหม่มา ให้แฮชและอัพเดท
     if (password) {
