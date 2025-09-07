@@ -7,8 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { ArrowLeft, Edit, Trash2 } from "lucide-react";
+import { ArrowLeft, Edit, Trash2, Save, X } from "lucide-react";
 import Swal from "sweetalert2";
 
 interface Player {
@@ -41,16 +40,12 @@ export default function TeamPlayersPage() {
   const params = useParams();
   const registrationId = params.id as string;
 
-  const [registration, setRegistration] = useState<any>(null);
+  const [registration, setRegistration] = useState<Registration | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
-  const [editForm, setEditForm] = useState({
-    name: "",
-    jerseyNumber: "",
-    birthYear: ""
-  });
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingPlayerId, setEditingPlayerId] = useState<number | null>(null);
+  const [editingData, setEditingData] = useState<{[key: number]: {name: string, jerseyNumber: string, birthYear: string}}>({});
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -82,9 +77,10 @@ export default function TeamPlayersPage() {
       const playersResponse = await fetch(`/api/team-players?registrationId=${registrationId}`);
       if (playersResponse.ok) {
         const playersData = await playersResponse.json();
+        console.log("Fetched players data:", playersData);
         setPlayers(playersData);
       } else {
-        // If no players found, set empty array
+        console.log("No players found or error:", await playersResponse.text());
         setPlayers([]);
       }
     } catch (error) {
@@ -100,83 +96,112 @@ export default function TeamPlayersPage() {
     }
   };
 
-  const handleEditPlayer = (player: Player) => {
-    setEditingPlayer(player);
-    setEditForm({
-      name: player.name,
-      jerseyNumber: player.jerseyNumber,
-      birthYear: player.birthYear
+  const startEditing = (player: Player) => {
+    setEditingPlayerId(player.id);
+    setEditingData({
+      ...editingData,
+      [player.id]: {
+        name: player.name,
+        jerseyNumber: player.jerseyNumber,
+        birthYear: player.birthYear
+      }
     });
-    setIsEditDialogOpen(true);
   };
 
-  const handleUpdatePlayer = async () => {
-    if (!editingPlayer) {
-      console.log("No editing player found");
-      return;
+  const cancelEditing = (playerId: number) => {
+    setEditingPlayerId(null);
+    const newEditingData = { ...editingData };
+    delete newEditingData[playerId];
+    setEditingData(newEditingData);
+  };
+
+  const updateEditingData = (playerId: number, field: string, value: string) => {
+    setEditingData({
+      ...editingData,
+      [playerId]: {
+        ...editingData[playerId],
+        [field]: value
+      }
+    });
+  };
+
+  const validatePlayerData = (data: {name: string, jerseyNumber: string, birthYear: string}) => {
+    if (!data.name.trim()) {
+      throw new Error("กรุณากรอกชื่อ-นามสกุล");
     }
 
-    console.log("Editing player:", editingPlayer);
-    console.log("Edit form data:", editForm);
-
-    // Validate form data
-    if (!editForm.name.trim()) {
-      Swal.fire({
-        icon: "error",
-        title: "ข้อมูลไม่ครบถ้วน",
-        text: "กรุณากรอกชื่อ-นามสกุล",
-        confirmButtonText: "ตกลง",
-      });
-      return;
+    const jerseyNum = parseInt(data.jerseyNumber);
+    if (!data.jerseyNumber || isNaN(jerseyNum) || jerseyNum < 1 || jerseyNum > 99) {
+      throw new Error("กรุณากรอกเบอร์เสื้อที่ถูกต้อง (1-99)");
     }
 
-    if (!editForm.jerseyNumber || parseInt(editForm.jerseyNumber) < 1) {
-      Swal.fire({
-        icon: "error",
-        title: "ข้อมูลไม่ถูกต้อง",
-        text: "กรุณากรอกเบอร์เสื้อที่ถูกต้อง",
-        confirmButtonText: "ตกลง",
-      });
-      return;
+    const birthYear = parseInt(data.birthYear);
+    if (!data.birthYear || isNaN(birthYear) || birthYear < 2400 || birthYear > 2600) {
+      throw new Error("กรุณากรอกปีเกิด (พ.ศ.) ที่ถูกต้อง (2400-2600)");
     }
 
-    if (!editForm.birthYear || parseInt(editForm.birthYear) < 2400 || parseInt(editForm.birthYear) > 2600) {
-      Swal.fire({
-        icon: "error",
-        title: "ข้อมูลไม่ถูกต้อง",
-        text: "กรุณากรอกปีเกิด (พ.ศ.) ที่ถูกต้อง",
-        confirmButtonText: "ตกลง",
-      });
-      return;
+    // Check if jersey number is already taken by another player
+    const duplicatePlayer = players.find(p => 
+      p.id !== editingPlayerId && 
+      parseInt(p.jerseyNumber) === jerseyNum
+    );
+    
+    if (duplicatePlayer) {
+      throw new Error(`เบอร์เสื้อ ${jerseyNum} ถูกใช้แล้วโดย ${duplicatePlayer.name}`);
     }
+  };
 
-    const requestData = {
-      playerId: editingPlayer.id,
-      name: editForm.name.trim(),
-      jerseyNumber: editForm.jerseyNumber,
-      birthYear: editForm.birthYear,
-    };
-
-    console.log("Sending request data:", requestData);
+  const savePlayer = async (playerId: number) => {
+    const playerData = editingData[playerId];
+    if (!playerData) return;
 
     try {
+      // Validate data
+      validatePlayerData(playerData);
+      
+      setSaving(true);
+      console.log("Saving player data:", { playerId, ...playerData });
+
       const response = await fetch('/api/team-players', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(requestData),
+        body: JSON.stringify({
+          playerId: playerId,
+          name: playerData.name.trim(),
+          jerseyNumber: playerData.jerseyNumber,
+          birthYear: playerData.birthYear,
+        }),
       });
 
-      console.log("Response status:", response.status);
-      console.log("Response ok:", response.ok);
+      console.log("Update response status:", response.status);
+      console.log("Update response headers:", Object.fromEntries(response.headers.entries()));
 
       if (response.ok) {
         const responseData = await response.json();
-        console.log("Success response:", responseData);
-        await fetchTeamData(); // Refresh the data
-        setIsEditDialogOpen(false);
-        setEditingPlayer(null);
+        console.log("Update success response:", responseData);
+        
+        // Update the player in local state
+        setPlayers(prevPlayers => 
+          prevPlayers.map(p => 
+            p.id === playerId 
+              ? { 
+                  ...p, 
+                  name: playerData.name.trim(),
+                  jerseyNumber: playerData.jerseyNumber,
+                  birthYear: playerData.birthYear
+                }
+              : p
+          )
+        );
+        
+        // Clear editing state
+        setEditingPlayerId(null);
+        const newEditingData = { ...editingData };
+        delete newEditingData[playerId];
+        setEditingData(newEditingData);
+        
         Swal.fire({
           icon: "success",
           title: "สำเร็จ",
@@ -184,8 +209,16 @@ export default function TeamPlayersPage() {
           confirmButtonText: "ตกลง",
         });
       } else {
-        const errorData = await response.json();
-        console.log("Error response:", errorData);
+        const errorText = await response.text();
+        console.error("Update error response:", errorText);
+        
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch {
+          errorData = { error: "เกิดข้อผิดพลาดในการแก้ไขข้อมูล" };
+        }
+        
         Swal.fire({
           icon: "error",
           title: "เกิดข้อผิดพลาด",
@@ -193,14 +226,16 @@ export default function TeamPlayersPage() {
           confirmButtonText: "ตกลง",
         });
       }
-    } catch (error) {
-      console.error("Error updating player:", error);
+    } catch (error: any) {
+      console.error("Error saving player:", error);
       Swal.fire({
         icon: "error",
         title: "เกิดข้อผิดพลาด",
-        text: "ไม่สามารถแก้ไขข้อมูลได้",
+        text: error.message || "ไม่สามารถแก้ไขข้อมูลได้",
         confirmButtonText: "ตกลง",
       });
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -223,7 +258,9 @@ export default function TeamPlayersPage() {
         });
 
         if (response.ok) {
-          await fetchTeamData(); // Refresh the data
+          // Remove player from local state
+          setPlayers(prevPlayers => prevPlayers.filter(p => p.id !== player.id));
+          
           Swal.fire({
             icon: "success",
             title: "สำเร็จ",
@@ -252,7 +289,16 @@ export default function TeamPlayersPage() {
   };
 
   if (status === "loading" || loading) {
-    return <div className="container mx-auto p-4">กำลังโหลด...</div>;
+    return (
+      <div className="container mx-auto p-4">
+        <div className="flex justify-center items-center h-64">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p>กำลังโหลด...</p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (session?.user?.role !== "ADMIN" && session?.user?.role !== "OWNER") {
@@ -280,7 +326,7 @@ export default function TeamPlayersPage() {
       </div>
 
       {/* Competition Info */}
-      <Card className="shadow-md">
+      <Card className="shadow-md mb-6">
         <CardHeader>
           <CardTitle>ข้อมูลการแข่งขัน</CardTitle>
         </CardHeader>
@@ -357,13 +403,47 @@ export default function TeamPlayersPage() {
                 {players.map((player, index) => (
                   <TableRow key={player.id}>
                     <TableCell className="font-medium">{index + 1}</TableCell>
-                    <TableCell>{player.name}</TableCell>
                     <TableCell>
-                      <div className="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-800 rounded-full font-bold">
-                        {player.jerseyNumber}
-                      </div>
+                      {editingPlayerId === player.id ? (
+                        <Input
+                          value={editingData[player.id]?.name || player.name}
+                          onChange={(e) => updateEditingData(player.id, 'name', e.target.value)}
+                          className="min-w-48"
+                        />
+                      ) : (
+                        player.name
+                      )}
                     </TableCell>
-                    <TableCell>{player.birthYear}</TableCell>
+                    <TableCell>
+                      {editingPlayerId === player.id ? (
+                        <Input
+                          type="number"
+                          min="1"
+                          max="99"
+                          value={editingData[player.id]?.jerseyNumber || player.jerseyNumber}
+                          onChange={(e) => updateEditingData(player.id, 'jerseyNumber', e.target.value)}
+                          className="w-20"
+                        />
+                      ) : (
+                        <div className="flex items-center justify-center w-8 h-8 bg-blue-100 text-blue-800 rounded-full font-bold">
+                          {player.jerseyNumber}
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {editingPlayerId === player.id ? (
+                        <Input
+                          type="number"
+                          min="2400"
+                          max="2600"
+                          value={editingData[player.id]?.birthYear || player.birthYear}
+                          onChange={(e) => updateEditingData(player.id, 'birthYear', e.target.value)}
+                          className="w-24"
+                        />
+                      ) : (
+                        player.birthYear
+                      )}
+                    </TableCell>
                     <TableCell>
                       {new Date(player.createdAt).toLocaleDateString('th-TH', {
                         year: 'numeric',
@@ -373,22 +453,46 @@ export default function TeamPlayersPage() {
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleEditPlayer(player)}
-                          className="text-blue-600 hover:text-blue-800"
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleDeletePlayer(player)}
-                          className="text-red-600 hover:text-red-800"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
+                        {editingPlayerId === player.id ? (
+                          <>
+                            <Button
+                              size="sm"
+                              onClick={() => savePlayer(player.id)}
+                              disabled={saving}
+                              className="text-green-600 hover:text-green-800 bg-green-50 hover:bg-green-100"
+                            >
+                              {saving ? <div className="animate-spin rounded-full h-4 w-4 border-2 border-green-600 border-t-transparent" /> : <Save className="h-4 w-4" />}
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => cancelEditing(player.id)}
+                              disabled={saving}
+                              className="text-gray-600 hover:text-gray-800"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </>
+                        ) : (
+                          <>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => startEditing(player)}
+                              className="text-blue-600 hover:text-blue-800"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDeletePlayer(player)}
+                              className="text-red-600 hover:text-red-800"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -398,73 +502,6 @@ export default function TeamPlayersPage() {
           )}
         </CardContent>
       </Card>
-
-      {/* Edit Player Modal */}
-      {isEditDialogOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
-            <h2 className="text-xl font-bold mb-4">แก้ไขข้อมูลนักเตะ</h2>
-            
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  ชื่อ-นามสกุล
-                </label>
-                <Input
-                  value={editForm.name}
-                  onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                  placeholder="กรอกชื่อ-นามสกุล"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  เบอร์เสื้อ
-                </label>
-                <Input
-                  type="number"
-                  value={editForm.jerseyNumber}
-                  onChange={(e) => setEditForm({ ...editForm, jerseyNumber: e.target.value })}
-                  placeholder="กรอกเบอร์เสื้อ"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  ปีเกิด (พ.ศ.)
-                </label>
-                <Input
-                  type="number"
-                  value={editForm.birthYear}
-                  onChange={(e) => setEditForm({ ...editForm, birthYear: e.target.value })}
-                  placeholder="กรอกปีเกิด"
-                />
-              </div>
-            </div>
-            
-            <div className="flex justify-end gap-2 mt-6">
-              <Button 
-                variant="outline" 
-                onClick={() => {
-                  console.log("Cancel button clicked");
-                  setIsEditDialogOpen(false);
-                }}
-              >
-                ยกเลิก
-              </Button>
-              <Button 
-                onClick={() => {
-                  console.log("Save button clicked");
-                  handleUpdatePlayer();
-                }}
-                className="bg-blue-600 hover:bg-blue-700"
-              >
-                บันทึก
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

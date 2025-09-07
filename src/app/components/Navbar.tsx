@@ -58,7 +58,7 @@ export default function Navbar() {
             <Button variant="ghost" className="cursor-pointer">จองสนาม</Button>
           </Link>
           <Link href="/competition-list">
-            <Button variant="ghost" className="w-full justify-start cursor-pointer">สมัครการแข่งขัน</Button>
+            <Button variant="ghost" className="w-full justify-start cursor-pointer">การแข่งขัน</Button>
           </Link>
           <Link href="/Products">
             <Button variant="ghost" className="w-full justify-start cursor-pointer">สินค้า</Button>
@@ -100,7 +100,7 @@ export default function Navbar() {
                 <DropdownMenuItem asChild>
                   <Link href="/Competition-history" className="flex items-center">
                     <User className="mr-2 h-4 w-4" />
-                    <span>ประวัติการแข่งขัน</span>
+                    <span>การแข่งขัน</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
@@ -142,7 +142,7 @@ export default function Navbar() {
                   <Button variant="ghost" className="w-full justify-start cursor-pointer">จองสนาม</Button>
                 </Link>
                 <Link href="/competition-list">
-                  <Button variant="ghost" className="w-full justify-start cursor-pointer">สมัครการแข่งขัน</Button>
+                  <Button variant="ghost" className="w-full justify-start cursor-pointer">การแข่งขัน</Button>
                 </Link>
                   <Link href="/Products">
                   <Button variant="ghost" className="w-full justify-start cursor-pointer">สินค้า</Button>
@@ -176,7 +176,7 @@ export default function Navbar() {
                     <Link href="/Competition-history">
                       <Button variant="ghost" className="w-full justify-start cursor-pointer">
                         <User className="mr-2 h-4 w-4" />
-                        ประวัติการแข่งขัน
+                        การแข่งขัน
                       </Button>
                     </Link>
                     <Link href="/user-orders">

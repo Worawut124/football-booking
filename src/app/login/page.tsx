@@ -133,7 +133,7 @@ export default function LoginPage() {
       <Card className="w-full max-w-md shadow-2xl bg-white/90 backdrop-blur-sm rounded-xl">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-bold text-green-700">
-            ล็อกอิน สนามบอล
+            ล็อกอิน
           </CardTitle>
           <p className="text-sm text-gray-600 mt-1">ยินดีต้อนรับสู่ระบบจองสนาม</p>
         </CardHeader>

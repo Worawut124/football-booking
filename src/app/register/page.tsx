@@ -66,7 +66,7 @@ export default function RegisterPage() {
       <Card className="w-full max-w-md shadow-2xl bg-white/90 backdrop-blur-sm rounded-xl">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-bold text-green-700">
-            สมัครสมาชิก สนามบอล
+            สมัครสมาชิก 
           </CardTitle>
           <p className="text-sm text-gray-600 mt-1">เข้าร่วมระบบจองสนามวันนี้!</p>
         </CardHeader>
