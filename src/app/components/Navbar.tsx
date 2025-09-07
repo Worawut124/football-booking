@@ -47,7 +47,6 @@ export default function Navbar() {
             height={70}
             className="h-15 w-auto"
           />
-          Sirinthra Stadium 
         </Link>
         
 
