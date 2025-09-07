@@ -1,186 +1,248 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useCart } from "@/components/CartContext";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import Link from "next/link";
+import { useState, useEffect } from "react";
 
-interface CartItem {
-  id: number;
-  name: string;
-  price: number;
-  quantity: number;
-  imageData: string | null;
-  stock: number;
-  categoryName: string | null;
-}
+export default function CartPage() {
+  const { items, updateQuantity, removeItem, clearCart, totalPrice, totalQuantity } = useCart();
+  const [shippingAddress, setShippingAddress] = useState("");
+  const [deliveryMethod, setDeliveryMethod] = useState("bankTransfer");
+  const [slipFile, setSlipFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-interface CartContextType {
-  items: CartItem[];
-  addItem: (product: Omit<CartItem, 'quantity'>, quantity?: number) => void;
-  removeItem: (id: number) => void;
-  updateQuantity: (id: number, quantity: number) => void;
-  clearCart: () => void;
-  totalPrice: number;
-  totalQuantity: number;
-}
-
-const CartContext = createContext<CartContextType | undefined>(undefined);
-
-export function CartProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([]);
-  const [isClient, setIsClient] = useState(false);
-
-  // ตรวจสอบว่าเป็น client-side หรือไม่
+  // ตรวจสอบและล้างตะกร้าเมื่อ session เปลี่ยน
   useEffect(() => {
-    setIsClient(true);
-  }, []);
-
-  // โหลดข้อมูลตะกร้าจาก sessionStorage เมื่อเริ่มต้น
-  useEffect(() => {
-    if (!isClient) return;
-
-    const loadCartFromSession = () => {
-      try {
-        // ใช้ sessionStorage แทน localStorage เพื่อให้ข้อมูลหายเมื่อปิด browser
-        const savedCart = sessionStorage.getItem('cart');
-        const currentSession = sessionStorage.getItem('userSession');
-        
-        // ถ้ามี session และมีข้อมูลตะกร้า
-        if (currentSession && savedCart) {
-          const cartData = JSON.parse(savedCart);
-          setItems(cartData);
+    const checkSession = () => {
+      const currentSession = sessionStorage.getItem('userSession');
+      const lastKnownSession = localStorage.getItem('lastUserSession');
+      
+      // ถ้า session เปลี่ยนหรือไม่มี session ให้ล้างตะกร้า
+      if (!currentSession || currentSession !== lastKnownSession) {
+        clearCart();
+        if (currentSession) {
+          localStorage.setItem('lastUserSession', currentSession);
         } else {
-          // ถ้าไม่มี session หรือไม่มีข้อมูลตะกร้า ให้ล้างตะกร้า
-          setItems([]);
+          localStorage.removeItem('lastUserSession');
         }
-      } catch (error) {
-        console.error('Error loading cart from session:', error);
-        setItems([]);
       }
     };
 
-    loadCartFromSession();
+    checkSession();
+    
+    // ตั้งค่าให้ตรวจสอบทุก 5 วินาที (optional)
+    const interval = setInterval(checkSession, 5000);
+    
+    return () => clearInterval(interval);
+  }, [clearCart]);
 
-    // ตรวจสอบการเปลี่ยนแปลงของ session
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'userSession' || e.key === 'cart') {
-        loadCartFromSession();
+  // ล้างตะกร้าเมื่อปิดหน้าต่าง/แท็บ
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      // ล้างตะกร้าเมื่อปิดหน้าต่าง (optional)
+      // clearCart();
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        // เมื่อเปลี่ยนแท็บหรือซ่อนหน้าต่าง
+        // สามารถเพิ่มการตรวจสอบ session ที่นี่ได้
       }
     };
 
-    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     
     return () => {
-      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [isClient]);
+  }, []);
 
-  // บันทึกข้อมูลตะกร้าลง sessionStorage ทุกครั้งที่มีการเปลี่ยนแปลง
-  useEffect(() => {
-    if (!isClient) return;
-    
+  const handleCheckout = async () => {
+    if (!items.length) return;
+    if (!shippingAddress.trim()) {
+      setError("กรุณากรอกที่อยู่จัดส่ง");
+      return;
+    }
+    setError(null);
+    setLoading(true);
     try {
-      const currentSession = sessionStorage.getItem('userSession');
-      if (currentSession) {
-        sessionStorage.setItem('cart', JSON.stringify(items));
-      } else {
-        sessionStorage.removeItem('cart');
-      }
-    } catch (error) {
-      console.error('Error saving cart to session:', error);
-    }
-  }, [items, isClient]);
+      for (const item of items) {
+        const form = new FormData();
+        form.append("productId", String(item.id));
+        form.append("name", item.name);
+        form.append("price", String(item.price));
+        form.append("stock", String(item.quantity));
+        form.append("category", item.categoryName || "ไม่มี");
+        form.append("shippingAddress", shippingAddress);
+        form.append("orderDate", new Date().toISOString());
+        form.append("deliveryMethod", deliveryMethod);
+        if (slipFile) form.append("slipImage", slipFile);
 
-  // ตรวจสอบ session และล้างตะกร้าหากจำเป็น
-  const checkSessionAndClearCart = () => {
-    if (!isClient) return;
-    
-    const currentSession = sessionStorage.getItem('userSession');
-    if (!currentSession) {
-      setItems([]);
-    }
-  };
-
-  const addItem = (product: Omit<CartItem, 'quantity'>, quantity: number = 1) => {
-    checkSessionAndClearCart();
-    
-    setItems(prevItems => {
-      const existingItem = prevItems.find(item => item.id === product.id);
-      
-      if (existingItem) {
-        // ตรวจสอบว่าจำนวนรวมไม่เกิน stock
-        const newQuantity = Math.min(existingItem.quantity + quantity, product.stock);
-        return prevItems.map(item =>
-          item.id === product.id 
-            ? { ...item, quantity: newQuantity }
-            : item
-        );
-      } else {
-        // เพิ่มสินค้าใหม่
-        const safeQuantity = Math.min(quantity, product.stock);
-        return [...prevItems, { ...product, quantity: safeQuantity }];
-      }
-    });
-  };
-
-  const removeItem = (id: number) => {
-    setItems(prevItems => prevItems.filter(item => item.id !== id));
-  };
-
-  const updateQuantity = (id: number, quantity: number) => {
-    if (quantity < 1) return;
-    
-    setItems(prevItems =>
-      prevItems.map(item => {
-        if (item.id === id) {
-          // ตรวจสอบว่าจำนวนไม่เกิน stock
-          const safeQuantity = Math.min(quantity, item.stock);
-          return { ...item, quantity: safeQuantity };
+        const res = await fetch("/api/orders", { method: "POST", body: form });
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.message || "ไม่สามารถสร้างคำสั่งซื้อได้");
         }
-        return item;
-      })
-    );
-  };
-
-  const clearCart = () => {
-    setItems([]);
-    if (isClient) {
-      sessionStorage.removeItem('cart');
+      }
+      clearCart();
+      alert("สั่งซื้อสำเร็จ");
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const totalPrice = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
-
-  const value: CartContextType = {
-    items,
-    addItem,
-    removeItem,
-    updateQuantity,
-    clearCart,
-    totalPrice,
-    totalQuantity,
+  // ฟังก์ชันสำหรับล้างตะกร้าด้วยตนเอง
+  const handleClearCart = () => {
+    if (confirm("คุณแน่ใจหรือไม่ที่จะล้างตะกร้าสินค้าทั้งหมด?")) {
+      clearCart();
+    }
   };
 
-  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+  return (
+    <div className="container mx-auto py-6 px-2 sm:px-4">
+      <h2 className="text-2xl font-bold mb-6">ตะกร้าสินค้า</h2>
+      {error && <div className="text-red-500 mb-4">{error}</div>}
+
+      {!items.length ? (
+        <Card>
+          <CardContent className="py-6">
+            ตะกร้าว่างเปล่า <Link href="/Products" className="text-blue-600 underline">ไปเลือกซื้อสินค้า</Link>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="md:col-span-2 space-y-3">
+            {items.map((item) => (
+              <Card key={item.id}>
+                <CardContent className="flex items-start gap-4 py-4 flex-col sm:flex-row">
+                  {item.imageData && (
+                    <img
+                      src={item.imageData.startsWith("http") ? item.imageData : `data:image/jpeg;base64,${item.imageData}`}
+                      alt={item.name}
+                      className="w-24 h-24 object-cover rounded self-start"
+                    />
+                  )}
+                  <div className="flex-1 w-full">
+                    <div className="font-semibold">{item.name}</div>
+                    <div className="text-sm text-gray-600">ราคา: {item.price} บาท</div>
+                    <div className="text-sm text-gray-600">คงเหลือ: {item.stock}</div>
+                    <div className="flex items-center gap-2 mt-2 flex-wrap">
+                      <Button 
+                        onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))} 
+                        variant="outline"
+                        disabled={item.quantity <= 1}
+                      >
+                        -
+                      </Button>
+                      <Input
+                        value={item.quantity}
+                        onChange={(e) => {
+                          const newQuantity = Number(e.target.value) || 1;
+                          if (newQuantity <= item.stock && newQuantity >= 1) {
+                            updateQuantity(item.id, newQuantity);
+                          }
+                        }}
+                        className="w-20 text-center"
+                        type="number"
+                        min={1}
+                        max={item.stock}
+                      />
+                      <Button 
+                        onClick={() => updateQuantity(item.id, Math.min(item.stock, item.quantity + 1))} 
+                        variant="outline"
+                        disabled={item.quantity >= item.stock}
+                      >
+                        +
+                      </Button>
+                      <Button onClick={() => removeItem(item.id)} variant="destructive" className="ml-2">
+                        ลบ
+                      </Button>
+                    </div>
+                    {item.quantity > item.stock && (
+                      <div className="text-red-500 text-sm mt-1">
+                        จำนวนที่เลือกเกินสต็อกที่มี
+                      </div>
+                    )}
+                  </div>
+                  <div className="font-semibold sm:self-center">
+                    {item.price * item.quantity} บาท
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <div>
+            <Card>
+              <CardHeader>
+                <CardTitle>สรุปคำสั่งซื้อ</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex justify-between">
+                  <span>จำนวนสินค้า</span>
+                  <span>{totalQuantity} ชิ้น</span>
+                </div>
+                <div className="flex justify-between font-semibold">
+                  <span>ราคารวม</span>
+                  <span>{totalPrice} บาท</span>
+                </div>
+                <div>
+                  <label className="block text-sm mb-1">ที่อยู่จัดส่ง</label>
+                  <Textarea 
+                    value={shippingAddress} 
+                    onChange={(e) => setShippingAddress(e.target.value)} 
+                    placeholder="ที่อยู่จัดส่ง" 
+                    rows={4} 
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm mb-1">วิธีจัดส่ง/ชำระเงิน</label>
+                  <select 
+                    className="border rounded px-3 py-2 w-full" 
+                    value={deliveryMethod} 
+                    onChange={(e) => setDeliveryMethod(e.target.value)}
+                  >
+                    <option value="bankTransfer">โอนผ่านธนาคาร</option>
+                    <option value="cash">เงินสด</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm mb-1">แนบสลิป (ถ้ามี)</label>
+                  <Input 
+                    type="file" 
+                    accept="image/*" 
+                    onChange={(e) => setSlipFile(e.target.files?.[0] || null)} 
+                  />
+                </div>
+              </CardContent>
+              <CardFooter className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={handleClearCart} 
+                  disabled={loading}
+                >
+                  ล้างตะกร้า
+                </Button>
+                <Button 
+                  className="ml-auto" 
+                  onClick={handleCheckout} 
+                  disabled={loading || !items.length}
+                >
+                  {loading ? "กำลังดำเนินการ..." : "ชำระเงิน"}
+                </Button>
+              </CardFooter>
+            </Card>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }
-
-export function useCart() {
-  const context = useContext(CartContext);
-  if (context === undefined) {
-    throw new Error('useCart must be used within a CartProvider');
-  }
-  return context;
-}
-
-// ฟังก์ชันสำหรับจัดการ session (ใช้เมื่อ login/logout)
-export const setUserSession = (sessionId: string) => {
-  if (typeof window !== 'undefined') {
-    sessionStorage.setItem('userSession', sessionId);
-  }
-};
-
-export const clearUserSession = () => {
-  if (typeof window !== 'undefined') {
-    sessionStorage.removeItem('userSession');
-    sessionStorage.removeItem('cart');
-  }
-};
