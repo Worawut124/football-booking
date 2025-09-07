@@ -39,7 +39,7 @@ export default function HomePage() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await fetch("/api/auth/me");
+        const response = await fetch("/api/users");
         if (response.ok) {
           const userData = await response.json();
           setUser(userData);
