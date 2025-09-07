@@ -141,5 +141,10 @@ export const clearUserSession = () => {
   if (typeof window !== 'undefined') {
     sessionStorage.removeItem('userSession');
     sessionStorage.removeItem(STORAGE_KEY);
+    // ส่งสัญญาณให้ล้างตะกร้าในทุกแท็บ
+    localStorage.setItem('userSessionCleared', 'true');
+    setTimeout(() => {
+      localStorage.removeItem('userSessionCleared');
+    }, 100);
   }
 };
