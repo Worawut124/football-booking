@@ -47,8 +47,9 @@ export default function Navbar() {
             height={70}
             className="h-15 w-auto"
           />
+          Sirinthra Stadium 
         </Link>
-        Sirinthra Stadium
+        
 
         {/* เมนูสำหรับเดสก์ท็อป */}
         <div className="hidden md:flex items-center space-x-4">
