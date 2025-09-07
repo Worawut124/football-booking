@@ -7,29 +7,33 @@ declare module "next-auth" {
     user: {
       id: string;
       email?: string | null;
-      name?: string | null; // ปรับให้เป็น string | null
-      role: string;        // เพิ่ม role
+      name?: string | null;
+      role: string;
+      phone?: string | null;  
     } & DefaultSession["user"];
   }
 
   interface User {
     id: string;
     email: string;
-    name: string | null; // ปรับให้เป็น string | null
-    role: string;        // เพิ่ม role
+    name: string | null;
+    role: string;
+    phone?: string | null;   
   }
 }
 
 declare module "@auth/core/adapters" {
   interface AdapterUser extends CoreAdapterUser {
-    name: string | null; // ปรับให้เข้ากับ next-auth (ไม่รวม undefined)
-    role: string;        // เพิ่ม role
+    name: string | null;
+    role: string;
+    phone?: string | null;   
   }
 }
 
 declare module "next-auth/jwt" {
   interface JWT {
     id: string;
-    role: string; // เพิ่ม role ใน JWT
+    role: string;
+    phone?: string | null;   
   }
 }
