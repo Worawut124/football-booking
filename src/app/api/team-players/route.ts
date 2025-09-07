@@ -174,7 +174,7 @@ export async function PUT(request: NextRequest) {
     // Check if jersey number is already taken by another player in the same registration
     const existingPlayer = await (prisma as any).player.findFirst({
       where: {
-        jerseyNumber: jerseyNum,
+        jerseyNumber: jerseyNumber.toString(), // Convert to string
         competitionRegistrationId: currentPlayer.competitionRegistrationId,
         id: {
           not: playerIdNum
@@ -185,7 +185,7 @@ export async function PUT(request: NextRequest) {
     if (existingPlayer) {
       console.log("Jersey number conflict:", existingPlayer);
       return NextResponse.json(
-        { error: `เบอร์เสื้อ ${jerseyNum} ถูกใช้แล้วโดย ${existingPlayer.name}` },
+        { error: `เบอร์เสื้อ ${jerseyNumber} ถูกใช้แล้วโดย ${existingPlayer.name}` },
         { status: 400 }
       );
     }
@@ -197,8 +197,8 @@ export async function PUT(request: NextRequest) {
       where: { id: playerIdNum },
       data: {
         name: name.trim(),
-        jerseyNumber: jerseyNum,
-        birthYear: birthYearNum,
+        jerseyNumber: jerseyNumber.toString(), // Convert to string
+        birthYear: birthYear.toString(), // Convert to string as well
       },
     });
 
