@@ -33,23 +33,6 @@ export default function HomePage() {
   const [current, setCurrent] = useState(0);
   const [count, setCount] = useState(0);
   const [bookingsToday, setBookingsToday] = useState<any[]>([]);
-  const [user, setUser] = useState<any>(null);
-
-  // ฟังก์ชันสำหรับดึงข้อมูลผู้ใช้
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await fetch("/api/users");
-        if (response.ok) {
-          const data = await response.json();
-          setUser(data);
-        }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    };
-    fetchUser();
-  }, []);
 
   useEffect(() => {
     const fetchAnnouncements = async () => {
@@ -130,24 +113,9 @@ export default function HomePage() {
   if (loading) {
     return <LoadingCrescent text="กำลังโหลดข้อมูล..." />;
   }
-
+    <div className="text-2xl text-center font-medium">ยินดีต้อนรับเข้าสู่สนามฟุตบอล Sirinthra Stadium </div>
   return (
     <div className="container mx-auto p-4 sm:p-6 bg-gray-50">
-      {/* ส่วนแสดงข้อความต้อนรับผู้ใช้ */}
-      {user && (
-        <div className="mb-4 sm:mb-6  text-white p-4 sm:p-6 rounded-lg shadow-lg text-center">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="text-xl sm:text-2xl">👋</span>
-            <h2 className="text-lg sm:text-xl font-semibold">
-              สวัสดี คุณ{user.name || user.email}
-            </h2>
-          </div>
-          <p className="text-sm sm:text-base opacity-90">
-            ยินดีต้อนรับเข้าสู่ สนามฟุตบอล Sirinthra Stadium
-          </p>
-        </div>
-      )}
-
       <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4 sm:mb-6">
         ข่าวประชาสัมพันธ์
       </h1>
