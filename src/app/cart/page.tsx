@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export default function CartPage() {
   const { items, updateQuantity, removeItem, clearCart, totalPrice, totalQuantity } = useCart();
@@ -15,54 +15,6 @@ export default function CartPage() {
   const [slipFile, setSlipFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // ตรวจสอบและล้างตะกร้าเมื่อ session เปลี่ยน
-  useEffect(() => {
-    const checkSession = () => {
-      const currentSession = sessionStorage.getItem('userSession');
-      const lastKnownSession = localStorage.getItem('lastUserSession');
-      
-      // ถ้า session เปลี่ยนหรือไม่มี session ให้ล้างตะกร้า
-      if (!currentSession || currentSession !== lastKnownSession) {
-        clearCart();
-        if (currentSession) {
-          localStorage.setItem('lastUserSession', currentSession);
-        } else {
-          localStorage.removeItem('lastUserSession');
-        }
-      }
-    };
-
-    checkSession();
-    
-    // ตั้งค่าให้ตรวจสอบทุก 5 วินาที (optional)
-    const interval = setInterval(checkSession, 5000);
-    
-    return () => clearInterval(interval);
-  }, [clearCart]);
-
-  // ล้างตะกร้าเมื่อปิดหน้าต่าง/แท็บ
-  useEffect(() => {
-    const handleBeforeUnload = () => {
-      // ล้างตะกร้าเมื่อปิดหน้าต่าง (optional)
-      // clearCart();
-    };
-
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        // เมื่อเปลี่ยนแท็บหรือซ่อนหน้าต่าง
-        // สามารถเพิ่มการตรวจสอบ session ที่นี่ได้
-      }
-    };
-
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, []);
 
   const handleCheckout = async () => {
     if (!items.length) return;
@@ -100,7 +52,6 @@ export default function CartPage() {
     }
   };
 
-  // ฟังก์ชันสำหรับล้างตะกร้าด้วยตนเอง
   const handleClearCart = () => {
     if (confirm("คุณแน่ใจหรือไม่ที่จะล้างตะกร้าสินค้าทั้งหมด?")) {
       clearCart();
@@ -137,7 +88,7 @@ export default function CartPage() {
                     <div className="text-sm text-gray-600">คงเหลือ: {item.stock}</div>
                     <div className="flex items-center gap-2 mt-2 flex-wrap">
                       <Button 
-                        onClick={() => updateQuantity(item.id, Math.max(1, item.quantity - 1))} 
+                        onClick={() => updateQuantity(item.id, item.quantity - 1)} 
                         variant="outline"
                         disabled={item.quantity <= 1}
                       >
@@ -147,9 +98,7 @@ export default function CartPage() {
                         value={item.quantity}
                         onChange={(e) => {
                           const newQuantity = Number(e.target.value) || 1;
-                          if (newQuantity <= item.stock && newQuantity >= 1) {
-                            updateQuantity(item.id, newQuantity);
-                          }
+                          updateQuantity(item.id, newQuantity);
                         }}
                         className="w-20 text-center"
                         type="number"
@@ -157,7 +106,7 @@ export default function CartPage() {
                         max={item.stock}
                       />
                       <Button 
-                        onClick={() => updateQuantity(item.id, Math.min(item.stock, item.quantity + 1))} 
+                        onClick={() => updateQuantity(item.id, item.quantity + 1)} 
                         variant="outline"
                         disabled={item.quantity >= item.stock}
                       >
