@@ -41,8 +41,8 @@ export default function HomePage() {
       try {
         const response = await fetch("/api/users");
         if (response.ok) {
-          const userData = await response.json();
-          setUser(userData);
+          const data = await response.json();
+          setUser(data);
         }
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -135,7 +135,7 @@ export default function HomePage() {
     <div className="container mx-auto p-4 sm:p-6 bg-gray-50">
       {/* ส่วนแสดงข้อความต้อนรับผู้ใช้ */}
       {user && (
-        <div className="mb-4 sm:mb-6 bg-gradient-to-r from-green-500 to-green-600 text-white p-4 sm:p-6 rounded-lg shadow-lg">
+        <div className="mb-4 sm:mb-6  text-white p-4 sm:p-6 rounded-lg shadow-lg text-center">
           <div className="flex items-center gap-2 mb-2">
             <span className="text-xl sm:text-2xl">👋</span>
             <h2 className="text-lg sm:text-xl font-semibold">
