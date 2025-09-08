@@ -31,7 +31,7 @@ export default function DashboardPage() {
 
   return (
     <div className="container mx-auto p-4 bg-gray-50">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">แดชบอร์ด (Admin/Owner)</h1>
+      <h1 className="text-3xl font-bold text-gray-800 mb-6">แดชบอร์ด (การจัดการ)</h1>
       {/* Mobile selector */}
       <div className="md:hidden mb-4">
         <Select value={activeKey} onValueChange={(v) => setActiveKey(v as PanelKey)}>
