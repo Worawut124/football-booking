@@ -84,7 +84,7 @@ export default function BookingPage() {
   const itemsPerPage = 5;
 
   const timeSlots: string[] = [];
-  for (let hour = 8; hour <= 24; hour++) {
+  for (let hour = 13; hour <= 24; hour++) {
     const hourStr = hour.toString().padStart(2, "0");
     if (hour === 24) {
       timeSlots.push("00:00น.");
