@@ -23,8 +23,10 @@ import { th } from "date-fns/locale";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import LoadingCrescent from "@/components/ui/loading-crescent";
+import { useSession } from "next-auth/react";
 
 export default function HomePage() {
+  const { data: session } = useSession();
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
@@ -110,12 +112,54 @@ export default function HomePage() {
   };
   const todayLabel = format(new Date(), "dd MMMM yyyy", { locale: th });
 
+  // Helper function to get role display name
+  const getRoleDisplayName = (role: string) => {
+    switch (role) {
+      case 'ADMIN':
+        return 'ผู้ดูแลระบบ';
+      case 'OWNER':
+        return 'เจ้าของสนาม';
+      case 'USER':
+        return 'ผู้ใช้';
+      default:
+        return 'ผู้ใช้';
+    }
+  };
+
   if (loading) {
     return <LoadingCrescent text="กำลังโหลดข้อมูล..." />;
   }
-    <div className="text-2xl text-center font-medium">ยินดีต้อนรับเข้าสู่สนามฟุตบอล Sirinthra Stadium </div>
+
   return (
     <div className="container mx-auto p-4 sm:p-6 bg-gray-50">
+      {/* Welcome Message */}
+      {session?.user && (
+        <div className="bg-gradient-to-r from-green-500 to-blue-600 text-white p-4 sm:p-6 rounded-lg mb-6 shadow-lg">
+          <div className="text-center">
+            <h2 className="text-xl sm:text-2xl font-bold mb-2">
+              สวัสดี คุณ{session.user.name || 'ผู้ใช้'} ({getRoleDisplayName(session.user.role || 'USER')})
+            </h2>
+            <p className="text-lg sm:text-xl opacity-90">
+              ยินดีต้อนรับเข้าสู่สนามฟุตบอล Sirinthra Stadium
+            </p>
+          </div>
+        </div>
+      )}
+      
+      {/* If not logged in, show general welcome */}
+      {!session?.user && (
+        <div className="bg-gradient-to-r from-gray-500 to-gray-600 text-white p-4 sm:p-6 rounded-lg mb-6 shadow-lg">
+          <div className="text-center">
+            <h2 className="text-xl sm:text-2xl font-bold mb-2">
+              ยินดีต้อนรับเข้าสู่สนามฟุตบอล Sirinthra Stadium
+            </h2>
+            <p className="text-lg sm:text-xl opacity-90">
+              กรุณาเข้าสู่ระบบเพื่อใช้งานเต็มรูปแบบ
+            </p>
+          </div>
+        </div>
+      )}
+
       <h1 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4 sm:mb-6">
         ข่าวประชาสัมพันธ์
       </h1>

@@ -291,24 +291,6 @@ export default function BookingPage() {
       return;
     }
 
-    const fieldName = fields.find((f) => f.id === selectedField)?.name || "ไม่ระบุ";
-    const bookingDetailsText = `
-      สนาม: ${fieldName}<br>
-      วันที่: ${format(selectedDate, "dd MMMM yyyy", { locale: th })}<br>
-      เวลา: ${startTime} - ${endTime}
-    `;
-
-    const result = await Swal.fire({
-      icon: "question",
-      title: "ยืนยันการจอง",
-      html: `คุณต้องการจองสนามตามรายละเอียดนี้หรือไม่?<br>${bookingDetailsText}`,
-      showCancelButton: true,
-      confirmButtonText: "ตกลง",
-      cancelButtonText: "ยกเลิก",
-    });
-
-    if (!result.isConfirmed) return;
-
     // Calculate total amount using new time-based pricing
     let totalAmount = 0;
     const currentTime = new Date(startDateTime);
@@ -349,6 +331,25 @@ export default function BookingPage() {
       // เลื่อนไปชั่วโมงถัดไป
       currentTime.setTime(nextHour.getTime());
     }
+
+    const fieldName = fields.find((f) => f.id === selectedField)?.name || "ไม่ระบุ";
+    const bookingDetailsText = `
+      สนาม: ${fieldName}<br>
+      วันที่: ${format(selectedDate, "dd MMMM yyyy", { locale: th })}<br>
+      เวลา: ${startTime} - ${endTime}<br>
+      <strong>ราคารวม: ${totalAmount.toLocaleString()} บาท</strong>
+    `;
+
+    const result = await Swal.fire({
+      icon: "question",
+      title: "ยืนยันการจอง",
+      html: `คุณต้องการจองสนามตามรายละเอียดนี้หรือไม่?<br>${bookingDetailsText}`,
+      showCancelButton: true,
+      confirmButtonText: "ตกลง",
+      cancelButtonText: "ยกเลิก",
+    });
+
+    if (!result.isConfirmed) return;
 
     const bookingDetails = {
       userId: parseInt(session.user.id as string),
