@@ -172,25 +172,56 @@ export default function BookingPage() {
   };
 
   const calculateAmount = (booking: Booking) => {
-    if (!paymentConfig) return 0;
-
     const start = new Date(booking.startTime);
     const end = new Date(booking.endTime);
-    const minutes = differenceInMinutes(end, start);
+    const durationMinutes = differenceInMinutes(end, start);
 
-    if (minutes === 60) {
-      return paymentConfig.pricePerHour;
-    } else if (minutes === 90) {
-      return paymentConfig.pricePerHour + 300;
-    } else {
-      const fullHours = Math.floor(minutes / 60);
-      const remainingMinutes = minutes % 60;
-      let total = fullHours * paymentConfig.pricePerHour;
-      if (remainingMinutes > 0) {
-        total += 300;
-      }
-      return total;
+    // ตรวจสอบระยะเวลาขั้นต่ำ 1 ชั่วโมง
+    if (durationMinutes < 60) {
+      return 0;
     }
+
+    let totalAmount = 0;
+    const currentTime = new Date(start);
+
+    while (currentTime < end) {
+      const currentHour = currentTime.getHours();
+      const nextHour = new Date(currentTime);
+      nextHour.setHours(currentHour + 1, 0, 0, 0);
+
+      // คำนวณระยะเวลาในชั่วโมงนี้
+      const segmentEnd = nextHour > end ? end : nextHour;
+      const segmentMinutes = differenceInMinutes(segmentEnd, currentTime);
+
+      // กำหนดราคาตามช่วงเวลา
+      let hourlyRate: number;
+      let halfHourRate: number;
+
+      if (currentHour >= 13 && currentHour < 17) {
+        // ช่วงกลางวัน 13:00-17:00
+        hourlyRate = 400;
+        halfHourRate = 200;
+      } else {
+        // ช่วงเย็น 17:00 เป็นต้นไป และก่อน 13:00
+        hourlyRate = 600;
+        halfHourRate = 300;
+      }
+
+      // คำนวณราคาสำหรับช่วงเวลานี้
+      if (segmentMinutes >= 60) {
+        totalAmount += hourlyRate;
+      } else if (segmentMinutes >= 30) {
+        totalAmount += halfHourRate;
+      } else if (segmentMinutes > 0) {
+        // ถ้าเหลือน้อยกว่า 30 นาที ให้คิดเป็น 30 นาที
+        totalAmount += halfHourRate;
+      }
+
+      // เลื่อนไปชั่วโมงถัดไป
+      currentTime.setTime(nextHour.getTime());
+    }
+
+    return totalAmount;
   };
 
   const handleBooking = async () => {
@@ -224,6 +255,16 @@ export default function BookingPage() {
         icon: "error",
         title: "เกิดข้อผิดพลาด",
         text: "เวลาสิ้นสุดต้องมากกว่าเวลาเริ่ม",
+      });
+      return;
+    }
+
+    const durationMinutes = differenceInMinutes(endDateTime, startDateTime);
+    if (durationMinutes < 60) {
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text: "ต้องจองขั้นต่ำ 1 ชั่วโมง",
       });
       return;
     }
@@ -268,19 +309,45 @@ export default function BookingPage() {
 
     if (!result.isConfirmed) return;
 
-    const minutes = differenceInMinutes(endDateTime, startDateTime);
+    // Calculate total amount using new time-based pricing
     let totalAmount = 0;
-    if (minutes === 60) {
-      totalAmount = paymentConfig.pricePerHour;
-    } else if (minutes === 90) {
-      totalAmount = paymentConfig.pricePerHour + 300;
-    } else {
-      const fullHours = Math.floor(minutes / 60);
-      const remainingMinutes = minutes % 60;
-      totalAmount = fullHours * paymentConfig.pricePerHour;
-      if (remainingMinutes > 0) {
-        totalAmount += 300;
+    const currentTime = new Date(startDateTime);
+
+    while (currentTime < endDateTime) {
+      const currentHour = currentTime.getHours();
+      const nextHour = new Date(currentTime);
+      nextHour.setHours(currentHour + 1, 0, 0, 0);
+
+      // คำนวณระยะเวลาในชั่วโมงนี้
+      const segmentEnd = nextHour > endDateTime ? endDateTime : nextHour;
+      const segmentMinutes = differenceInMinutes(segmentEnd, currentTime);
+
+      // กำหนดราคาตามช่วงเวลา
+      let hourlyRate: number;
+      let halfHourRate: number;
+
+      if (currentHour >= 13 && currentHour < 17) {
+        // ช่วงกลางวัน 13:00-17:00
+        hourlyRate = 400;
+        halfHourRate = 200;
+      } else {
+        // ช่วงเย็น 17:00 เป็นต้นไป และก่อน 13:00
+        hourlyRate = 600;
+        halfHourRate = 300;
       }
+
+      // คำนวณราคาสำหรับช่วงเวลานี้
+      if (segmentMinutes >= 60) {
+        totalAmount += hourlyRate;
+      } else if (segmentMinutes >= 30) {
+        totalAmount += halfHourRate;
+      } else if (segmentMinutes > 0) {
+        // ถ้าเหลือน้อยกว่า 30 นาที ให้คิดเป็น 30 นาที
+        totalAmount += halfHourRate;
+      }
+
+      // เลื่อนไปชั่วโมงถัดไป
+      currentTime.setTime(nextHour.getTime());
     }
 
     const bookingDetails = {

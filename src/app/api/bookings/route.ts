@@ -17,30 +17,54 @@ interface BookingRequest {
 }
 
 async function calculateAmount(startTime: Date, endTime: Date) {
-  const paymentConfig = await prisma.paymentConfig.findFirst();
-  if (!paymentConfig) {
-    throw new Error("ไม่พบการตั้งค่าการชำระเงิน");
-  }
-
   const durationMinutes = (endTime.getTime() - startTime.getTime()) / (1000 * 60);
 
-  if (durationMinutes === 60) {
-    // 1 ชั่วโมง
-    return paymentConfig.pricePerHour; // 600 บาท
-  } else if (durationMinutes === 90) {
-    // 1 ชั่วโมง 30 นาที
-    return paymentConfig.pricePerHour + 300; // 600 + 300 = 900 บาท
-  } else {
-    // มากกว่า 1 ชั่วโมง 30 นาที
-    const fullHours = Math.floor(durationMinutes / 60); // จำนวนชั่วโมงเต็ม
-    const remainingMinutes = durationMinutes % 60; // นาทีที่เหลือ
-
-    let total = fullHours * paymentConfig.pricePerHour; // คิดตามชั่วโมง
-    if (remainingMinutes > 0) {
-      total += 300; // ถ้ามีเศษ 30 นาที บวกเพิ่ม 300 บาท
-    }
-    return total;
+  // ตรวจสอบระยะเวลาขั้นต่ำ 1 ชั่วโมง
+  if (durationMinutes < 60) {
+    throw new Error("ต้องจองขั้นต่ำ 1 ชั่วโมง");
   }
+
+  let totalAmount = 0;
+  const currentTime = new Date(startTime);
+
+  while (currentTime < endTime) {
+    const currentHour = currentTime.getHours();
+    const nextHour = new Date(currentTime);
+    nextHour.setHours(currentHour + 1, 0, 0, 0);
+
+    // คำนวณระยะเวลาในชั่วโมงนี้
+    const segmentEnd = nextHour > endTime ? endTime : nextHour;
+    const segmentMinutes = (segmentEnd.getTime() - currentTime.getTime()) / (1000 * 60);
+
+    // กำหนดราคาตามช่วงเวลา
+    let hourlyRate: number;
+    let halfHourRate: number;
+
+    if (currentHour >= 13 && currentHour < 17) {
+      // ช่วงกลางวัน 13:00-17:00
+      hourlyRate = 400;
+      halfHourRate = 200;
+    } else {
+      // ช่วงเย็น 17:00 เป็นต้นไป และก่อน 13:00
+      hourlyRate = 600;
+      halfHourRate = 300;
+    }
+
+    // คำนวณราคาสำหรับช่วงเวลานี้
+    if (segmentMinutes >= 60) {
+      totalAmount += hourlyRate;
+    } else if (segmentMinutes >= 30) {
+      totalAmount += halfHourRate;
+    } else if (segmentMinutes > 0) {
+      // ถ้าเหลือน้อยกว่า 30 นาที ให้คิดเป็น 30 นาที
+      totalAmount += halfHourRate;
+    }
+
+    // เลื่อนไปชั่วโมงถัดไป
+    currentTime.setTime(nextHour.getTime());
+  }
+
+  return totalAmount;
 }
 
 export async function GET() {
@@ -194,6 +218,9 @@ export async function PUT(request: Request) {
       }
     }
 
+    // Recalculate total amount with new times
+    const newTotalAmount = await calculateAmount(newStartTime, newEndTime);
+
     const updatedBooking = await prisma.booking.update({
       where: { id },
       data: {
@@ -202,6 +229,7 @@ export async function PUT(request: Request) {
         startTime: newStartTime,
         endTime: newEndTime,
         status: status ?? booking.status,
+        totalAmount: newTotalAmount,
       },
       include: { field: true, user: true, payment: true },
     });
