@@ -8,16 +8,21 @@ export const authOptions: AuthOptions = {
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        email: { label: "Email", type: "email" },
+        emailOrPhone: { label: "Email or Phone", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          throw new Error("กรุณากรอกอีเมลและรหัสผ่าน");
+        if (!credentials?.emailOrPhone || !credentials?.password) {
+          throw new Error("กรุณากรอกอีเมลหรือเบอร์โทรและรหัสผ่าน");
         }
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
+        // ตรวจสอบว่าเป็นอีเมลหรือเบอร์โทร
+        const isEmail = credentials.emailOrPhone.includes('@');
+        
+        const user = await prisma.user.findFirst({
+          where: isEmail 
+            ? { email: credentials.emailOrPhone }
+            : { phone: credentials.emailOrPhone }
         });
 
         if (!user || !user.password) {

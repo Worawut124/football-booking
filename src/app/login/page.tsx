@@ -12,7 +12,7 @@ import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
+  const [emailOrPhone, setEmailOrPhone] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
@@ -31,7 +31,7 @@ export default function LoginPage() {
     try {
       const result = await signIn("credentials", {
         redirect: false,
-        email,
+        emailOrPhone,
         password,
       });
 
@@ -39,7 +39,7 @@ export default function LoginPage() {
         Swal.fire({
           icon: "error",
           title: "ล็อกอินล้มเหลว",
-          text: result.error || "กรุณาตรวจสอบอีเมลและรหัสผ่าน",
+          text: result.error || "กรุณาตรวจสอบอีเมล/เบอร์โทรและรหัสผ่าน",
         });
       } else {
         const sessionResponse = await fetch("/api/auth/session");
@@ -140,14 +140,14 @@ export default function LoginPage() {
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700">อีเมล</label>
+              <label className="block text-sm font-medium text-gray-700">อีเมลหรือเบอร์โทร</label>
               <Input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="text"
+                value={emailOrPhone}
+                onChange={(e) => setEmailOrPhone(e.target.value)}
                 required
                 className="mt-1 w-full border-gray-300 rounded-md focus:ring-2 focus:ring-green-500"
-                placeholder="กรอกอีเมลของคุณ"
+                placeholder="กรอกอีเมลหรือเบอร์โทรของคุณ"
               />
             </div>
             <div className="relative">
