@@ -579,6 +579,22 @@ export default function BookingPage() {
           </div>
           <div>
             <h2 className="text-lg font-semibold mb-2">เวลาเริ่ม</h2>
+            
+            {/* Color Legend */}
+            <div className="mb-3 p-3 bg-gray-50 rounded-lg border">
+              <h3 className="text-sm font-medium mb-2">หมายเหตุ:</h3>
+              <div className="flex flex-col gap-1 text-sm">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-green-600 rounded"></div>
+                  <span className="text-green-600 font-medium">จองแล้ว (ไม่สามารถเลือกได้)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-black rounded"></div>
+                  <span className="text-black font-medium">สนามว่าง (สามารถจองได้)</span>
+                </div>
+              </div>
+            </div>
+
             <Select onValueChange={setStartTime} value={startTime}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="เลือกเวลาเริ่ม" />

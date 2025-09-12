@@ -116,13 +116,13 @@ export default function HomePage() {
   const getRoleDisplayName = (role: string) => {
     switch (role) {
       case 'ADMIN':
-        return 'ผู้ดูแลระบบ';
+        return 'แอดมิน';
       case 'OWNER':
         return 'เจ้าของสนาม';
       case 'USER':
-        return 'ผู้ใช้';
+        return 'สมาชิก';
       default:
-        return 'ผู้ใช้';
+        return 'สมาชิก';
     }
   };
 
@@ -134,10 +134,10 @@ export default function HomePage() {
     <div className="container mx-auto p-4 sm:p-6 bg-gray-50">
       {/* Welcome Message */}
       {session?.user && (
-        <div className="bg-gradient-to-r from-green-500 to-blue-600 text-white p-4 sm:p-6 rounded-lg mb-6 shadow-lg">
+        <div className="bg-gradient-to-r from-green-500 to-blue-600 text-white p-3 sm:p-6 rounded-lg mb-6 shadow-lg">
           <div className="text-center">
             <h2 className="text-xl sm:text-2xl font-bold mb-2">
-              สวัสดี คุณ{session.user.name || 'ผู้ใช้'} ({getRoleDisplayName(session.user.role || 'USER')})
+              สวัสดี คุณ{session.user.name || 'สมาชิก'} ({getRoleDisplayName(session.user.role || 'USER')})
             </h2>
             <p className="text-lg sm:text-xl opacity-90">
               ยินดีต้อนรับเข้าสู่สนามฟุตบอล Sirinthra Stadium
@@ -148,7 +148,7 @@ export default function HomePage() {
       
       {/* If not logged in, show general welcome */}
       {!session?.user && (
-        <div className="bg-gradient-to-r from-gray-500 to-gray-600 text-white p-4 sm:p-6 rounded-lg mb-6 shadow-lg">
+        <div className="bg-gradient-to-r from-gray-500 to-gray-600 text-white p-3 sm:p-6 rounded-lg mb-6 shadow-lg">
           <div className="text-center">
             <h2 className="text-xl sm:text-2xl font-bold mb-2">
               ยินดีต้อนรับเข้าสู่สนามฟุตบอล Sirinthra Stadium
