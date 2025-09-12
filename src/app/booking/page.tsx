@@ -264,7 +264,7 @@ export default function BookingPage() {
       Swal.fire({
         icon: "error",
         title: "เกิดข้อผิดพลาด",
-        text: "ต้องจองขั้นต่ำ 1 ชั่วโมง",
+        text: "ต้องจองขั้นต่ำ 1 ชั่วโมงขึ้นไป",
       });
       return;
     }
