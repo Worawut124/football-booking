@@ -911,18 +911,9 @@ export default function BookingPage() {
                                     )}
                                   </div>
                                   <div className="border-t pt-4">
-                                    <h3 className="text-lg font-semibold text-center">ชำระด้วยเงินสดที่สนาม</h3>
                                     <p className="text-sm text-gray-600 mt-2 text-center">
-                                      ชำระมัดจำ 100 บาท ที่เคาน์เตอร์สนาม<br/>
-                                      (ไม่ต้องโอนเงิน)
+                                      หมายเหตุ: หากไม่ชำระมัดจำภายในเวลาที่กำหนด ระบบจะยกเลิกการจองอัตโนมัติ
                                     </p>
-                                    <Button
-                                      onClick={() => handlePayment("cash")}
-                                      disabled={isPaying}
-                                      className="mt-3 w-full bg-orange-600 hover:bg-orange-700 text-white disabled:opacity-50"
-                                    >
-                                      {isPaying ? "กำลังดำเนินการ..." : "ยืนยันชำระที่สนาม"}
-                                    </Button>
                                   </div>
                                 </div>
                               </DialogContent>
@@ -1073,18 +1064,9 @@ export default function BookingPage() {
                                 )}
                               </div>
                               <div className="border-t pt-4">
-                                <h3 className="text-lg font-semibold text-center">ชำระด้วยเงินสดที่สนาม</h3>
                                 <p className="text-sm text-gray-600 mt-2 text-center">
-                                  ชำระมัดจำ {(promptPayQR?.amount || 100).toLocaleString()} บาท ที่เคาน์เตอร์สนาม<br/>
-                                  (ไม่ต้องโอนเงิน)
+                                  หมายเหตุ: หากไม่ชำระมัดจำภายในเวลาที่กำหนด ระบบจะยกเลิกการจองอัตโนมัติ
                                 </p>
-                                <Button
-                                  onClick={() => handlePayment("cash")}
-                                  disabled={isPaying}
-                                  className="mt-3 w-full bg-orange-600 hover:bg-orange-700 text-white disabled:opacity-50"
-                                >
-                                  {isPaying ? "กำลังดำเนินการ..." : "ยืนยันชำระที่สนาม"}
-                                </Button>
                               </div>
                             </div>
                           </DialogContent>
