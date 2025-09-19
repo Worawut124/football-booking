@@ -77,7 +77,8 @@ export async function POST(request: Request) {
         },
       });
 
-      const newStatus = method === "cash" ? "pending_confirmation" : "deposit_paid";
+      // หลังแนบหลักฐานมัดจำแล้ว ให้เป็นสถานะรอดำเนินการเสมอ
+      const newStatus = "pending_confirmation";
       await tx.booking.update({ 
         where: { id: bookingId }, 
         data: { 

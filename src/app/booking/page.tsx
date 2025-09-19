@@ -83,6 +83,7 @@ export default function BookingPage() {
   const [isPaying, setIsPaying] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [fullPaymentBooking, setFullPaymentBooking] = useState<Booking | null>(null);
   const [promptPayQR, setPromptPayQR] = useState<{
     bookingId: number;
     qrCode: string;
@@ -460,6 +461,10 @@ export default function BookingPage() {
         showConfirmButton: false,
       });
       const newBooking = await response.json();
+      // Start QR timer immediately by generating PromptPay QR (and set expiresAt on server)
+      try {
+        await generatePromptPayQR(newBooking.id);
+      } catch {}
       const updatedBookings = [...bookings, newBooking].sort((a: Booking, b: Booking) => {
         const dateA = new Date(a.startTime);
         const dateB = new Date(b.startTime);
@@ -542,7 +547,7 @@ export default function BookingPage() {
         booking.id === selectedBooking.id
           ? {
               ...booking,
-              status: method === "promptpay" ? "deposit_paid" : "pending_confirmation",
+              status: "pending_confirmation",
             }
           : booking
       ).sort((a: Booking, b: Booking) => {
@@ -911,21 +916,74 @@ export default function BookingPage() {
                                     )}
                                   </div>
                                   <div className="border-t pt-4">
-                                    <p className="text-sm text-gray-600 mt-2 text-center">
-                                      หมายเหตุ: หากไม่ชำระมัดจำภายในเวลาที่กำหนด ระบบจะยกเลิกการจองอัตโนมัติ
-                                    </p>
+                                    <div className="mt-2 text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded p-3 flex items-start gap-2 justify-center">
+                                      <span className="text-amber-600" aria-hidden>⚠️</span>
+                                      <span>
+                                        หมายเหตุ: หากไม่ชำระมัดจำภายในเวลาที่กำหนด ระบบจะยกเลิกการจองอัตโนมัติทันที
+                                      </span>
+                                    </div>
                                   </div>
                                 </div>
                               </DialogContent>
                             </Dialog>
                           )}
-                          {(booking.status === "pending" || booking.status === "pending_confirmation") && (
+                          {booking.status === "pending" && (
                             <Button
                               onClick={() => handleCancel(booking.id)}
                               className="bg-red-600 hover:bg-red-700 text-white"
                             >
                               ยกเลิก
                             </Button>
+                          )}
+                          {booking.status === "pending_confirmation" && (
+                            <>
+                              <Dialog
+                                open={fullPaymentBooking?.id === booking.id}
+                                onOpenChange={(open) => {
+                                  if (!open) setFullPaymentBooking(null);
+                                }}
+                              >
+                                <DialogTrigger asChild>
+                                  <Button
+                                    onClick={() => setFullPaymentBooking(booking)}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white"
+                                  >
+                                    ชำระส่วนที่เหลือ
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-md">
+                                  <DialogHeader>
+                                    <DialogTitle>ชำระค่าสนามส่วนที่เหลือ</DialogTitle>
+                                  </DialogHeader>
+                                  <div className="space-y-3">
+                                    <p className="text-center text-gray-800">
+                                      ราคารวม: <span className="font-semibold">{calculateAmount(booking)} บาท</span>
+                                    </p>
+                                    <div>
+                                      <h3 className="text-lg font-semibold text-center">QR Code สำหรับชำระเต็มจำนวน</h3>
+                                      {paymentConfig?.qrCode ? (
+                                        <img
+                                          src={paymentConfig.qrCode.startsWith('http') ? paymentConfig.qrCode : `/uploads/${paymentConfig.qrCode}`}
+                                          alt="QR Code ชำระเต็ม"
+                                          className="w-64 h-64 mx-auto mt-2 border rounded-md object-contain"
+                                        />
+                                      ) : (
+                                        <p className="text-center text-red-600">ยังไม่ได้ตั้งค่า QR Code</p>
+                                      )}
+                                      <p className="text-xs text-gray-600 mt-2 text-center">
+                                        หมายเหตุ: กรุณาสแกนชำระเต็มจำนวนตามราคารวม และแจ้งหลักฐานกับเจ้าหน้าที่ ณ จุดบริการ
+                                      </p>
+                                    </div>
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
+                              <Button
+                                onClick={() => handleCancel(booking.id)}
+                                className="bg-red-600 hover:bg-red-700 text-white"
+                              >
+                                ยกเลิก
+                              </Button>
+                            </>
                           )}
                         </div>
                       </TableCell>
@@ -1064,9 +1122,12 @@ export default function BookingPage() {
                                 )}
                               </div>
                               <div className="border-t pt-4">
-                                <p className="text-sm text-gray-600 mt-2 text-center">
-                                  หมายเหตุ: หากไม่ชำระมัดจำภายในเวลาที่กำหนด ระบบจะยกเลิกการจองอัตโนมัติ
-                                </p>
+                                <div className="mt-2 text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded p-3 flex items-start gap-2 justify-center">
+                                  <span className="text-amber-600" aria-hidden>⚠️</span>
+                                  <span>
+                                    หมายเหตุ: หากไม่ชำระมัดจำภายในเวลาที่กำหนด ระบบจะยกเลิกการจองอัตโนมัติทันที
+                                  </span>
+                                </div>
                               </div>
                             </div>
                           </DialogContent>
