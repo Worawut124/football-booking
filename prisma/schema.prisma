@@ -31,17 +31,18 @@ model Field {
 }
 
 model Booking {
-  id           Int      @id @default(autoincrement())
+  id           Int       @id @default(autoincrement())
   userId       Int
   fieldId      Int
   startTime    DateTime
   endTime      DateTime
-  status       String   @default("pending")
+  status       String    @default("pending")
   paymentProof String?
-  totalAmount  Int      @default(0)
-  createdAt    DateTime @default(now())
-  field        Field    @relation(fields: [fieldId], references: [id])
-  user         User     @relation(fields: [userId], references: [id])
+  totalAmount  Int       @default(0)
+  createdAt    DateTime  @default(now())
+  expiresAt    DateTime? // Payment expiration time (30 minutes from creation)
+  field        Field     @relation(fields: [fieldId], references: [id])
+  user         User      @relation(fields: [userId], references: [id])
   payment      Payment?
 }
 
@@ -63,7 +64,8 @@ model Payment {
   method    String
   proof     String?
   createdAt DateTime @default(now())
-  amount    Float
+  amount    Float    @default(100) // Fixed deposit amount of 100 baht
+  isDeposit Boolean  @default(true) // Mark as deposit payment
   booking   Booking  @relation(fields: [bookingId], references: [id])
 }
 
@@ -87,6 +89,8 @@ model PaymentConfig {
   accountName      String?
   accountNumber    String?
   bankName         String?
+  promptPayId      String?  // PromptPay ID for QR code generation
+  depositAmount    Int      @default(100) // Fixed deposit amount
 }
 
 model Competition {

@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import LoadingCrescent from "@/components/ui/loading-crescent";
+import CountdownTimer from "@/components/ui/countdown-timer";
 import Swal from "sweetalert2";
 import {
   Pagination,
@@ -81,6 +82,12 @@ export default function BookingPage() {
   const [isPaying, setIsPaying] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [promptPayQR, setPromptPayQR] = useState<{
+    qrCode: string;
+    amount: number;
+    expiresAt: string;
+    promptPayId: string;
+  } | null>(null);
 
   const itemsPerPage = 5;
 
@@ -446,24 +453,44 @@ export default function BookingPage() {
     }
   };
 
+  const generatePromptPayQR = async (bookingId: number) => {
+    try {
+      const response = await fetch("/api/promptpay-qr", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookingId }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setPromptPayQR(data);
+      } else {
+        const errorData = await response.json();
+        Swal.fire({
+          icon: "error",
+          title: "เกิดข้อผิดพลาด",
+          text: errorData.error || "ไม่สามารถสร้าง QR Code ได้",
+        });
+      }
+    } catch (error) {
+      console.error("Error generating PromptPay QR:", error);
+      Swal.fire({
+        icon: "error",
+        title: "เกิดข้อผิดพลาด",
+        text: "ไม่สามารถสร้าง QR Code ได้",
+      });
+    }
+  };
+
   const handlePayment = async (method: string) => {
     if (isPaying) return;
     setIsPaying(true);
     if (!selectedBooking) return;
 
-    if (!paymentConfig) {
-      Swal.fire({
-        icon: "error",
-        title: "เกิดข้อผิดพลาด",
-        text: "ไม่สามารถดึงข้อมูลการชำระเงินได้ กรุณาติดต่อผู้ดูแลระบบ",
-      });
-      return;
-    }
-
     const formData = new FormData();
     formData.append("bookingId", selectedBooking.id.toString());
     formData.append("method", method);
-    if (method === "qrcode" && proofFile) {
+    if (method === "promptpay" && proofFile) {
       formData.append("proof", proofFile);
     }
 
@@ -484,7 +511,7 @@ export default function BookingPage() {
         booking.id === selectedBooking.id
           ? {
               ...booking,
-              status: method === "qrcode" ? "paid" : "pending_confirmation",
+              status: method === "promptpay" ? "deposit_paid" : "pending_confirmation",
             }
           : booking
       ).sort((a: Booking, b: Booking) => {
@@ -495,6 +522,7 @@ export default function BookingPage() {
       setBookings(updatedBookings);
       setSelectedBooking(null);
       setProofFile(null);
+      setPromptPayQR(null);
       await fetchData();
     } else {
       const errorData = await response.json();
@@ -764,69 +792,96 @@ export default function BookingPage() {
                                 <Button
                                   onClick={() => {
                                     setSelectedBooking(booking);
-                                    setProofFile(null); // รีเซ็ตไฟล์เมื่อเปิด Dialog ใหม่
+                                    setProofFile(null);
+                                    setPromptPayQR(null);
+                                    generatePromptPayQR(booking.id);
                                   }}
                                   className="bg-green-600 hover:bg-green-700 text-white"
                                 >
-                                  ชำระเงิน
+                                  ชำระมัดจำ
                                 </Button>
                               </DialogTrigger>
-                              <DialogContent>
+                              <DialogContent className="max-w-md">
                                 <DialogHeader>
-                                  <DialogTitle>ชำระเงินสำหรับการจอง</DialogTitle>
+                                  <DialogTitle>ชำระมัดจำการจอง</DialogTitle>
                                 </DialogHeader>
                                 <div className="space-y-4">
-                                  <p className="text-gray-800">
-                                    ราคา: {calculateAmount(booking)} บาท
-                                  </p>
-                                  <div>
-                                    <h3 className="text-lg font-semibold">ชำระด้วย QR Code</h3>
-                                    {paymentConfig?.qrCode ? (
-                                      <img
-                                        src={paymentConfig.qrCode.startsWith('http') ? paymentConfig.qrCode : `/uploads/${paymentConfig.qrCode}`}
-                                        alt="QR Code"
-                                        className="w-full max-w-xs h-auto mx-auto mt-2 object-contain"
-                                      />
-                                    ) : (
-                                      <p className="text-red-600 text-center mt-2">
-                                        ไม่มี QR Code สำหรับชำระเงิน
-                                      </p>
-                                    )}
-                                    <p className="text-sm text-gray-600 mt-2">
-                                      {paymentConfig?.qrCode
-                                        ? `สแกน QR Code เพื่อชำระเงิน ${calculateAmount(booking)} บาท แล้วอัปโหลดหลักฐานการโอน`
-                                        : "กรุณาเลือกวิธีชำระเงินแบบอื่น หรือติดต่อผู้ดูแลระบบ"}
+                                  <div className="text-center">
+                                    <p className="text-lg font-semibold text-blue-600">
+                                      ค่าราคาเต็ม: {calculateAmount(booking)} บาท
                                     </p>
-                                    {paymentConfig?.qrCode && (
-                                      <Input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={(e) =>
-                                          setProofFile(e.target.files?.[0] || null)
-                                        }
-                                        className="mt-2"
-                                      />
-                                    )}
-                                    <Button
-                                      onClick={() => handlePayment("qrcode")}
-                                      className="mt-2 w-full bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                                      disabled={!paymentConfig?.qrCode || !proofFile || isPaying}
-                                    >
-                                      ยืนยันการชำระด้วย QR Code
-                                    </Button>
-                                  </div>
-                                  <div>
-                                    <h3 className="text-lg font-semibold">ชำระด้วยเงินสด</h3>
+                                    <p className="text-2xl font-bold text-green-600">
+                                      ค่าจองมัดจำ: 100 บาท
+                                    </p>
                                     <p className="text-sm text-gray-600 mt-2">
-                                      กรุณาชำระเงินสด {calculateAmount(booking)} บาท
-                                      ที่เคาน์เตอร์สนาม
+                                      ชำระมัดจำ 100 บาท เพื่อยืนยันการจอง<br/>
+                                      ส่วนที่เหลือชำระที่สนาม
+                                    </p>
+                                  </div>
+
+                                  {promptPayQR && (
+                                    <CountdownTimer
+                                      expiresAt={promptPayQR.expiresAt}
+                                      onExpired={() => {
+                                        setPromptPayQR(null);
+                                        Swal.fire({
+                                          icon: "warning",
+                                          title: "หมดเวลาชำระเงิน",
+                                          text: "กรุณาทำการจองใหม่"
+                                        });
+                                      }}
+                                    />
+                                  )}
+
+                                  <div>
+                                    <h3 className="text-lg font-semibold text-center mb-3">ชำระด้วย PromptPay</h3>
+                                    {promptPayQR ? (
+                                      <div className="text-center">
+                                        <img
+                                          src={promptPayQR.qrCode}
+                                          alt="PromptPay QR Code"
+                                          className="w-64 h-64 mx-auto border rounded-lg"
+                                        />
+                                        <p className="text-sm text-gray-600 mt-2">
+                                          สแกน QR Code เพื่อชำระมัดจำ 100 บาท<br/>
+                                          PromptPay: {promptPayQR.promptPayId}
+                                        </p>
+                                        <Input
+                                          type="file"
+                                          accept="image/*"
+                                          onChange={(e) =>
+                                            setProofFile(e.target.files?.[0] || null)
+                                          }
+                                          className="mt-3"
+                                          placeholder="อัปโหลดหลักฐานการโอน"
+                                        />
+                                        <Button
+                                          onClick={() => handlePayment("promptpay")}
+                                          className="mt-3 w-full bg-green-600 hover:bg-green-700 text-white disabled:opacity-50"
+                                          disabled={!proofFile || isPaying}
+                                        >
+                                          {isPaying ? "กำลังดำเนินการ..." : "ยืนยันการชำระมัดจำ"}
+                                        </Button>
+                                      </div>
+                                    ) : (
+                                      <div className="text-center">
+                                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                                        <p className="text-sm text-gray-600 mt-2">กำลังสร้าง QR Code...</p>
+                                      </div>
+                                    )}
+                                  </div>
+                                  <div className="border-t pt-4">
+                                    <h3 className="text-lg font-semibold text-center">ชำระด้วยเงินสดที่สนาม</h3>
+                                    <p className="text-sm text-gray-600 mt-2 text-center">
+                                      ชำระมัดจำ 100 บาท ที่เคาน์เตอร์สนาม<br/>
+                                      (ไม่ต้องโอนเงิน)
                                     </p>
                                     <Button
                                       onClick={() => handlePayment("cash")}
                                       disabled={isPaying}
-                                      className="mt-2 w-full bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                                      className="mt-3 w-full bg-orange-600 hover:bg-orange-700 text-white disabled:opacity-50"
                                     >
-                                      ยืนยันการชำระด้วยเงินสด
+                                      {isPaying ? "กำลังดำเนินการ..." : "ยืนยันชำระที่สนาม"}
                                     </Button>
                                   </div>
                                 </div>

@@ -20,6 +20,12 @@ async function calculateAmount(startTime: Date, endTime: Date) {
   return totalPrice;
 }
 
+// Get deposit amount from config
+async function getDepositAmount() {
+  const paymentConfig = await prisma.paymentConfig.findFirst();
+  return paymentConfig?.depositAmount || 100;
+}
+
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
@@ -37,9 +43,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "ไม่พบการจอง" }, { status: 404 });
     }
 
-    const startTime = new Date(booking.startTime);
-    const endTime = new Date(booking.endTime);
-    const amount = await calculateAmount(startTime, endTime); // ใช้ฟังก์ชันคำนวณราคา
+    // Check if booking has expired
+    if (booking.expiresAt && new Date() > booking.expiresAt) {
+      return NextResponse.json({ error: "การจองหมดอายุแล้ว กรุณาทำการจองใหม่" }, { status: 410 });
+    }
+
+    const depositAmount = await getDepositAmount();
 
     let proofUrl: string | undefined;
     if (method === "qrcode" && proofFile) {
@@ -59,11 +68,23 @@ export async function POST(request: Request) {
       }
 
       const created = await tx.payment.create({
-        data: { bookingId, method, proof: proofUrl, amount },
+        data: { 
+          bookingId, 
+          method, 
+          proof: proofUrl, 
+          amount: depositAmount,
+          isDeposit: true
+        },
       });
 
-      const newStatus = method === "cash" ? "pending" : "paid";
-      await tx.booking.update({ where: { id: bookingId }, data: { status: newStatus } });
+      const newStatus = method === "cash" ? "pending_confirmation" : "deposit_paid";
+      await tx.booking.update({ 
+        where: { id: bookingId }, 
+        data: { 
+          status: newStatus,
+          expiresAt: null // Clear expiration after payment
+        } 
+      });
       return created;
     });
 
