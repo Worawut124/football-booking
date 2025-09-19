@@ -606,7 +606,15 @@ export default function BookingPage() {
               onSelect={setSelectedDate}
               locale={th}
               className="rounded-md border"
-              disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+              disabled={(date) => {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                const maxDate = new Date(today);
+                maxDate.setDate(today.getDate() + 14);
+                
+                return date < today || date > maxDate;
+              }}
             />
           </div>
         </div>
