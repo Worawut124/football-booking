@@ -80,19 +80,47 @@ export default function BookingPage() {
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [isPaying, setIsPaying] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [currentTime, setCurrentTime] = useState(new Date());
 
   const itemsPerPage = 5;
 
-  const timeSlots: string[] = [];
-  for (let hour = 13; hour <= 24; hour++) {
+  // Generate all available time slots (13:00-23:00)
+  const allTimeSlots: string[] = [];
+  for (let hour = 13; hour <= 23; hour++) {
     const hourStr = hour.toString().padStart(2, "0");
-    if (hour === 24) {
-      timeSlots.push("00:00น.");
-      break;
-    }
-    timeSlots.push(`${hourStr}:00น.`);
-    if (hour < 24) timeSlots.push(`${hourStr}:30น.`);
+    allTimeSlots.push(`${hourStr}:00น.`);
+    allTimeSlots.push(`${hourStr}:30น.`);
   }
+
+  // Filter time slots based on current time and selected date
+  const getFilteredTimeSlots = () => {
+    if (!selectedDate) return allTimeSlots;
+    
+    const now = new Date();
+    const selectedDateOnly = new Date(selectedDate);
+    selectedDateOnly.setHours(0, 0, 0, 0);
+    const todayOnly = new Date(now);
+    todayOnly.setHours(0, 0, 0, 0);
+    
+    // If selected date is not today, show all time slots
+    if (selectedDateOnly.getTime() !== todayOnly.getTime()) {
+      return allTimeSlots;
+    }
+    
+    // If selected date is today, filter out past time slots
+    return allTimeSlots.filter(timeSlot => {
+      const [hour, minute] = timeSlot.replace("น.", "").split(":");
+      const slotTime = new Date(selectedDate);
+      slotTime.setHours(parseInt(hour), parseInt(minute), 0, 0);
+      
+      // Add 30 minutes buffer to current time to prevent booking slots that are about to pass
+      const currentTimeWithBuffer = new Date(now.getTime() + 30 * 60 * 1000);
+      
+      return slotTime > currentTimeWithBuffer;
+    });
+  };
+
+  const timeSlots = getFilteredTimeSlots();
 
   const fetchData = async () => {
     setLoading(true);
@@ -150,6 +178,30 @@ export default function BookingPage() {
       fetchData();
     }
   }, [status, router]);
+
+  // Update current time every minute for real-time filtering
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 60000); // Update every minute
+
+    return () => clearInterval(interval);
+  }, []);
+
+  // Reset start and end time when filtered time slots change
+  useEffect(() => {
+    const filteredSlots = getFilteredTimeSlots();
+    
+    // If current start time is no longer available, reset it
+    if (startTime && !filteredSlots.includes(startTime)) {
+      setStartTime(undefined);
+    }
+    
+    // If current end time is no longer available, reset it
+    if (endTime && !filteredSlots.includes(endTime)) {
+      setEndTime(undefined);
+    }
+  }, [currentTime, selectedDate, startTime, endTime]);
 
   const isTimeSlotBooked = (fieldId: number, time: string) => {
     if (!selectedDate) return false;
