@@ -42,6 +42,10 @@ export async function PUT(req: NextRequest) {
     const accountName = formData.get("accountName") as string;
     const bankName = formData.get("bankName") as string;
     const accountNumber = formData.get("accountNumber") as string;
+    const promptPayIdRaw = formData.get("promptPayId");
+    const promptPayId = typeof promptPayIdRaw === 'string' ? promptPayIdRaw : null;
+    const depositAmountRaw = formData.get("depositAmount");
+    const depositAmount = depositAmountRaw != null ? parseInt(depositAmountRaw as string) : undefined;
 
     // Validate ราคา
     if (isNaN(pricePerHour) || pricePerHour <= 0) {
@@ -49,6 +53,11 @@ export async function PUT(req: NextRequest) {
     }
     if (isNaN(pricePerHalfHour) || pricePerHalfHour <= 0) {
       return NextResponse.json({ error: "ราคาต่อ 30 นาทีต้องเป็นตัวเลขที่มากกว่า 0" }, { status: 400 });
+    }
+
+    // Validate มัดจำถ้ามีส่งมา
+    if (depositAmountRaw != null && (isNaN(depositAmount as number) || (depositAmount as number) <= 0)) {
+      return NextResponse.json({ error: "ยอดมัดจำต้องเป็นตัวเลขที่มากกว่า 0" }, { status: 400 });
     }
 
     // Validate ข้อมูลบัญชี (ถ้าต้องการ)
@@ -68,6 +77,16 @@ export async function PUT(req: NextRequest) {
       bankName,
       accountNumber,
     };
+
+    // อัพเดท PromptPay ID (ยอมให้ลบได้ถ้าส่งว่าง)
+    if (promptPayId !== null) {
+      updateData.promptPayId = promptPayId.trim() === '' ? null : promptPayId.trim();
+    }
+
+    // อัพเดทยอดมัดจำถ้าส่งมา
+    if (depositAmount !== undefined) {
+      updateData.depositAmount = depositAmount;
+    }
 
     if (qrCodeFile) {
       // ลบไฟล์เก่าถ้ามี

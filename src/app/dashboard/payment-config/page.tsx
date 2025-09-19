@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Swal from "sweetalert2";
+import { generatePromptPayQR } from "@/lib/promptpay";
 
 interface PaymentConfig {
   id: number;
@@ -17,6 +18,8 @@ interface PaymentConfig {
   accountName: string | null;
   bankName: string | null;
   accountNumber: string | null;
+  promptPayId?: string | null;
+  depositAmount: number;
 }
 
 export default function PaymentConfigPage() {
@@ -30,8 +33,12 @@ export default function PaymentConfigPage() {
     accountName: "",
     bankName: "",
     accountNumber: "",
+    promptPayId: "",
+    depositAmount: 100,
   });
   const [loading, setLoading] = useState(true);
+  const [qrPreview, setQrPreview] = useState<string | null>(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -59,6 +66,8 @@ export default function PaymentConfigPage() {
               accountName: data.accountName || "",
               bankName: data.bankName || "",
               accountNumber: data.accountNumber || "",
+              promptPayId: data.promptPayId || "",
+              depositAmount: typeof data.depositAmount === 'number' ? data.depositAmount : 100,
             });
           } else {
             Swal.fire({
@@ -95,6 +104,8 @@ export default function PaymentConfigPage() {
       data.append("accountName", formData.accountName || "");
       data.append("bankName", formData.bankName || "");
       data.append("accountNumber", formData.accountNumber || "");
+      data.append("promptPayId", formData.promptPayId || "");
+      data.append("depositAmount", String(formData.depositAmount ?? 100));
 
       const response = await fetch("/api/payment-config", {
         method: "PUT",
@@ -112,6 +123,8 @@ export default function PaymentConfigPage() {
           accountName: updatedConfig.accountName || "",
           bankName: updatedConfig.bankName || "",
           accountNumber: updatedConfig.accountNumber || "",
+          promptPayId: updatedConfig.promptPayId || "",
+          depositAmount: typeof updatedConfig.depositAmount === 'number' ? updatedConfig.depositAmount : formData.depositAmount,
         });
         Swal.fire({
           icon: "success",
@@ -169,6 +182,8 @@ export default function PaymentConfigPage() {
           accountName: updatedConfig.accountName || "",
           bankName: updatedConfig.bankName || "",
           accountNumber: updatedConfig.accountNumber || "",
+          promptPayId: updatedConfig.promptPayId || "",
+          depositAmount: typeof updatedConfig.depositAmount === 'number' ? updatedConfig.depositAmount : formData.depositAmount,
         });
         Swal.fire({
           icon: "success",
@@ -241,6 +256,29 @@ export default function PaymentConfigPage() {
                   />
                 </div>
                 <div>
+                  <Label htmlFor="depositAmount">ยอดมัดจำ (บาท)</Label>
+                  <Input
+                    id="depositAmount"
+                    type="number"
+                    min="1"
+                    value={formData.depositAmount}
+                    onChange={(e) =>
+                      setFormData({ ...formData, depositAmount: parseInt(e.target.value || '0') })
+                    }
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="promptPayId">PromptPay ID</Label>
+                  <Input
+                    id="promptPayId"
+                    type="text"
+                    placeholder="เช่น เบอร์โทรศัพท์ หรือ เลขบัตรประชาชน"
+                    value={formData.promptPayId}
+                    onChange={(e) => setFormData({ ...formData, promptPayId: e.target.value })}
+                  />
+                </div>
+                <div>
                   <Label htmlFor="qrCode">QR Code ปัจจุบัน</Label>
                   {paymentConfig?.qrCode && (
                     <img
@@ -253,6 +291,50 @@ export default function PaymentConfigPage() {
                       className="w-40 h-40 mx-auto mt-2 rounded-md"
                     />
                   )}
+                  {/* PromptPay Live Preview */}
+                  <div className="mt-4 space-y-2">
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        className="cursor-pointer"
+                        onClick={async () => {
+                          if (!formData.promptPayId || !formData.depositAmount) {
+                            Swal.fire({
+                              icon: "warning",
+                              title: "กรุณากรอก PromptPay ID และยอดมัดจำ",
+                            });
+                            return;
+                          }
+                          try {
+                            setPreviewLoading(true);
+                            const url = await generatePromptPayQR(formData.promptPayId, formData.depositAmount);
+                            setQrPreview(url);
+                          } catch (err) {
+                            Swal.fire({ icon: "error", title: "สร้าง QR ไม่สำเร็จ" });
+                          } finally {
+                            setPreviewLoading(false);
+                          }
+                        }}
+                        disabled={previewLoading}
+                      >
+                        {previewLoading ? "กำลังสร้าง QR..." : "พรีวิว PromptPay QR"}
+                      </Button>
+                      {qrPreview && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="cursor-pointer"
+                          onClick={() => setQrPreview(null)}
+                        >
+                          ล้างพรีวิว
+                        </Button>
+                      )}
+                    </div>
+                    {qrPreview && (
+                      <img src={qrPreview} alt="PromptPay QR Preview" className="w-40 h-40 mx-auto rounded-md" />
+                    )}
+                  </div>
                   <Label htmlFor="qrCodeFile" className="block mt-2">
                     อัปโหลด QR Code ใหม่
                   </Label>
