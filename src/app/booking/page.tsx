@@ -84,6 +84,7 @@ export default function BookingPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [promptPayQR, setPromptPayQR] = useState<{
+    bookingId: number;
     qrCode: string;
     amount: number;
     expiresAt: string;
@@ -489,7 +490,11 @@ export default function BookingPage() {
 
       if (response.ok) {
         const data = await response.json();
-        setPromptPayQR(data);
+        const payload = { ...data, bookingId };
+        setPromptPayQR(payload);
+        try {
+          sessionStorage.setItem(`ppqr_${bookingId}`, JSON.stringify(payload));
+        } catch {}
       } else {
         const errorData = await response.json();
         Swal.fire({
@@ -820,8 +825,15 @@ export default function BookingPage() {
                                   onClick={() => {
                                     setSelectedBooking(booking);
                                     setProofFile(null);
-                                    setPromptPayQR(null);
-                                    generatePromptPayQR(booking.id);
+                                    // Reuse existing QR if same booking and not expired
+                                    const now = new Date();
+                                    const cacheRaw = sessionStorage.getItem(`ppqr_${booking.id}`);
+                                    const cached = cacheRaw ? JSON.parse(cacheRaw) : null;
+                                    if (cached && cached.expiresAt && now <= new Date(cached.expiresAt)) {
+                                      setPromptPayQR(cached);
+                                    } else if (!promptPayQR || promptPayQR.bookingId !== booking.id || (promptPayQR.expiresAt && now > new Date(promptPayQR.expiresAt))) {
+                                      generatePromptPayQR(booking.id);
+                                    }
                                   }}
                                   className="bg-green-600 hover:bg-green-700 text-white"
                                 >
@@ -970,7 +982,6 @@ export default function BookingPage() {
                             if (!open) {
                               setSelectedBooking(null);
                               setProofFile(null);
-                              setPromptPayQR(null);
                             }
                           }}
                         >
@@ -979,8 +990,14 @@ export default function BookingPage() {
                               onClick={() => {
                                 setSelectedBooking(booking);
                                 setProofFile(null);
-                                setPromptPayQR(null);
-                                generatePromptPayQR(booking.id);
+                                const now = new Date();
+                                const cacheRaw = sessionStorage.getItem(`ppqr_${booking.id}`);
+                                const cached = cacheRaw ? JSON.parse(cacheRaw) : null;
+                                if (cached && cached.expiresAt && now <= new Date(cached.expiresAt)) {
+                                  setPromptPayQR(cached);
+                                } else if (!promptPayQR || promptPayQR.bookingId !== booking.id || (promptPayQR.expiresAt && now > new Date(promptPayQR.expiresAt))) {
+                                  generatePromptPayQR(booking.id);
+                                }
                               }}
                               className="bg-green-600 hover:bg-green-700 text-white flex-1"
                             >
