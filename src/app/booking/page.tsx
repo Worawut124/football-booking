@@ -884,7 +884,7 @@ export default function BookingPage() {
                                           placeholder="อัปโหลดหลักฐานการโอน"
                                         />
                                         <Button
-                                          onClick={() => handlePayment("promptpay")}
+                                          onClick={() => handlePayment("qrcode")}
                                           className="mt-3 w-full bg-green-600 hover:bg-green-700 text-white disabled:opacity-50"
                                           disabled={!proofFile || isPaying}
                                         >
@@ -1041,7 +1041,7 @@ export default function BookingPage() {
                                       placeholder="อัปโหลดหลักฐานการโอน"
                                     />
                                     <Button
-                                      onClick={() => handlePayment("promptpay")}
+                                      onClick={() => handlePayment("qrcode")}
                                       className="mt-3 w-full bg-green-600 hover:bg-green-700 text-white disabled:opacity-50"
                                       disabled={!proofFile || isPaying}
                                     >
