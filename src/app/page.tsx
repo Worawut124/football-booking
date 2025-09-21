@@ -233,54 +233,61 @@ export default function HomePage() {
               <span className="font-semibold text-gray-800">การจองวันที่ {todayLabel}</span>
             </div>
             {/* Group by field */}
-            {Object.entries(
-              bookingsToday.reduce((acc: Record<string, any[]>, b: any) => {
-                const key = `${b.fieldId}|${b.field?.name || `สนาม ${b.fieldId}`}`;
-                acc[key] = acc[key] || [];
-                acc[key].push(b);
-                return acc;
-              }, {})
-            )
-              .sort((a, b) => {
-                const nameA = a[0].split('|')[1] || '';
-                const nameB = b[0].split('|')[1] || '';
-                return nameA.localeCompare(nameB, 'th');
-              })
-              .map(([key, list]) => {
-                const [, fieldName] = key.split('|');
-                const sorted = [...list].sort((x, y) => new Date(x.startTime).getTime() - new Date(y.startTime).getTime());
-                return (
-                  <div key={key} className="mb-4 rounded-lg border border-slate-200 bg-white shadow-sm">
-                    <div className="px-4 py-3 border-b bg-slate-50 rounded-t-lg">
-                      <h3 className="text-base sm:text-lg font-semibold text-gray-800">{fieldName}</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+              {Object.entries(
+                bookingsToday.reduce((acc: Record<string, any[]>, b: any) => {
+                  const key = `${b.fieldId}|${b.field?.name || `สนาม ${b.fieldId}`}`;
+                  acc[key] = acc[key] || [];
+                  acc[key].push(b);
+                  return acc;
+                }, {})
+              )
+                .sort((a, b) => {
+                  const nameA = a[0].split('|')[1] || '';
+                  const nameB = b[0].split('|')[1] || '';
+                  return nameA.localeCompare(nameB, 'th');
+                })
+                .map(([key, list], idx) => {
+                  const [, fieldName] = key.split('|');
+                  const sorted = [...list].sort((x, y) => new Date(x.startTime).getTime() - new Date(y.startTime).getTime());
+                  const colorHeader = idx % 2 === 0 ? 'from-emerald-50 to-teal-50' : 'from-sky-50 to-indigo-50';
+                  const colorTitle = idx % 2 === 0 ? 'text-emerald-700' : 'text-sky-700';
+                  const colorBadge = idx % 2 === 0 ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-sky-100 text-sky-700 border-sky-200';
+                  return (
+                    <div key={key} className="rounded-lg border border-slate-200 bg-white shadow-sm">
+                      <div className={`px-4 py-3 border-b rounded-t-lg bg-gradient-to-r ${colorHeader}`}>
+                        <div className="flex items-center justify-between">
+                          <h3 className={`text-base sm:text-lg font-semibold ${colorTitle}`}>{fieldName}</h3>
+                          <span className={`text-xs px-2 py-1 rounded border ${colorBadge}`}>จอง {sorted.length} รายการ</span>
+                        </div>
+                      </div>
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-sm">
+                          <thead className="bg-slate-100">
+                            <tr>
+                              <th className="text-left px-4 py-2 text-gray-700">เวลา</th>
+                              <th className="text-left px-4 py-2 text-gray-700">ผู้จอง</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {sorted.map((b, i) => {
+                              const start = format(new Date(b.startTime), 'HH:mm');
+                              const end = format(new Date(b.endTime), 'HH:mm');
+                              const userName = b.user?.name || (b.userId ? `User ${b.userId}` : 'ไม่ทราบชื่อ');
+                              return (
+                                <tr key={b.id} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50'}>
+                                  <td className="px-4 py-2 text-gray-800 whitespace-nowrap">{start}-{end} น.</td>
+                                  <td className="px-4 py-2 text-gray-700">{userName}</td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-sm">
-                        <thead className="bg-slate-100">
-                          <tr>
-                            <th className="text-left px-4 py-2 text-gray-700">เวลา</th>
-                            <th className="text-left px-4 py-2 text-gray-700">ผู้จอง</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {sorted.map((b) => {
-                            const start = format(new Date(b.startTime), 'HH:mm');
-                            const end = format(new Date(b.endTime), 'HH:mm');
-                            const userName = b.user?.name || (b.userId ? `User ${b.userId}` : 'ไม่ทราบชื่อ');
-                            const status = b.status || 'pending';
-                            return (
-                              <tr key={b.id} className="border-t">
-                                <td className="px-4 py-2 text-gray-800 whitespace-nowrap">{start}-{end} น.</td>
-                                <td className="px-4 py-2 text-gray-700">{userName}</td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+            </div>
           </div>
         )}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-4 sm:mb-6 mt-5">
