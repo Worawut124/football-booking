@@ -134,7 +134,7 @@ export async function POST(request: Request) {
       ? totalAmount
       : await calculateAmount(newStartTime, newEndTime);
 
-    const booking = await prisma.booking.create({
+    const booking = await (prisma as any).booking.create({
       data: {
         userId: finalUserId,
         fieldId,
@@ -143,7 +143,7 @@ export async function POST(request: Request) {
         status: status || "pending",
         totalAmount: finalTotalAmount,
       },
-      include: { field: true, user: true, payment: true },
+      include: { field: true, user: true, payments: true },
     });
     console.log("Booking created:", booking); // Log เพื่อตรวจสอบข้อมูล
     return NextResponse.json(booking, { status: 201 });
