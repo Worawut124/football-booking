@@ -15,6 +15,7 @@ export async function GET(request: Request) {
   }
 
   try {
+    const now = new Date();
     const bookings = await prisma.booking.findMany({
       where: {
         fieldId,
@@ -23,6 +24,15 @@ export async function GET(request: Request) {
           lt: new Date(`${date}T23:59:59.999Z`),
         },
         ...(excludeId && { id: { not: excludeId } }),
+        // Exclude cancelled bookings
+        status: { not: "cancelled" },
+        // Exclude expired pending bookings (didn't pay deposit in time)
+        NOT: [
+          {
+            status: "pending",
+            expiresAt: { lt: now },
+          },
+        ],
       },
     });
 

@@ -69,6 +69,16 @@ async function calculateAmount(startTime: Date, endTime: Date) {
 
 export async function GET() {
   try {
+    // Auto-cancel expired pending bookings so their timeslots are freed
+    const now = new Date();
+    await prisma.booking.updateMany({
+      where: {
+        status: "pending",
+        expiresAt: { lt: now },
+      },
+      data: { status: "cancelled" },
+    });
+
     const bookings = await (prisma as any).booking.findMany({
       include: { field: true, user: true, payments: true },
     });
@@ -271,15 +281,14 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: "ไม่สามารถยกเลิกการจองที่ชำระเงินแล้วได้" }, { status: 400 });
     }
 
-    await prisma.payment.deleteMany({
-      where: { bookingId: id },
-    });
-    await prisma.booking.delete({
+    // Soft cancel: keep record and payments, just mark as cancelled
+    const cancelled = await prisma.booking.update({
       where: { id },
+      data: { status: "cancelled" },
     });
 
-    console.log(`Booking deleted: ID ${id}`); // Log เพื่อตรวจสอบ
-    return NextResponse.json({ message: "ยกเลิกและลบการจองสำเร็จ" }, { status: 200 });
+    console.log(`Booking cancelled: ID ${id}`); // Log เพื่อตรวจสอบ
+    return NextResponse.json({ message: "ยกเลิกการจองสำเร็จ", booking: cancelled }, { status: 200 });
   } catch (error) {
     console.error("Error deleting booking:", error);
     return NextResponse.json({ error: "เกิดข้อผิดพลาดในการยกเลิก" }, { status: 500 });
