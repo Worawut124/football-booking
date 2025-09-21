@@ -200,12 +200,15 @@ export default function HomePage() {
       {featuredAnnouncements.length > 0 ? (
         <div className="mb-12">
           <div className="text-center mb-8">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4">
-              ข่าวเด่น
-            </h2>
-            <p className="text-gray-600 text-lg">
+            <div className="inline-flex items-center gap-3 bg-gradient-to-r from-yellow-100 to-orange-100 px-6 py-3 rounded-full mb-4">
+              <Star className="h-6 w-6 text-yellow-600" />
+              <span className="text-yellow-800 font-semibold text-lg">ข่าวเด่น</span>
+              <Star className="h-6 w-6 text-yellow-600" />
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-yellow-600 to-orange-600 bg-clip-text text-transparent mb-4">
               ข่าวสารสำคัญและกิจกรรมพิเศษ
-            </p>
+            </h2>
+            <div className="w-24 h-1 bg-gradient-to-r from-yellow-400 to-orange-400 mx-auto rounded-full"></div>
           </div>
           <Carousel setApi={setApi} className="w-full max-w-6xl mx-auto">
             <CarouselContent>
@@ -277,12 +280,15 @@ export default function HomePage() {
         {bookingsToday.length > 0 && (
           <div className="mb-12">
             <div className="text-center mb-8">
-              <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4">
-                การจองวันนี้
-              </h2>
-              <p className="text-gray-600 text-lg">
+              <div className="inline-flex items-center gap-3 bg-gradient-to-r from-green-100 to-emerald-100 px-6 py-3 rounded-full mb-4">
+                <Clock className="h-6 w-6 text-green-600" />
+                <span className="text-green-800 font-semibold text-lg">การจองวันนี้</span>
+                <Clock className="h-6 w-6 text-green-600" />
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-4">
                 {todayLabel}
-              </p>
+              </h2>
+              <div className="w-24 h-1 bg-gradient-to-r from-green-400 to-emerald-400 mx-auto rounded-full"></div>
             </div>
             {/* Group by field */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
@@ -348,12 +354,19 @@ export default function HomePage() {
         {/* News Section */}
         <div className="mb-12">
           <div className="text-center mb-8">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4">
-              ข่าวประชาสัมพันธ์
-            </h2>
-            <p className="text-gray-600 text-lg">
+            <div className="inline-flex items-center gap-3 bg-gradient-to-r from-blue-100 to-purple-100 px-6 py-3 rounded-full mb-4">
+              <svg className="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+              </svg>
+              <span className="text-blue-800 font-semibold text-lg">ข่าวประชาสัมพันธ์</span>
+              <svg className="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+              </svg>
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">
               ติดตามข่าวสารและกิจกรรมของเรา
-            </p>
+            </h2>
+            <div className="w-24 h-1 bg-gradient-to-r from-blue-400 to-purple-400 mx-auto rounded-full"></div>
           </div>
           {announcements.length === 0 ? (
             <div className="text-center py-12">
@@ -439,12 +452,15 @@ export default function HomePage() {
         {/* Contact Section */}
         <div className="mb-12">
           <div className="text-center mb-8">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4">
-              ติดต่อเรา
-            </h2>
-            <p className="text-gray-600 text-lg">
+            <div className="inline-flex items-center gap-3 bg-gradient-to-r from-pink-100 to-rose-100 px-6 py-3 rounded-full mb-4">
+              <Phone className="h-6 w-6 text-pink-600" />
+              <span className="text-pink-800 font-semibold text-lg">ติดต่อเรา</span>
+              <MapPin className="h-6 w-6 text-rose-600" />
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent mb-4">
               ข้อมูลการติดต่อและที่ตั้งสนาม
-            </p>
+            </h2>
+            <div className="w-24 h-1 bg-gradient-to-r from-pink-400 to-rose-400 mx-auto rounded-full"></div>
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
