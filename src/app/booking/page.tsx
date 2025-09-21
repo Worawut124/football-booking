@@ -81,6 +81,7 @@ export default function BookingPage() {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [isPaying, setIsPaying] = useState(false);
+  const [isBooking, setIsBooking] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [fullPaymentBooking, setFullPaymentBooking] = useState<Booking | null>(null);
@@ -372,6 +373,7 @@ export default function BookingPage() {
   }, [selectedDate, fields, bookings, startTime, endTime]);
 
   const handleBooking = async () => {
+    if (isBooking) return;
     if (!session || !selectedDate || !selectedField || !startTime || !endTime) {
       Swal.fire({
         icon: "warning",
@@ -510,42 +512,49 @@ export default function BookingPage() {
       totalAmount,
     };
 
-        const response = await fetch("/api/bookings", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(bookingDetails),
-    });
+    try {
+      setIsBooking(true);
+      const response = await fetch("/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(bookingDetails),
+      });
 
-    if (response.ok) {
-      Swal.fire({
-        icon: "success",
-        title: "จองสำเร็จ!",
-        text: "กรุณาชำระมัดจำเพื่อยืนยันการจอง",
-        timer: 1500,
-        showConfirmButton: false,
-      });
-      const newBooking = await response.json();
-      // Start QR timer immediately by generating PromptPay QR (and set expiresAt on server)
-      try {
-        await generatePromptPayQR(newBooking.id);
-      } catch {}
-      const updatedBookings = [...bookings, newBooking].sort((a: Booking, b: Booking) => {
-        const dateA = new Date(a.startTime);
-        const dateB = new Date(b.startTime);
-        return dateA.getTime() - dateB.getTime();
-      });
-      setBookings(updatedBookings);
-      setStartTime(undefined);
-      setEndTime(undefined);
-      setCurrentPage(1);
-      await fetchData();
-    } else {
-      const errorData = await response.json();
-      Swal.fire({
-        icon: "error",
-        title: "เกิดข้อผิดพลาด",
-        text: errorData.error || "ไม่สามารถจองได้",
-      });
+      if (response.ok) {
+        Swal.fire({
+          icon: "success",
+          title: "จองสำเร็จ!",
+          text: "กรุณาชำระมัดจำเพื่อยืนยันการจอง",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+        const newBooking = await response.json();
+        // Start QR timer immediately by generating PromptPay QR (and set expiresAt on server)
+        try {
+          await generatePromptPayQR(newBooking.id);
+        } catch {}
+        const updatedBookings = [...bookings, newBooking].sort((a: Booking, b: Booking) => {
+          const dateA = new Date(a.startTime);
+          const dateB = new Date(b.startTime);
+          return dateA.getTime() - dateB.getTime();
+        });
+        setBookings(updatedBookings);
+        setStartTime(undefined);
+        setEndTime(undefined);
+        setCurrentPage(1);
+        await fetchData();
+      } else {
+        const errorData = await response.json();
+        Swal.fire({
+          icon: "error",
+          title: "เกิดข้อผิดพลาด",
+          text: errorData.error || "ไม่สามารถจองได้",
+        });
+      }
+    } catch (e) {
+      Swal.fire({ icon: "error", title: "เกิดข้อผิดพลาด", text: "ไม่สามารถจองได้" });
+    } finally {
+      setIsBooking(false);
     }
   };
 
@@ -768,12 +777,12 @@ export default function BookingPage() {
               <h3 className="text-sm font-medium mb-2">หมายเหตุ:</h3>
               <div className="flex flex-col gap-1 text-sm">
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-green-600 rounded"></div>
-                  <span className="text-green-600 font-medium">จองแล้ว (ไม่สามารถเลือกได้)</span>
+                  <div className="w-3 h-3 bg-green-500 rounded"></div>
+                  <span className="text-green-700 font-medium">สนามว่าง (สามารถจองได้)</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-black rounded"></div>
-                  <span className="text-black font-medium">สนามว่าง (สามารถจองได้)</span>
+                  <div className="w-3 h-3 bg-red-500 rounded"></div>
+                  <span className="text-red-700 font-medium">จองแล้ว (ไม่สามารถเลือกได้)</span>
                 </div>
               </div>
             </div>
@@ -806,11 +815,13 @@ export default function BookingPage() {
                   <SelectItem
                     key={time}
                     value={time}
-                    className={
-                      selectedField && isTimeSlotBooked(selectedField, time)
-                        ? "text-green-600"
-                        : ""
-                    }
+                    className={(() => {
+                      if (!selectedField) return "";
+                      const booked = isTimeSlotBooked(selectedField, time);
+                      return booked
+                        ? "bg-red-100 text-red-700"
+                        : "bg-green-50 text-green-700";
+                    })()}
                     disabled={selectedField ? isTimeSlotBooked(selectedField, time) : false}
                   >
                     {time}
@@ -832,11 +843,13 @@ export default function BookingPage() {
                     <SelectItem
                       key={time}
                       value={time}
-                      className={
-                        selectedField && isTimeSlotBooked(selectedField, time)
-                          ? "text-green-600"
-                          : ""
-                      }
+                      className={(() => {
+                        if (!selectedField) return "";
+                        const booked = isTimeSlotBooked(selectedField, time);
+                        return booked
+                          ? "bg-red-100 text-red-700"
+                          : "bg-green-50 text-green-700";
+                      })()}
                       disabled={selectedField ? isTimeSlotBooked(selectedField, time) : false}
                     >
                       {time}
@@ -847,9 +860,17 @@ export default function BookingPage() {
           </div>
           <Button
             onClick={handleBooking}
-            className="mt-4 w-full bg-gray-800 hover:bg-gray-900 text-white"
+            disabled={isBooking}
+            className={`mt-4 w-full text-white ${isBooking ? "bg-gray-400 cursor-not-allowed" : "bg-gray-800 hover:bg-gray-900"}`}
           >
-            ยืนยันการจอง
+            {isBooking ? (
+              <span className="flex items-center justify-center gap-2 w-full">
+                <span className="inline-block h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                กำลังยืนยัน...
+              </span>
+            ) : (
+              "ยืนยันการจอง"
+            )}
           </Button>
         </div>
       </div>
