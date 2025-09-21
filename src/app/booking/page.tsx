@@ -94,6 +94,12 @@ export default function BookingPage() {
 
   const itemsPerPage = 5;
 
+  // Calculate deposit sum for a booking
+  const calcDepositSum = (booking: Booking) => {
+    const deposits = (booking as any).payments ? (booking as any).payments.filter((p: any) => (p.type || '').toUpperCase() === 'DEPOSIT') : [];
+    return deposits.reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
+  };
+
   // Generate all available time slots (13:00-23:00)
   const allTimeSlots: string[] = [];
   for (let hour = 13; hour <= 23; hour++) {
@@ -1005,7 +1011,13 @@ export default function BookingPage() {
                                   </DialogHeader>
                                   <div className="space-y-3">
                                     <p className="text-center text-gray-800">
-                                      ราคารวม: <span className="font-semibold">{calculateAmount(booking)} บาท</span>
+                                      ยอดรวม: <span className="font-semibold">{booking.totalAmount} บาท</span>
+                                    </p>
+                                    <p className="text-center text-gray-800">
+                                      ชำระมัดจำแล้ว: <span className="font-semibold">{calcDepositSum(booking)} บาท</span>
+                                    </p>
+                                    <p className="text-center text-gray-900 text-lg">
+                                      คงเหลือที่ต้องชำระ: <span className="font-bold text-blue-700">{Math.max(0, (booking.totalAmount || 0) - calcDepositSum(booking))} บาท</span>
                                     </p>
                                     <div>
                                       <h3 className="text-lg font-semibold text-center">QR Code สำหรับชำระเต็มจำนวน</h3>

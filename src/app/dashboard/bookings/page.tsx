@@ -68,6 +68,7 @@ interface Booking {
   startTime: string;
   endTime: string;
   status: string;
+  totalAmount: number;
   user: User;
   field: Field;
   payments?: Payment[];
@@ -644,7 +645,7 @@ export default function BookingsPage() {
                     <TableHead className="min-w-[150px] text-center">เวลา</TableHead>
                     <TableHead className="min-w-[150px] text-center">สถานะ</TableHead>
                     <TableHead className="min-w-[150px] text-center">หลักฐานการชำระเงิน</TableHead>
-                    <TableHead className="min-w-[150px] text-center">การจัดการ</TableHead>
+                    <TableHead className="min-w-[220px] text-center">การจัดการ</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -708,7 +709,7 @@ export default function BookingsPage() {
                         )}
                       </TableCell>
                       <TableCell className="min-w-[150px] text-center">
-                        <div className="flex gap-2 justify-center">
+                        <div className="flex gap-2 justify-center flex-wrap">
                           <Dialog open={editBooking?.id === booking.id} onOpenChange={(open) => !open && setEditBooking(null)}>
                             <DialogTrigger asChild>
                               <Button
@@ -935,7 +936,7 @@ export default function BookingsPage() {
                         "-"
                       )}
                     </div>
-                    <div className="flex gap-2 pt-2">
+                    <div className="flex gap-2 pt-2 flex-wrap">
                       <Dialog open={editBooking?.id === booking.id} onOpenChange={(open) => !open && setEditBooking(null)}>
                         <DialogTrigger asChild>
                           <Button

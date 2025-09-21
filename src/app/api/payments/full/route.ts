@@ -45,6 +45,10 @@ export async function POST(request: Request) {
 
     // Use transaction to update payment and booking atomically
     const result = await prisma.$transaction(async (tx) => {
+      // Calculate remaining amount = total - sum of deposits
+      const deposits = await (tx as any).payment.findMany({ where: { bookingId, type: 'DEPOSIT' } });
+      const depositSum = deposits.reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
+      const remaining = Math.max(0, (booking.totalAmount || 0) - depositSum);
       // Find existing FULL payment for this booking
       const existingFull = await (tx as any).payment.findFirst({ where: { bookingId, type: 'FULL' } });
       if (!existingFull) {
@@ -53,7 +57,7 @@ export async function POST(request: Request) {
             bookingId,
             method,
             proof: proofUrl,
-            amount: booking.totalAmount,
+            amount: remaining,
             type: 'FULL',
           },
         });
@@ -63,7 +67,7 @@ export async function POST(request: Request) {
           data: {
             method,
             proof: proofUrl,
-            amount: booking.totalAmount,
+            amount: remaining,
             type: 'FULL',
           },
         });
