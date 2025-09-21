@@ -580,7 +580,8 @@ export default function BookingPage() {
     const formData = new FormData();
     formData.append("bookingId", selectedBooking.id.toString());
     formData.append("method", method);
-    if (method === "promptpay" && proofFile) {
+    // Attach proof if user selected a slip, regardless of method label
+    if (proofFile) {
       formData.append("proof", proofFile);
     }
 

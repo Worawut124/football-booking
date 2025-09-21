@@ -50,8 +50,9 @@ export async function POST(request: Request) {
 
     const depositAmount = await getDepositAmount();
 
+    // Upload proof if provided (regardless of method)
     let proofUrl: string | undefined;
-    if (method === "qrcode" && proofFile) {
+    if (proofFile) {
       const uploadResult = await uploadFile(proofFile, 'payments', 'proofs');
       if (uploadResult.error) {
         return NextResponse.json({ error: `ไม่สามารถอัพโหลดหลักฐานการชำระเงินได้: ${uploadResult.error}` }, { status: 500 });
