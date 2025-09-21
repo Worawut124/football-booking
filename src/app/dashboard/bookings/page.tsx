@@ -661,7 +661,8 @@ export default function BookingsPage() {
                     <TableHead className="min-w-[150px] text-center">วันที่</TableHead>
                     <TableHead className="min-w-[150px] text-center">เวลา</TableHead>
                     <TableHead className="min-w-[150px] text-center">สถานะ</TableHead>
-                    <TableHead className="min-w-[150px] text-center">หลักฐานการชำระเงิน</TableHead>
+                    <TableHead className="min-w-[150px] text-center">สลิปมัดจำ</TableHead>
+                    <TableHead className="min-w-[150px] text-center">สลิปชำระเต็ม</TableHead>
                     <TableHead className="min-w-[220px] text-center">การจัดการ</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -689,71 +690,65 @@ export default function BookingsPage() {
                           {getStatusLabel(booking.status)}
                         </span>
                       </TableCell>
+                      {/* Deposit slips column */}
                       <TableCell className="min-w-[150px] text-center">
-                        {booking.payments && booking.payments.length > 0 ? (
-                          <div className="space-y-2">
-                            {/* Deposits */}
-                            {booking.payments.some(p => (p.type || '').toUpperCase() === 'DEPOSIT' && p.proof) && (
-                              <div>
-                                <div className="text-xs text-gray-600 mb-1">สลิปมัดจำ</div>
-                                <div className="flex gap-2 justify-center">
-                                  {booking.payments
-                                    .filter(p => (p.type || '').toUpperCase() === 'DEPOSIT' && !!p.proof)
-                                    .map((p) => (
-                                      <Dialog key={p.id}>
-                                        <DialogTrigger asChild>
-                                          <img
-                                            src={p.proof!}
-                                            alt="Deposit Proof"
-                                            className="w-16 h-16 object-cover mx-auto rounded cursor-pointer"
-                                          />
-                                        </DialogTrigger>
-                                        <DialogContent className="max-w-[80%] max-h-[80vh] overflow-auto">
-                                          <DialogHeader>
-                                            <DialogTitle>หลักฐานการชำระเงิน (มัดจำ)</DialogTitle>
-                                          </DialogHeader>
-                                          <img
-                                            src={p.proof!}
-                                            alt="Deposit Proof (Full Size)"
-                                            className="w-full h-auto max-h-[70vh] object-contain"
-                                          />
-                                        </DialogContent>
-                                      </Dialog>
-                                    ))}
-                                </div>
-                              </div>
-                            )}
-                            {/* Full payments */}
-                            {booking.payments.some(p => (p.type || '').toUpperCase() === 'FULL' && p.proof) && (
-                              <div>
-                                <div className="text-xs text-gray-600 mb-1">สลิปชำระเต็ม</div>
-                                <div className="flex gap-2 justify-center">
-                                  {booking.payments
-                                    .filter(p => (p.type || '').toUpperCase() === 'FULL' && !!p.proof)
-                                    .map((p) => (
-                                      <Dialog key={p.id}>
-                                        <DialogTrigger asChild>
-                                          <img
-                                            src={p.proof!}
-                                            alt="Full Payment Proof"
-                                            className="w-16 h-16 object-cover mx-auto rounded cursor-pointer"
-                                          />
-                                        </DialogTrigger>
-                                        <DialogContent className="max-w-[80%] max-h-[80vh] overflow-auto">
-                                          <DialogHeader>
-                                            <DialogTitle>หลักฐานการชำระเงิน (เต็มจำนวน)</DialogTitle>
-                                          </DialogHeader>
-                                          <img
-                                            src={p.proof!}
-                                            alt="Full Payment Proof (Full Size)"
-                                            className="w-full h-auto max-h-[70vh] object-contain"
-                                          />
-                                        </DialogContent>
-                                      </Dialog>
-                                    ))}
-                                </div>
-                              </div>
-                            )}
+                        {booking.payments && booking.payments.some(p => (p.type || '').toUpperCase() === 'DEPOSIT' && p.proof) ? (
+                          <div className="flex gap-2 justify-center">
+                            {booking.payments
+                              .filter(p => (p.type || '').toUpperCase() === 'DEPOSIT' && !!p.proof)
+                              .map((p) => (
+                                <Dialog key={p.id}>
+                                  <DialogTrigger asChild>
+                                    <img
+                                      src={p.proof!}
+                                      alt="Deposit Proof"
+                                      className="w-16 h-16 object-cover mx-auto rounded cursor-pointer"
+                                    />
+                                  </DialogTrigger>
+                                  <DialogContent className="max-w-[80%] max-h-[80vh] overflow-auto">
+                                    <DialogHeader>
+                                      <DialogTitle>หลักฐานการชำระเงิน (มัดจำ)</DialogTitle>
+                                    </DialogHeader>
+                                    <img
+                                      src={p.proof!}
+                                      alt="Deposit Proof (Full Size)"
+                                      className="w-full h-auto max-h-[70vh] object-contain"
+                                    />
+                                  </DialogContent>
+                                </Dialog>
+                              ))}
+                          </div>
+                        ) : (
+                          "-"
+                        )}
+                      </TableCell>
+                      {/* Full payment slips column */}
+                      <TableCell className="min-w-[150px] text-center">
+                        {booking.payments && booking.payments.some(p => (p.type || '').toUpperCase() === 'FULL' && p.proof) ? (
+                          <div className="flex gap-2 justify-center">
+                            {booking.payments
+                              .filter(p => (p.type || '').toUpperCase() === 'FULL' && !!p.proof)
+                              .map((p) => (
+                                <Dialog key={p.id}>
+                                  <DialogTrigger asChild>
+                                    <img
+                                      src={p.proof!}
+                                      alt="Full Payment Proof"
+                                      className="w-16 h-16 object-cover mx-auto rounded cursor-pointer"
+                                    />
+                                  </DialogTrigger>
+                                  <DialogContent className="max-w-[80%] max-h-[80vh] overflow-auto">
+                                    <DialogHeader>
+                                      <DialogTitle>หลักฐานการชำระเงิน (เต็มจำนวน)</DialogTitle>
+                                    </DialogHeader>
+                                    <img
+                                      src={p.proof!}
+                                      alt="Full Payment Proof (Full Size)"
+                                      className="w-full h-auto max-h-[70vh] object-contain"
+                                    />
+                                  </DialogContent>
+                                </Dialog>
+                              ))}
                           </div>
                         ) : (
                           "-"
