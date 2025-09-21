@@ -119,12 +119,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "เวลาสิ้นสุดต้องมากกว่าเวลาเริ่มต้น" }, { status: 400 });
     }
 
+    const nowPost = new Date();
     const overlappingBooking = await prisma.booking.findFirst({
       where: {
         fieldId,
         AND: [
           { startTime: { lt: newEndTime } },
           { endTime: { gt: newStartTime } },
+        ],
+        // exclude cancelled
+        status: { not: "cancelled" },
+        // exclude expired pending
+        NOT: [
+          {
+            status: "pending",
+            expiresAt: { lt: nowPost },
+          },
         ],
       },
     });
@@ -206,6 +216,7 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "เวลาสิ้นสุดต้องมากกว่าเวลาเริ่มต้น" }, { status: 400 });
     }
 
+    const nowPut = new Date();
     const overlappingBooking = await prisma.booking.findFirst({
       where: {
         fieldId: newFieldId,
@@ -213,6 +224,13 @@ export async function PUT(request: Request) {
         AND: [
           { startTime: { lt: newEndTime } },
           { endTime: { gt: newStartTime } },
+        ],
+        status: { not: "cancelled" },
+        NOT: [
+          {
+            status: "pending",
+            expiresAt: { lt: nowPut },
+          },
         ],
       },
     });
