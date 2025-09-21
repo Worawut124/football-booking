@@ -26,11 +26,11 @@ export default function DashboardPage() {
   }, [status, router, session]);
 
   if (status === "loading") {
-    return <div className="container mx-auto p-4">กำลังโหลด...</div>;
+    return <div className="w-full p-4">กำลังโหลด...</div>;
   }
 
   return (
-    <div className="container mx-auto p-4 bg-gray-50">
+    <div className="w-full min-h-screen bg-gray-50">
       <h1 className="text-3xl font-bold text-gray-800 mb-6">แดชบอร์ด (การจัดการ)</h1>
       {/* Mobile selector */}
       <div className="md:hidden mb-4">
