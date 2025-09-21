@@ -100,6 +100,50 @@ export default function BookingPage() {
     return deposits.reduce((sum: number, p: any) => sum + (p.amount || 0), 0);
   };
 
+  // Calculate total amount for a booking based on time-of-day pricing
+  const calculateAmount = (booking: Booking): number => {
+    const start = new Date(booking.startTime);
+    const end = new Date(booking.endTime);
+    const durationMinutes = differenceInMinutes(end, start);
+    if (durationMinutes < 60) {
+      return 0;
+    }
+
+    let totalAmount = 0;
+    const currentTime = new Date(start);
+
+    while (currentTime < end) {
+      const currentHour = currentTime.getHours();
+      const nextHour = new Date(currentTime);
+      nextHour.setHours(currentHour + 1, 0, 0, 0);
+
+      const segmentEnd = nextHour > end ? end : nextHour;
+      const segmentMinutes = differenceInMinutes(segmentEnd, currentTime);
+
+      let hourlyRate: number;
+      let halfHourRate: number;
+      if (currentHour >= 13 && currentHour < 17) {
+        hourlyRate = 400;
+        halfHourRate = 200;
+      } else {
+        hourlyRate = 600;
+        halfHourRate = 300;
+      }
+
+      if (segmentMinutes >= 60) {
+        totalAmount += hourlyRate;
+      } else if (segmentMinutes >= 30) {
+        totalAmount += halfHourRate;
+      } else if (segmentMinutes > 0) {
+        totalAmount += halfHourRate;
+      }
+
+      currentTime.setTime(nextHour.getTime());
+    }
+
+    return totalAmount;
+  };
+
   // Generate all available time slots (13:00-23:00)
   const allTimeSlots: string[] = [];
   for (let hour = 13; hour <= 23; hour++) {
@@ -133,6 +177,41 @@ export default function BookingPage() {
       const currentTimeWithBuffer = new Date(now.getTime() + 30 * 60 * 1000);
       
       return slotTime > currentTimeWithBuffer;
+    });
+  };
+
+  // Determine if a time slot is already booked (ignore cancelled and expired-pending)
+  const isTimeSlotBooked = (fieldId: number, time: string) => {
+    if (!selectedDate) return false;
+
+    const [hour, minute] = time.replace("น.", "").split(":");
+    const checkTime = new Date(selectedDate);
+    checkTime.setHours(parseInt(hour), parseInt(minute), 0, 0);
+
+    const now = new Date();
+
+    return bookings.some((booking) => {
+      const bookingStart = new Date(booking.startTime);
+      const bookingEnd = new Date(booking.endTime);
+
+      // Ignore cancelled bookings (free slot)
+      if (booking.status === "cancelled") return false;
+
+      // Ignore expired pending (free slot immediately)
+      if (
+        booking.status === "pending" &&
+        booking.expiresAt &&
+        new Date(booking.expiresAt) < now
+      ) {
+        return false;
+      }
+
+      return (
+        fieldId === booking.fieldId &&
+        checkTime >= bookingStart &&
+        checkTime < bookingEnd &&
+        bookingStart.toDateString() === checkTime.toDateString()
+      );
     });
   };
 
@@ -290,80 +369,7 @@ export default function BookingPage() {
     if (endTime && !filteredSlots.includes(endTime)) {
       setEndTime(undefined);
     }
-  }, [currentTime, selectedDate, startTime, endTime]);
-
-  const isTimeSlotBooked = (fieldId: number, time: string) => {
-    if (!selectedDate) return false;
-
-    const [hour, minute] = time.replace("น.", "").split(":");
-    const checkTime = new Date(selectedDate);
-    checkTime.setHours(parseInt(hour), parseInt(minute), 0, 0);
-
-    return bookings.some((booking) => {
-      const bookingStart = new Date(booking.startTime);
-      const bookingEnd = new Date(booking.endTime);
-
-      return (
-        fieldId === booking.fieldId &&
-        checkTime >= bookingStart &&
-        checkTime < bookingEnd &&
-        bookingStart.toDateString() === checkTime.toDateString()
-      );
-    });
-  };
-
-  const calculateAmount = (booking: Booking) => {
-    const start = new Date(booking.startTime);
-    const end = new Date(booking.endTime);
-    const durationMinutes = differenceInMinutes(end, start);
-
-    // ตรวจสอบระยะเวลาขั้นต่ำ 1 ชั่วโมง
-    if (durationMinutes < 60) {
-      return 0;
-    }
-
-    let totalAmount = 0;
-    const currentTime = new Date(start);
-
-    while (currentTime < end) {
-      const currentHour = currentTime.getHours();
-      const nextHour = new Date(currentTime);
-      nextHour.setHours(currentHour + 1, 0, 0, 0);
-
-      // คำนวณระยะเวลาในชั่วโมงนี้
-      const segmentEnd = nextHour > end ? end : nextHour;
-      const segmentMinutes = differenceInMinutes(segmentEnd, currentTime);
-
-      // กำหนดราคาตามช่วงเวลา
-      let hourlyRate: number;
-      let halfHourRate: number;
-
-      if (currentHour >= 13 && currentHour < 17) {
-        // ช่วงกลางวัน 13:00-17:00
-        hourlyRate = 400;
-        halfHourRate = 200;
-      } else {
-        // ช่วงเย็น 17:00 เป็นต้นไป และก่อน 13:00
-        hourlyRate = 600;
-        halfHourRate = 300;
-      }
-
-      // คำนวณราคาสำหรับช่วงเวลานี้
-      if (segmentMinutes >= 60) {
-        totalAmount += hourlyRate;
-      } else if (segmentMinutes >= 30) {
-        totalAmount += halfHourRate;
-      } else if (segmentMinutes > 0) {
-        // ถ้าเหลือน้อยกว่า 30 นาที ให้คิดเป็น 30 นาที
-        totalAmount += halfHourRate;
-      }
-
-      // เลื่อนไปชั่วโมงถัดไป
-      currentTime.setTime(nextHour.getTime());
-    }
-
-    return totalAmount;
-  };
+  }, [selectedDate, fields, bookings, startTime, endTime]);
 
   const handleBooking = async () => {
     if (!session || !selectedDate || !selectedField || !startTime || !endTime) {
@@ -410,10 +416,14 @@ export default function BookingPage() {
       return;
     }
 
+    const now = new Date();
     const isOverlapping = bookings.some((booking) => {
       const bookingStart = new Date(booking.startTime);
       const bookingEnd = new Date(booking.endTime);
-
+      // Ignore cancelled
+      if (booking.status === "cancelled") return false;
+      // Ignore expired pending
+      if (booking.status === "pending" && booking.expiresAt && new Date(booking.expiresAt) < now) return false;
       return (
         selectedField === booking.fieldId &&
         startDateTime < bookingEnd &&
@@ -648,15 +658,18 @@ export default function BookingPage() {
       Swal.fire({
         icon: "success",
         title: "ยกเลิกสำเร็จ!",
-        text: "การจองถูกลบเรียบร้อยแล้ว",
+        text: "การจองถูกยกเลิกเรียบร้อยแล้ว",
         timer: 1500,
         showConfirmButton: false,
       });
-      const updatedBookings = bookings.filter((booking) => booking.id !== bookingId).sort((a: Booking, b: Booking) => {
-        const dateA = new Date(a.startTime);
-        const dateB = new Date(b.startTime);
-        return dateA.getTime() - dateB.getTime();
-      });
+      // Soft cancel locally: keep booking but mark as cancelled
+      const updatedBookings = bookings
+        .map((booking) => booking.id === bookingId ? { ...booking, status: "cancelled" } : booking)
+        .sort((a: Booking, b: Booking) => {
+          const dateA = new Date(a.startTime);
+          const dateB = new Date(b.startTime);
+          return dateA.getTime() - dateB.getTime();
+        });
       setBookings(updatedBookings);
       if (paginatedBookings.length === 1 && currentPage > 1) {
         setCurrentPage(currentPage - 1);
