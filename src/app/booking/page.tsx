@@ -867,6 +867,8 @@ export default function BookingPage() {
                             ? "รอชำระเงิน"
                             : booking.status === "pending_confirmation"
                             ? "รอดำเนินการ"
+                            : booking.status === "cancelled"
+                            ? "ยกเลิก"
                             : "ชำระแล้ว"}
                         </span>
                       </TableCell>
@@ -1097,6 +1099,8 @@ export default function BookingPage() {
                           ? "รอชำระเงิน"
                           : booking.status === "pending_confirmation"
                           ? "รอดำเนินการ"
+                          : booking.status === "cancelled"
+                          ? "ยกเลิก"
                           : "ชำระแล้ว"}
                       </span>
                     </div>
