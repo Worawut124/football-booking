@@ -130,6 +130,54 @@ export default function BookingPage() {
     });
   };
 
+  // Handle full payment (second payment) slip upload and mark as paid
+  const handleFullPayment = async (bookingId: number) => {
+    if (!proofFile) {
+      Swal.fire({ icon: "warning", title: "กรุณาอัปโหลดสลิป", text: "โปรดแนบหลักฐานการชำระเงินเต็มจำนวน" });
+      return;
+    }
+    setIsPaying(true);
+    try {
+      const formData = new FormData();
+      formData.append("bookingId", String(bookingId));
+      formData.append("method", "qrcode_full");
+      formData.append("proof", proofFile);
+
+      const response = await fetch("/api/payments/full", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (response.ok) {
+        Swal.fire({
+          icon: "success",
+          title: "ชำระเต็มจำนวนสำเร็จ!",
+          text: "การชำระเงินของคุณได้รับการบันทึกแล้ว",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+        const updated = bookings.map((b) =>
+          b.id === bookingId ? { ...b, status: "paid" } : b
+        ).sort((a: Booking, b: Booking) => {
+          const dateA = new Date(a.startTime);
+          const dateB = new Date(b.startTime);
+          return dateA.getTime() - dateB.getTime();
+        });
+        setBookings(updated);
+        setFullPaymentBooking(null);
+        setProofFile(null);
+        await fetchData();
+      } else {
+        const errorData = await response.json();
+        Swal.fire({ icon: "error", title: "เกิดข้อผิดพลาด", text: errorData.error || "ไม่สามารถชำระเต็มจำนวนได้" });
+      }
+    } catch (e) {
+      Swal.fire({ icon: "error", title: "เกิดข้อผิดพลาด", text: "ไม่สามารถชำระเต็มจำนวนได้" });
+    } finally {
+      setIsPaying(false);
+    }
+  };
+
   const timeSlots = getFilteredTimeSlots();
 
   const fetchData = async () => {
@@ -973,6 +1021,20 @@ export default function BookingPage() {
                                       <p className="text-xs text-gray-600 mt-2 text-center">
                                         หมายเหตุ: กรุณาสแกนชำระเต็มจำนวนตามราคารวม และแจ้งหลักฐานกับเจ้าหน้าที่ ณ จุดบริการ
                                       </p>
+                                      <div className="mt-3">
+                                        <Input
+                                          type="file"
+                                          accept="image/*"
+                                          onChange={(e) => setProofFile(e.target.files?.[0] || null)}
+                                        />
+                                        <Button
+                                          onClick={() => handleFullPayment(booking.id)}
+                                          disabled={!proofFile || isPaying}
+                                          className="mt-2 w-full bg-blue-600 hover:bg-blue-700 text-white disabled:opacity-50"
+                                        >
+                                          {isPaying ? "กำลังอัปโหลด..." : "ยืนยันการชำระเต็มจำนวน"}
+                                        </Button>
+                                      </div>
                                     </div>
                                   </div>
                                 </DialogContent>

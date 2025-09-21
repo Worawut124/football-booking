@@ -56,6 +56,9 @@ interface Field {
 interface Payment {
   id: number;
   proof: string | null;
+  type?: string; // 'DEPOSIT' | 'FULL'
+  method?: string;
+  amount?: number;
 }
 
 interface Booking {
@@ -67,7 +70,7 @@ interface Booking {
   status: string;
   user: User;
   field: Field;
-  payment?: Payment;
+  payments?: Payment[];
 }
 
 // สร้างตัวเลือกเวลาเริ่มต้นทุก 30 นาที (08:00-00:00)
@@ -669,26 +672,37 @@ export default function BookingsPage() {
                         </span>
                       </TableCell>
                       <TableCell className="min-w-[150px] text-center">
-                        {booking.payment?.proof ? (
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <img
-                                src={booking.payment.proof}
-                                alt="Payment Proof"
-                                className="w-16 h-16 object-cover mx-auto cursor-pointer"
-                              />
-                            </DialogTrigger>
-                            <DialogContent className="max-w-[80%] max-h-[80vh] overflow-auto">
-                              <DialogHeader>
-                                <DialogTitle>หลักฐานการชำระเงิน</DialogTitle>
-                              </DialogHeader>
-                              <img
-                                src={booking.payment.proof}
-                                alt="Payment Proof (Full Size)"
-                                className="w-full h-auto max-h-[70vh] object-contain"
-                              />
-                            </DialogContent>
-                          </Dialog>
+                        {booking.payments && booking.payments.length > 0 ? (
+                          <div className="flex gap-2 justify-center">
+                            {booking.payments
+                              .filter(p => !!p.proof)
+                              .map((p) => (
+                                <Dialog key={p.id}>
+                                  <DialogTrigger asChild>
+                                    <div className="flex flex-col items-center gap-1 cursor-pointer">
+                                      <img
+                                        src={p.proof!}
+                                        alt={`Payment Proof ${p.type || ''}`}
+                                        className="w-16 h-16 object-cover mx-auto rounded"
+                                      />
+                                      <span className="text-xs px-2 py-0.5 rounded bg-gray-100 text-gray-700">
+                                        {p.type === 'FULL' ? 'เต็มจำนวน' : 'มัดจำ'}
+                                      </span>
+                                    </div>
+                                  </DialogTrigger>
+                                  <DialogContent className="max-w-[80%] max-h-[80vh] overflow-auto">
+                                    <DialogHeader>
+                                      <DialogTitle>หลักฐานการชำระเงิน ({p.type === 'FULL' ? 'เต็มจำนวน' : 'มัดจำ'})</DialogTitle>
+                                    </DialogHeader>
+                                    <img
+                                      src={p.proof!}
+                                      alt={`Payment Proof ${p.type || ''} (Full Size)`}
+                                      className="w-full h-auto max-h-[70vh] object-contain"
+                                    />
+                                  </DialogContent>
+                                </Dialog>
+                              ))}
+                          </div>
                         ) : (
                           "-"
                         )}
@@ -886,26 +900,37 @@ export default function BookingsPage() {
                     </div>
                     <div>
                       <span className="font-medium text-gray-700">หลักฐานการชำระเงิน:</span>{" "}
-                      {booking.payment?.proof ? (
-                        <Dialog>
-                          <DialogTrigger asChild>
-                            <img
-                              src={booking.payment.proof}
-                              alt="Payment Proof"
-                              className="w-32 h-32 object-cover mt-2 cursor-pointer"
-                            />
-                          </DialogTrigger>
-                          <DialogContent className="max-w-[80%] max-h-[80vh] overflow-auto">
-                            <DialogHeader>
-                              <DialogTitle>หลักฐานการชำระเงิน</DialogTitle>
-                            </DialogHeader>
-                            <img
-                              src={booking.payment.proof}
-                              alt="Payment Proof (Full Size)"
-                              className="w-full h-auto max-h-[70vh] object-contain"
-                            />
-                          </DialogContent>
-                        </Dialog>
+                      {booking.payments && booking.payments.length > 0 ? (
+                        <div className="flex gap-3 flex-wrap mt-2">
+                          {booking.payments
+                            .filter(p => !!p.proof)
+                            .map((p) => (
+                              <Dialog key={p.id}>
+                                <DialogTrigger asChild>
+                                  <div className="flex flex-col items-center gap-1 cursor-pointer">
+                                    <img
+                                      src={p.proof!}
+                                      alt={`Payment Proof ${p.type || ''}`}
+                                      className="w-24 h-24 object-cover rounded"
+                                    />
+                                    <span className="text-xs px-2 py-0.5 rounded bg-gray-100 text-gray-700">
+                                      {p.type === 'FULL' ? 'เต็มจำนวน' : 'มัดจำ'}
+                                    </span>
+                                  </div>
+                                </DialogTrigger>
+                                <DialogContent className="max-w-[80%] max-h-[80vh] overflow-auto">
+                                  <DialogHeader>
+                                    <DialogTitle>หลักฐานการชำระเงิน ({p.type === 'FULL' ? 'เต็มจำนวน' : 'มัดจำ'})</DialogTitle>
+                                  </DialogHeader>
+                                  <img
+                                    src={p.proof!}
+                                    alt={`Payment Proof ${p.type || ''} (Full Size)`}
+                                    className="w-full h-auto max-h-[70vh] object-contain"
+                                  />
+                                </DialogContent>
+                              </Dialog>
+                            ))}
+                        </div>
                       ) : (
                         "-"
                       )}

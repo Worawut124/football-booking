@@ -43,7 +43,7 @@ model Booking {
   expiresAt    DateTime? // Payment expiration time (30 minutes from creation)
   field        Field     @relation(fields: [fieldId], references: [id])
   user         User      @relation(fields: [userId], references: [id])
-  payment      Payment?
+  payments     Payment[]
 }
 
 model Product {
@@ -60,12 +60,12 @@ model Product {
 
 model Payment {
   id        Int      @id @default(autoincrement())
-  bookingId Int      @unique
+  bookingId Int
   method    String
   proof     String?
   createdAt DateTime @default(now())
-  amount    Float    @default(100) // Fixed deposit amount of 100 baht
-  isDeposit Boolean  @default(true) // Mark as deposit payment
+  amount    Float    @default(100)
+  type      String   @default("DEPOSIT") // 'DEPOSIT' or 'FULL'
   booking   Booking  @relation(fields: [bookingId], references: [id])
 }
 

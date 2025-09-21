@@ -61,19 +61,19 @@ export async function POST(request: Request) {
 
     // Server-side idempotency: prevent duplicate payments for the same booking
     const payment = await prisma.$transaction(async (tx) => {
-      const existing = await tx.payment.findUnique({ where: { bookingId } });
-      if (existing) {
-        // Indicate to caller it's already processed
+      const existingDeposit = await (tx as any).payment.findFirst({ where: { bookingId, type: 'DEPOSIT' } });
+      if (existingDeposit) {
+        // Already has a deposit recorded
         throw Object.assign(new Error("ALREADY_PAID"), { code: "ALREADY_PAID" });
       }
 
-      const created = await tx.payment.create({
+      const created = await (tx as any).payment.create({
         data: { 
           bookingId, 
           method, 
           proof: proofUrl, 
           amount: depositAmount,
-          isDeposit: true
+          type: 'DEPOSIT'
         },
       });
 

@@ -69,8 +69,8 @@ async function calculateAmount(startTime: Date, endTime: Date) {
 
 export async function GET() {
   try {
-    const bookings = await prisma.booking.findMany({
-      include: { field: true, user: true, payment: true },
+    const bookings = await (prisma as any).booking.findMany({
+      include: { field: true, user: true, payments: true },
     });
     console.log("Bookings fetched:", bookings); // Log เพื่อตรวจสอบข้อมูล
     return NextResponse.json(bookings);
@@ -171,9 +171,9 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "ID ผู้ใช้ไม่ถูกต้อง" }, { status: 400 });
     }
 
-    const booking = await prisma.booking.findUnique({
+    const booking = await (prisma as any).booking.findUnique({
       where: { id },
-      include: { field: true, user: true, payment: true },
+      include: { field: true, user: true, payments: true },
     });
 
     if (!booking) {
@@ -221,7 +221,7 @@ export async function PUT(request: Request) {
     // Recalculate total amount with new times
     const newTotalAmount = await calculateAmount(newStartTime, newEndTime);
 
-    const updatedBooking = await prisma.booking.update({
+    const updatedBooking = await (prisma as any).booking.update({
       where: { id },
       data: {
         userId: finalUserId,
@@ -231,7 +231,7 @@ export async function PUT(request: Request) {
         status: status ?? booking.status,
         totalAmount: newTotalAmount,
       },
-      include: { field: true, user: true, payment: true },
+      include: { field: true, user: true, payments: true },
     });
 
     console.log("Booking updated:", updatedBooking); // Log เพื่อตรวจสอบข้อมูล
