@@ -714,6 +714,15 @@ export default function BookingPage() {
     }
   };
 
+  // Remaining minutes until booking expiration
+  const getRemainingMinutes = (booking: Booking): number | null => {
+    if (!booking.expiresAt) return null;
+    const expires = new Date(booking.expiresAt).getTime();
+    const now = currentTime.getTime();
+    const diffMs = expires - now;
+    return Math.ceil(diffMs / 60000);
+  };
+
   if (status === "loading" || loading) {
     return <LoadingCrescent text="กำลังโหลดข้อมูล..." />;
   }
@@ -875,15 +884,28 @@ export default function BookingPage() {
                         {format(new Date(booking.endTime), "HH:mm", { locale: th })}น.
                       </TableCell>
                       <TableCell>
-                        <span className={`px-2 py-1 rounded ${getStatusColor(booking.status)}`}>
-                          {booking.status === "pending"
-                            ? "รอชำระเงิน"
-                            : booking.status === "pending_confirmation"
-                            ? "รอดำเนินการ"
-                            : booking.status === "cancelled"
-                            ? "ยกเลิก"
-                            : "ชำระแล้ว"}
-                        </span>
+                        <div className="flex flex-col items-start gap-1">
+                          <span className={`px-2 py-1 rounded ${getStatusColor(booking.status)}`}>
+                            {booking.status === "pending"
+                              ? "รอชำระเงิน"
+                              : booking.status === "pending_confirmation"
+                              ? "รอดำเนินการ"
+                              : booking.status === "cancelled"
+                              ? "ยกเลิก"
+                              : "ชำระแล้ว"}
+                          </span>
+                          {booking.status === "pending" && booking.expiresAt && (
+                            (() => {
+                              const mins = getRemainingMinutes(booking);
+                              if (mins === null) return null;
+                              return (
+                                <span className={`text-xs px-2 py-0.5 rounded border ${mins > 0 ? "bg-amber-50 text-amber-700 border-amber-200" : "bg-gray-100 text-gray-600 border-gray-200"}`}>
+                                  {mins > 0 ? `เหลือ ${mins} นาที` : "หมดเวลา"}
+                                </span>
+                              );
+                            })()
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
@@ -1116,6 +1138,19 @@ export default function BookingPage() {
                           ? "ยกเลิก"
                           : "ชำระแล้ว"}
                       </span>
+                      {booking.status === "pending" && booking.expiresAt && (
+                        (() => {
+                          const mins = getRemainingMinutes(booking);
+                          if (mins === null) return null;
+                          return (
+                            <div className="mt-1">
+                              <span className={`text-xs px-2 py-0.5 rounded border ${mins > 0 ? "bg-amber-50 text-amber-700 border-amber-200" : "bg-gray-100 text-gray-600 border-gray-200"}`}>
+                                {mins > 0 ? `เหลือ ${mins} นาที` : "หมดเวลา"}
+                              </span>
+                            </div>
+                          );
+                        })()
+                      )}
                     </div>
                     <div className="flex gap-2 pt-2">
                       {booking.status === "pending" && (
