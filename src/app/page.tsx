@@ -112,6 +112,22 @@ export default function HomePage() {
   };
   const todayLabel = format(new Date(), "dd MMMM yyyy", { locale: th });
 
+  // Status badge color
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "paid":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "pending":
+      case "pending_confirmation":
+      case "deposit_paid":
+        return "bg-amber-50 text-amber-700 border-amber-200";
+      case "cancelled":
+        return "bg-red-100 text-red-800 border-red-200";
+      default:
+        return "bg-gray-100 text-gray-700 border-gray-200";
+    }
+  };
+
   // Helper function to get role display name
   const getRoleDisplayName = (role: string) => {
     switch (role) {
@@ -211,29 +227,60 @@ export default function HomePage() {
       {/* รายการข่าว */}
       <div>
         {bookingsToday.length > 0 && (
-          <div className="mb-4 sm:mb-6 rounded-md border border-slate-200 bg-green-50 px-3 py-2 text-sm sm:text-base text-gray-900 shadow-sm">
-            <div className="mb-1 font-semibold flex items-center gap-2">
-              <span className="inline-block h-2 w-2 rounded-full bg-red-500"></span>
-              <span>การจองวันที่ {todayLabel}</span>
+          <div className="mb-4 sm:mb-6">
+            <div className="mb-2 flex items-center gap-2">
+              <span className="inline-block h-2 w-2 rounded-full bg-green-500"></span>
+              <span className="font-semibold text-gray-800">การจองวันที่ {todayLabel}</span>
             </div>
-            {React.createElement(
-              "marquee",
-              {
-                direction: "left",
-                scrollamount: "6",
-                onMouseOver: (e: any) => e?.currentTarget?.stop?.(),
-                onMouseOut: (e: any) => e?.currentTarget?.start?.(),
-              },
-              bookingsToday
-                .map((b: any) => {
-                  const start = format(new Date(b.startTime), "HH:mm");
-                  const end = format(new Date(b.endTime), "HH:mm");
-                  const fieldName = b.field?.name || `สนาม ${b.fieldId}`;
-                  const userName = b.user?.name || (b.userId ? `User ${b.userId}` : "ไม่ทราบชื่อ");
-                  return `${start}-${end} ${fieldName} จองโดย ${userName}`;
-                })
-                .join("  |  ")
-            )}
+            {/* Group by field */}
+            {Object.entries(
+              bookingsToday.reduce((acc: Record<string, any[]>, b: any) => {
+                const key = `${b.fieldId}|${b.field?.name || `สนาม ${b.fieldId}`}`;
+                acc[key] = acc[key] || [];
+                acc[key].push(b);
+                return acc;
+              }, {})
+            )
+              .sort((a, b) => {
+                const nameA = a[0].split('|')[1] || '';
+                const nameB = b[0].split('|')[1] || '';
+                return nameA.localeCompare(nameB, 'th');
+              })
+              .map(([key, list]) => {
+                const [, fieldName] = key.split('|');
+                const sorted = [...list].sort((x, y) => new Date(x.startTime).getTime() - new Date(y.startTime).getTime());
+                return (
+                  <div key={key} className="mb-4 rounded-lg border border-slate-200 bg-white shadow-sm">
+                    <div className="px-4 py-3 border-b bg-slate-50 rounded-t-lg">
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-800">{fieldName}</h3>
+                    </div>
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead className="bg-slate-100">
+                          <tr>
+                            <th className="text-left px-4 py-2 text-gray-700">เวลา</th>
+                            <th className="text-left px-4 py-2 text-gray-700">ผู้จอง</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {sorted.map((b) => {
+                            const start = format(new Date(b.startTime), 'HH:mm');
+                            const end = format(new Date(b.endTime), 'HH:mm');
+                            const userName = b.user?.name || (b.userId ? `User ${b.userId}` : 'ไม่ทราบชื่อ');
+                            const status = b.status || 'pending';
+                            return (
+                              <tr key={b.id} className="border-t">
+                                <td className="px-4 py-2 text-gray-800 whitespace-nowrap">{start}-{end} น.</td>
+                                <td className="px-4 py-2 text-gray-700">{userName}</td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                );
+              })}
           </div>
         )}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-4 sm:mb-6 mt-5">
