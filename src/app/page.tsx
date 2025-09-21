@@ -70,7 +70,8 @@ export default function HomePage() {
 
         const todays = (Array.isArray(all) ? all : []).filter((b: any) => {
           const s = new Date(b.startTime);
-          return s >= startOfToday && s <= endOfToday;
+          // Filter out cancelled bookings from today's display
+          return s >= startOfToday && s <= endOfToday && b.status !== 'cancelled';
         });
         setBookingsToday(todays);
       } catch (e) {
@@ -197,17 +198,25 @@ export default function HomePage() {
 
       {/* Carousel สำหรับข่าวเด่น */}
       {featuredAnnouncements.length > 0 ? (
-        <div className="mb-6 sm:mb-8">
-          <Carousel setApi={setApi} className="w-full max-w-full sm:max-w-4xl mx-auto">
+        <div className="mb-12">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4">
+              ข่าวเด่น
+            </h2>
+            <p className="text-gray-600 text-lg">
+              ข่าวสารสำคัญและกิจกรรมพิเศษ
+            </p>
+          </div>
+          <Carousel setApi={setApi} className="w-full max-w-6xl mx-auto">
             <CarouselContent>
               {featuredAnnouncements.map((ann) => (
                 <CarouselItem key={ann.id}>
-                  <div className="relative">
+                  <div className="relative rounded-2xl overflow-hidden shadow-2xl">
                     {ann.image ? (
                       <img
                         src={ann.image.startsWith('http') ? ann.image : `/uploads/${ann.image}`}
                         alt={ann.title}
-                        className="h-40 sm:h-64 w-full object-cover rounded-lg"
+                        className="h-64 sm:h-96 w-full object-cover"
                         onError={(e) => {
                           console.error("Failed to load image:", ann.image);
                           e.currentTarget.style.display = "none";
@@ -218,23 +227,50 @@ export default function HomePage() {
                         }}
                       />
                     ) : (
-                      <p className="text-red-600 text-center h-40 sm:h-64 flex items-center justify-center">
-                        ไม่มีภาพสำหรับข่าวนี้
-                      </p>
+                      <div className="h-64 sm:h-96 w-full bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+                        <div className="text-center">
+                          <Star className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                          <p className="text-gray-600 text-lg">ไม่มีภาพสำหรับข่าวนี้</p>
+                        </div>
+                      </div>
                     )}
-                    <p className="text-red-600 text-center h-40 sm:h-64 flex items-center justify-center" style={{ display: "none" }}>
-                      ไม่สามารถโหลดภาพได้ กรุณาตรวจสอบ path
-                    </p>
+                    {/* Overlay with title */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent">
+                      <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
+                        <h3 className="text-2xl sm:text-4xl font-bold text-white mb-2 sm:mb-4">
+                          {ann.title}
+                        </h3>
+                        <p className="text-white/90 text-sm sm:text-lg line-clamp-2 mb-4">
+                          {ann.content}
+                        </p>
+                        <Link href={`/announcements/${ann.id}`}>
+                          <Button className="bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white hover:text-gray-800 transition-all duration-300">
+                            อ่านเพิ่มเติม
+                          </Button>
+                        </Link>
+                      </div>
+                    </div>
+                    <div className="text-red-600 text-center h-64 sm:h-96 flex items-center justify-center" style={{ display: "none" }}>
+                      <div className="text-center">
+                        <Star className="h-16 w-16 text-red-400 mx-auto mb-4" />
+                        <p className="text-red-600 text-lg">ไม่สามารถโหลดภาพได้</p>
+                      </div>
+                    </div>
                   </div>
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <CarouselPrevious className="left-2 sm:left-4 h-8 w-8 sm:h-10 sm:w-10 cursor-pointer" />
-            <CarouselNext className="right-2 sm:right-4 h-8 w-8 sm:h-10 sm:w-10 cursor-pointer" />
+            <CarouselPrevious className="left-4 sm:left-6 h-12 w-12 sm:h-14 sm:w-14 cursor-pointer bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white hover:text-gray-800" />
+            <CarouselNext className="right-4 sm:right-6 h-12 w-12 sm:h-14 sm:w-14 cursor-pointer bg-white/20 backdrop-blur-sm border border-white/30 text-white hover:bg-white hover:text-gray-800" />
           </Carousel>
         </div>
       ) : (
-        <p className="text-gray-600 mb-6 sm:mb-8 text-sm sm:text-base">ไม่มีข่าวเด่นในขณะนี้</p>
+        <div className="text-center py-12 mb-12">
+          <div className="bg-gray-100 rounded-full p-6 w-24 h-24 mx-auto mb-4 flex items-center justify-center">
+            <Star className="h-12 w-12 text-gray-400" />
+          </div>
+          <p className="text-gray-600 text-lg">ไม่มีข่าวเด่นในขณะนี้</p>
+        </div>
       )}
 
         {/* Today's Bookings Section */}
