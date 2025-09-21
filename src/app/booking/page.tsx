@@ -323,30 +323,7 @@ export default function BookingPage() {
     }
   }, [status, router]);
 
-  // Auto-cancel expired pending bookings periodically
-  useEffect(() => {
-    const interval = setInterval(async () => {
-      try {
-        const now = new Date();
-        for (const b of bookings) {
-          if (b.status === 'pending' && b.expiresAt && now > new Date(b.expiresAt)) {
-            await fetch("/api/bookings", {
-              method: "DELETE",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ id: b.id }),
-            });
-          }
-        }
-        // Refresh after processing
-        if (bookings.length) {
-          await fetchData();
-        }
-      } catch {
-        // ignore
-      }
-    }, 30000);
-    return () => clearInterval(interval);
-  }, [bookings]);
+  // Removed client-side auto-cancel interval; server GET auto-cancels expired pending.
 
   // Update current time every minute for real-time filtering
   useEffect(() => {
