@@ -35,7 +35,7 @@ export async function GET(request: Request) {
         return NextResponse.json({ error: "ช่วงเวลาไม่ถูกต้อง" }, { status: 400 });
     }
 
-    const paidBookings = await prisma.booking.findMany({
+    const paidBookings: any[] = await (prisma as any).booking.findMany({
       where: {
         status: { in: ["pending", "paid"] }, // ดึงทั้ง pending และ paid
         startTime: {
@@ -44,13 +44,13 @@ export async function GET(request: Request) {
         },
       },
       include: {
-        payment: true,
+        payments: true,
         user: true,
         field: true,
       },
     });
 
-    const revenueData = paidBookings.map((booking) => ({
+    const revenueData = paidBookings.map((booking: any) => ({
       id: booking.id,
       userName: booking.user?.name || "ไม่ระบุ",
       fieldName: booking.field?.name || "ไม่ระบุ",
@@ -59,7 +59,7 @@ export async function GET(request: Request) {
       totalAmount: booking.totalAmount || 0,
     }));
 
-    const totalRevenue = paidBookings.reduce((sum, booking) => sum + (booking.totalAmount || 0), 0);
+    const totalRevenue = paidBookings.reduce((sum: number, booking: any) => sum + (booking.totalAmount || 0), 0);
 
     return NextResponse.json({
       revenueData,
