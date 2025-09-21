@@ -1024,7 +1024,7 @@ export default function BookingPage() {
                                       <h3 className="text-lg font-semibold text-center">QR Code สำหรับชำระเต็มจำนวน</h3>
                                       {paymentConfig?.qrCode ? (
                                         <img
-                                          src={paymentConfig.qrCode.startsWith('http') ? paymentConfig.qrCode : `/uploads/${paymentConfig.qrCode}`}
+                                          src={paymentConfig.qrCode}
                                           alt="QR Code ชำระเต็ม"
                                           className="w-64 h-64 mx-auto mt-2 border rounded-md object-contain"
                                         />
