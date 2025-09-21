@@ -5,13 +5,16 @@ import { generatePromptPayQR } from "@/lib/promptpay";
 import { prisma } from "@/lib/prisma";
 
 export async function POST(request: Request) {
+  console.log("[promptpay-qr] POST called");
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
+    console.warn("[promptpay-qr] Unauthorized access");
     return NextResponse.json({ error: "กรุณาล็อกอินก่อน" }, { status: 401 });
   }
 
   try {
     const { bookingId } = await request.json();
+    console.log("[promptpay-qr] Generating for booking:", bookingId);
 
     // Get booking details
     const booking = await prisma.booking.findUnique({
@@ -31,12 +34,14 @@ export async function POST(request: Request) {
     // Get payment config
     const paymentConfig = await prisma.paymentConfig.findFirst();
     if (!paymentConfig?.promptPayId) {
+      console.error("[promptpay-qr] Missing promptPayId in payment config");
       return NextResponse.json({ error: "ไม่พบการตั้งค่า PromptPay" }, { status: 500 });
     }
 
     // Generate PromptPay QR code with fixed deposit amount
     const depositAmount = paymentConfig.depositAmount || 100;
     const qrCodeDataURL = await generatePromptPayQR(paymentConfig.promptPayId, depositAmount);
+    console.log("[promptpay-qr] QR generated length:", qrCodeDataURL?.length || 0);
 
     // Update booking with expiration time (30 minutes from now)
     const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
@@ -45,6 +50,7 @@ export async function POST(request: Request) {
       data: { expiresAt }
     });
 
+    console.log("[promptpay-qr] Success for booking:", bookingId, "expiresAt:", expiresAt.toISOString());
     return NextResponse.json({
       qrCode: qrCodeDataURL,
       amount: depositAmount,
@@ -53,7 +59,7 @@ export async function POST(request: Request) {
     });
 
   } catch (error) {
-    console.error("Error generating PromptPay QR:", error);
+    console.error("[promptpay-qr] Error generating PromptPay QR:", error);
     return NextResponse.json({ error: "เกิดข้อผิดพลาดในการสร้าง QR Code" }, { status: 500 });
   }
 }

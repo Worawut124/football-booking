@@ -8,6 +8,8 @@ import { uploadFile, deleteFile } from "@/lib/supabaseStorage";
 export async function GET(req: NextRequest) {
   try {
     const paymentConfig = await prisma.paymentConfig.findFirst();
+    // Build origin for absolute URL normalization
+    const origin = req.nextUrl.origin;
     if (!paymentConfig) {
       const defaultConfig = await prisma.paymentConfig.create({
         data: {
@@ -19,9 +21,17 @@ export async function GET(req: NextRequest) {
           accountNumber: "123-456-7890",
         },
       });
-      return NextResponse.json(defaultConfig, { status: 200 });
+      const normalized = {
+        ...defaultConfig,
+        qrCode: defaultConfig.qrCode?.startsWith('http') ? defaultConfig.qrCode : `${origin}${defaultConfig.qrCode || ''}`,
+      };
+      return NextResponse.json(normalized, { status: 200 });
     }
-    return NextResponse.json(paymentConfig, { status: 200 });
+    const normalized = {
+      ...paymentConfig,
+      qrCode: paymentConfig.qrCode?.startsWith('http') ? paymentConfig.qrCode : (paymentConfig.qrCode ? `${origin}${paymentConfig.qrCode}` : null),
+    };
+    return NextResponse.json(normalized, { status: 200 });
   } catch (error) {
     return NextResponse.json({ error: "ไม่สามารถดึงข้อมูลการชำระเงินได้" }, { status: 500 });
   }
