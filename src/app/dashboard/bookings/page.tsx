@@ -100,10 +100,27 @@ const getStatusColor = (status: string) => {
       return "bg-green-100 text-green-800";
     case "pending":
       return "bg-yellow-100 text-yellow-800";
+    case "pending_confirmation":
+      return "bg-blue-100 text-blue-800";
     case "cancelled":
       return "bg-red-100 text-red-800";
     default:
       return "bg-gray-100 text-gray-800";
+  }
+};
+
+const getStatusLabel = (status: string) => {
+  switch (status) {
+    case "paid":
+      return "ชำระแล้ว";
+    case "pending":
+      return "รอชำระเงิน";
+    case "pending_confirmation":
+      return "รอดำเนินการ";
+    case "cancelled":
+      return "ยกเลิก";
+    default:
+      return status;
   }
 };
 
@@ -669,40 +686,74 @@ export default function BookingsPage() {
                       </TableCell>
                       <TableCell className="min-w-[150px] text-center">
                         <span className={`px-2 py-1 rounded ${getStatusColor(booking.status)}`}>
-                          {booking.status === "paid" ? "ชำระแล้ว" : booking.status === "pending" ? "รอชำระเงิน" : "ยกเลิก"}
+                          {getStatusLabel(booking.status)}
                         </span>
                       </TableCell>
                       <TableCell className="min-w-[150px] text-center">
                         {booking.payments && booking.payments.length > 0 ? (
-                          <div className="flex gap-2 justify-center">
-                            {booking.payments
-                              .filter(p => !!p.proof)
-                              .map((p) => (
-                                <Dialog key={p.id}>
-                                  <DialogTrigger asChild>
-                                    <div className="flex flex-col items-center gap-1 cursor-pointer">
-                                      <img
-                                        src={p.proof!}
-                                        alt={`Payment Proof ${p.type || ''}`}
-                                        className="w-16 h-16 object-cover mx-auto rounded"
-                                      />
-                                      <span className="text-xs px-2 py-0.5 rounded bg-gray-100 text-gray-700">
-                                        {p.type === 'FULL' ? 'เต็มจำนวน' : 'มัดจำ'}
-                                      </span>
-                                    </div>
-                                  </DialogTrigger>
-                                  <DialogContent className="max-w-[80%] max-h-[80vh] overflow-auto">
-                                    <DialogHeader>
-                                      <DialogTitle>หลักฐานการชำระเงิน ({p.type === 'FULL' ? 'เต็มจำนวน' : 'มัดจำ'})</DialogTitle>
-                                    </DialogHeader>
-                                    <img
-                                      src={p.proof!}
-                                      alt={`Payment Proof ${p.type || ''} (Full Size)`}
-                                      className="w-full h-auto max-h-[70vh] object-contain"
-                                    />
-                                  </DialogContent>
-                                </Dialog>
-                              ))}
+                          <div className="space-y-2">
+                            {/* Deposits */}
+                            {booking.payments.some(p => (p.type || '').toUpperCase() === 'DEPOSIT' && p.proof) && (
+                              <div>
+                                <div className="text-xs text-gray-600 mb-1">สลิปมัดจำ</div>
+                                <div className="flex gap-2 justify-center">
+                                  {booking.payments
+                                    .filter(p => (p.type || '').toUpperCase() === 'DEPOSIT' && !!p.proof)
+                                    .map((p) => (
+                                      <Dialog key={p.id}>
+                                        <DialogTrigger asChild>
+                                          <img
+                                            src={p.proof!}
+                                            alt="Deposit Proof"
+                                            className="w-16 h-16 object-cover mx-auto rounded cursor-pointer"
+                                          />
+                                        </DialogTrigger>
+                                        <DialogContent className="max-w-[80%] max-h-[80vh] overflow-auto">
+                                          <DialogHeader>
+                                            <DialogTitle>หลักฐานการชำระเงิน (มัดจำ)</DialogTitle>
+                                          </DialogHeader>
+                                          <img
+                                            src={p.proof!}
+                                            alt="Deposit Proof (Full Size)"
+                                            className="w-full h-auto max-h-[70vh] object-contain"
+                                          />
+                                        </DialogContent>
+                                      </Dialog>
+                                    ))}
+                                </div>
+                              </div>
+                            )}
+                            {/* Full payments */}
+                            {booking.payments.some(p => (p.type || '').toUpperCase() === 'FULL' && p.proof) && (
+                              <div>
+                                <div className="text-xs text-gray-600 mb-1">สลิปชำระเต็ม</div>
+                                <div className="flex gap-2 justify-center">
+                                  {booking.payments
+                                    .filter(p => (p.type || '').toUpperCase() === 'FULL' && !!p.proof)
+                                    .map((p) => (
+                                      <Dialog key={p.id}>
+                                        <DialogTrigger asChild>
+                                          <img
+                                            src={p.proof!}
+                                            alt="Full Payment Proof"
+                                            className="w-16 h-16 object-cover mx-auto rounded cursor-pointer"
+                                          />
+                                        </DialogTrigger>
+                                        <DialogContent className="max-w-[80%] max-h-[80vh] overflow-auto">
+                                          <DialogHeader>
+                                            <DialogTitle>หลักฐานการชำระเงิน (เต็มจำนวน)</DialogTitle>
+                                          </DialogHeader>
+                                          <img
+                                            src={p.proof!}
+                                            alt="Full Payment Proof (Full Size)"
+                                            className="w-full h-auto max-h-[70vh] object-contain"
+                                          />
+                                        </DialogContent>
+                                      </Dialog>
+                                    ))}
+                                </div>
+                              </div>
+                            )}
                           </div>
                         ) : (
                           "-"
@@ -896,41 +947,75 @@ export default function BookingsPage() {
                     <div>
                       <span className="font-medium text-gray-700">สถานะ:</span>{" "}
                       <span className={`px-2 py-1 rounded ${getStatusColor(booking.status)}`}>
-                        {booking.status === "paid" ? "ชำระแล้ว" : booking.status === "pending" ? "รอชำระเงิน" : "ยกเลิก"}
+                        {getStatusLabel(booking.status)}
                       </span>
                     </div>
                     <div>
                       <span className="font-medium text-gray-700">หลักฐานการชำระเงิน:</span>{" "}
                       {booking.payments && booking.payments.length > 0 ? (
-                        <div className="flex gap-3 flex-wrap mt-2">
-                          {booking.payments
-                            .filter(p => !!p.proof)
-                            .map((p) => (
-                              <Dialog key={p.id}>
-                                <DialogTrigger asChild>
-                                  <div className="flex flex-col items-center gap-1 cursor-pointer">
-                                    <img
-                                      src={p.proof!}
-                                      alt={`Payment Proof ${p.type || ''}`}
-                                      className="w-24 h-24 object-cover rounded"
-                                    />
-                                    <span className="text-xs px-2 py-0.5 rounded bg-gray-100 text-gray-700">
-                                      {p.type === 'FULL' ? 'เต็มจำนวน' : 'มัดจำ'}
-                                    </span>
-                                  </div>
-                                </DialogTrigger>
-                                <DialogContent className="max-w-[80%] max-h-[80vh] overflow-auto">
-                                  <DialogHeader>
-                                    <DialogTitle>หลักฐานการชำระเงิน ({p.type === 'FULL' ? 'เต็มจำนวน' : 'มัดจำ'})</DialogTitle>
-                                  </DialogHeader>
-                                  <img
-                                    src={p.proof!}
-                                    alt={`Payment Proof ${p.type || ''} (Full Size)`}
-                                    className="w-full h-auto max-h-[70vh] object-contain"
-                                  />
-                                </DialogContent>
-                              </Dialog>
-                            ))}
+                        <div className="space-y-2 mt-2">
+                          {/* Deposits */}
+                          {booking.payments.some(p => (p.type || '').toUpperCase() === 'DEPOSIT' && p.proof) && (
+                            <div>
+                              <div className="text-xs text-gray-600 mb-1">สลิปมัดจำ</div>
+                              <div className="flex gap-3 flex-wrap">
+                                {booking.payments
+                                  .filter(p => (p.type || '').toUpperCase() === 'DEPOSIT' && !!p.proof)
+                                  .map((p) => (
+                                    <Dialog key={p.id}>
+                                      <DialogTrigger asChild>
+                                        <img
+                                          src={p.proof!}
+                                          alt="Deposit Proof"
+                                          className="w-24 h-24 object-cover rounded cursor-pointer"
+                                        />
+                                      </DialogTrigger>
+                                      <DialogContent className="max-w-[80%] max-h-[80vh] overflow-auto">
+                                        <DialogHeader>
+                                          <DialogTitle>หลักฐานการชำระเงิน (มัดจำ)</DialogTitle>
+                                        </DialogHeader>
+                                        <img
+                                          src={p.proof!}
+                                          alt="Deposit Proof (Full Size)"
+                                          className="w-full h-auto max-h-[70vh] object-contain"
+                                        />
+                                      </DialogContent>
+                                    </Dialog>
+                                  ))}
+                              </div>
+                            </div>
+                          )}
+                          {/* Full payments */}
+                          {booking.payments.some(p => (p.type || '').toUpperCase() === 'FULL' && p.proof) && (
+                            <div>
+                              <div className="text-xs text-gray-600 mb-1">สลิปชำระเต็ม</div>
+                              <div className="flex gap-3 flex-wrap">
+                                {booking.payments
+                                  .filter(p => (p.type || '').toUpperCase() === 'FULL' && !!p.proof)
+                                  .map((p) => (
+                                    <Dialog key={p.id}>
+                                      <DialogTrigger asChild>
+                                        <img
+                                          src={p.proof!}
+                                          alt="Full Payment Proof"
+                                          className="w-24 h-24 object-cover rounded cursor-pointer"
+                                        />
+                                      </DialogTrigger>
+                                      <DialogContent className="max-w-[80%] max-h-[80vh] overflow-auto">
+                                        <DialogHeader>
+                                          <DialogTitle>หลักฐานการชำระเงิน (เต็มจำนวน)</DialogTitle>
+                                        </DialogHeader>
+                                        <img
+                                          src={p.proof!}
+                                          alt="Full Payment Proof (Full Size)"
+                                          className="w-full h-auto max-h-[70vh] object-contain"
+                                        />
+                                      </DialogContent>
+                                    </Dialog>
+                                  ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       ) : (
                         "-"
