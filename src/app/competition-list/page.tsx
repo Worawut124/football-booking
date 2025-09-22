@@ -4,8 +4,21 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import Swal from "sweetalert2";
 import LoadingCrescent from "@/components/ui/loading-crescent";
+import {
+  Trophy,
+  Calendar,
+  Users,
+  MapPin,
+  Star,
+  Sparkles,
+  ArrowRight,
+  Target,
+  Award,
+  Zap
+} from "lucide-react";
 
 interface Competition {
   id: number;
@@ -44,31 +57,125 @@ export default function CompetitionListPage() {
   }
 
   return (
-    <div className="container mx-auto p-4 bg-gray-50">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">รายการแข่งขันฟุตบอล</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {competitions.map((competition) => (
-          <Card key={competition.id} className="overflow-hidden">
-            <CardHeader>
-              <img
-                src={competition.imageName ? (competition.imageName.startsWith('http') ? competition.imageName : `/uploads/${competition.imageName}`) : "/placeholder.jpg"}
-                alt={competition.title}
-                className="w-full h-48 object-cover"
-              />
-              <CardTitle className="text-center mt-2">{competition.title}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-gray-600 mb-2">{competition.description}</p>
-              <p className="text-sm text-gray-600 mb-2">หมวดหมู่: {competition.category}</p>
-              <Button
-                className="w-full"
-                onClick={() => router.push(`/football-competition-public?competitionId=${competition.id}`)}
-              >
-                สมัคร
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-green-50">
+      {/* Hero Header */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-green-600 via-blue-600 to-purple-600 text-white">
+        <div className="absolute inset-0 bg-black/20"></div>
+        <div className="absolute inset-0 opacity-30">
+          <div className="w-full h-full bg-repeat" style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+          }}></div>
+        </div>
+        <div className="relative container mx-auto px-4 sm:px-6 py-20">
+          <div className="text-center">
+            <div className="flex justify-center mb-8">
+              <div className="bg-white/20 backdrop-blur-sm rounded-full p-6 shadow-2xl">
+                <Trophy className="h-16 w-16 text-white animate-pulse" />
+              </div>
+            </div>
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <Sparkles className="h-8 w-8 text-yellow-300 animate-bounce" />
+              <h1 className="text-5xl sm:text-6xl font-bold bg-gradient-to-r from-white via-yellow-200 to-white bg-clip-text text-transparent">
+                รายการแข่งขันฟุตบอล
+              </h1>
+              <Sparkles className="h-8 w-8 text-yellow-300 animate-bounce" />
+            </div>
+            <p className="text-xl sm:text-2xl opacity-90 max-w-3xl mx-auto mb-8 leading-relaxed">
+              🏆 เข้าร่วมการแข่งขันฟุตบอลระดับมืออาชีพ พร้อมรางวัลมากมาย ⚽
+            </p>
+            <div className="flex flex-wrap justify-center gap-4 mb-8">
+              <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
+                <Target className="h-5 w-5 text-green-300" />
+                <span className="text-sm font-medium">แข่งขันมืออาชีพ</span>
+              </div>
+              <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
+                <Award className="h-5 w-5 text-yellow-300" />
+                <span className="text-sm font-medium">รางวัลมากมาย</span>
+              </div>
+              <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
+                <Zap className="h-5 w-5 text-blue-300" />
+                <span className="text-sm font-medium">สมัครง่าย รวดเร็ว</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="container mx-auto px-4 sm:px-6 py-12">
+        <div className="mb-8 text-center">
+          <div className="inline-flex items-center gap-3 bg-gradient-to-r from-green-100 to-blue-100 px-6 py-3 rounded-full mb-4">
+            <Trophy className="h-6 w-6 text-green-600" />
+            <span className="text-green-800 font-semibold text-lg">การแข่งขันที่เปิดรับสมัคร</span>
+            <Trophy className="h-6 w-6 text-blue-600" />
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent mb-4">
+            เลือกการแข่งขันที่คุณสนใจ
+          </h2>
+          <div className="w-24 h-1 bg-gradient-to-r from-green-400 to-blue-400 mx-auto rounded-full"></div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {competitions.map((competition) => (
+            <Card key={competition.id} className="group overflow-hidden shadow-xl border-0 bg-white hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
+              <div className="relative overflow-hidden">
+                <img
+                  src={competition.imageName ? (competition.imageName.startsWith('http') ? competition.imageName : `/uploads/${competition.imageName}`) : "/placeholder.jpg"}
+                  alt={competition.title}
+                  className="w-full h-56 object-cover transition-transform duration-300 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                <div className="absolute top-4 right-4">
+                  <Badge className="bg-gradient-to-r from-green-500 to-blue-500 text-white border-0 shadow-lg">
+                    <Star className="h-3 w-3 mr-1" />
+                    แข่งขัน
+                  </Badge>
+                </div>
+              </div>
+              
+              <CardHeader className="pb-4">
+                <CardTitle className="text-xl font-bold text-gray-800 group-hover:text-green-600 transition-colors duration-300 flex items-center gap-2">
+                  <Trophy className="h-5 w-5 text-yellow-500" />
+                  {competition.title}
+                </CardTitle>
+              </CardHeader>
+              
+              <CardContent className="space-y-4">
+                <p className="text-gray-600 leading-relaxed line-clamp-3">
+                  {competition.description}
+                </p>
+                
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <Users className="h-4 w-4 text-blue-500" />
+                  <span className="font-medium">หมวดหมู่:</span>
+                  <Badge variant="outline" className="text-blue-600 border-blue-200 bg-blue-50">
+                    {competition.category}
+                  </Badge>
+                </div>
+                
+                <Button
+                  className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 group"
+                  onClick={() => router.push(`/football-competition-public?competitionId=${competition.id}`)}
+                >
+                  <span className="flex items-center justify-center gap-2">
+                    สมัครแข่งขัน
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  </span>
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        
+        {competitions.length === 0 && (
+          <div className="text-center py-16">
+            <div className="bg-gray-100 rounded-full p-8 w-32 h-32 mx-auto mb-6 flex items-center justify-center">
+              <Trophy className="h-16 w-16 text-gray-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-gray-600 mb-2">ยังไม่มีการแข่งขันในขณะนี้</h3>
+            <p className="text-gray-500">กรุณาติดตามการแข่งขันใหม่ๆ ในอนาคต</p>
+          </div>
+        )}
       </div>
     </div>
   );

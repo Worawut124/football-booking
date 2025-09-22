@@ -25,6 +25,21 @@ import { Input } from "@/components/ui/input";
 import LoadingCrescent from "@/components/ui/loading-crescent";
 import CountdownTimer from "@/components/ui/countdown-timer";
 import Swal from "sweetalert2";
+import { 
+  CalendarDays, 
+  Clock, 
+  MapPin, 
+  Users, 
+  CreditCard, 
+  RefreshCw,
+  Sparkles,
+  Trophy,
+  Star,
+  CheckCircle,
+  AlertCircle,
+  Timer
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Pagination,
   PaginationContent,
@@ -716,39 +731,114 @@ export default function BookingPage() {
   if (!session) return null;
 
   return (
-    <div className="container mx-auto p-4 bg-gray-50">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">จองสนามฟุตบอล</h1>
-        <Button
-          onClick={fetchData}
-          className="bg-gray-600 hover:bg-gray-700 text-white"
-        >
-          รีเฟรชข้อมูล
-        </Button>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow-md flex flex-col items-center">
-          <h2 className="text-lg font-semibold mb-4">เลือกวันที่</h2>
-          <div className="flex justify-center items-center w-full">
-            <Calendar
-              mode="single"
-              selected={selectedDate}
-              onSelect={setSelectedDate}
-              locale={th}
-              className="rounded-md border"
-              disabled={(date) => {
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                
-                const maxDate = new Date(today);
-                maxDate.setDate(today.getDate() + 14);
-                
-                return date < today || date > maxDate;
-              }}
-            />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-green-50">
+      {/* Hero Header */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-green-600 text-white">
+        <div className="absolute inset-0 bg-black/20"></div>
+        <div className="absolute inset-0 opacity-30">
+          <div className="w-full h-full bg-repeat" style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+          }}></div>
+        </div>
+        <div className="relative container mx-auto px-4 sm:px-6 py-20">
+          <div className="text-center">
+            <div className="flex justify-center mb-8">
+              <div className="bg-white/20 backdrop-blur-sm rounded-full p-6 shadow-2xl">
+                <Trophy className="h-16 w-16 text-white animate-pulse" />
+              </div>
+            </div>
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <Sparkles className="h-8 w-8 text-yellow-300 animate-bounce" />
+              <h1 className="text-5xl sm:text-6xl font-bold bg-gradient-to-r from-white via-yellow-200 to-white bg-clip-text text-transparent">
+                จองสนามฟุตบอล
+              </h1>
+              <Sparkles className="h-8 w-8 text-yellow-300 animate-bounce" />
+            </div>
+            <p className="text-xl sm:text-2xl opacity-90 max-w-3xl mx-auto mb-8 leading-relaxed">
+              🏆 เลือกวันที่ เวลา และสนามที่ต้องการ เพื่อเริ่มต้นการแข่งขันของคุณ ⚽
+            </p>
+            <div className="flex flex-wrap justify-center gap-4 mb-8">
+              <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
+                <CheckCircle className="h-5 w-5 text-green-300" />
+                <span className="text-sm font-medium">จองง่าย รวดเร็ว</span>
+              </div>
+              <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
+                <Star className="h-5 w-5 text-yellow-300" />
+                <span className="text-sm font-medium">สนามคุณภาพสูง</span>
+              </div>
+              <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
+                <Timer className="h-5 w-5 text-blue-300" />
+                <span className="text-sm font-medium">เปิด 13:00-23:00</span>
+              </div>
+            </div>
           </div>
         </div>
-        <div className="bg-white p-6 rounded-lg shadow-md flex flex-col gap-6">
+      </div>
+
+      <div className="container mx-auto px-4 sm:px-6 py-12">
+        <div className="mb-8 flex justify-between items-center">
+          <div className="flex items-center gap-3">
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-full p-2">
+              <CalendarDays className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-gray-800">ระบบจองสนาม</h2>
+              <p className="text-gray-600">เลือกวันที่และเวลาที่ต้องการ</p>
+            </div>
+          </div>
+          <Button
+            onClick={fetchData}
+            className="bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800 text-white shadow-lg hover:shadow-xl transition-all duration-200 flex items-center gap-2"
+          >
+            <RefreshCw className="h-4 w-4" />
+            รีเฟรชข้อมูล
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+          {/* Calendar Card */}
+          <Card className="shadow-xl border-0 bg-gradient-to-br from-white to-blue-50 hover:shadow-2xl transition-all duration-300">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-3 text-xl font-bold text-gray-800">
+                <div className="bg-blue-100 rounded-full p-2">
+                  <CalendarDays className="h-6 w-6 text-blue-600" />
+                </div>
+                เลือกวันที่
+              </CardTitle>
+              <p className="text-sm text-gray-600 mt-2">เลือกวันที่ที่ต้องการจองสนาม (สามารถจองล่วงหน้าได้ 14 วัน)</p>
+            </CardHeader>
+            <CardContent>
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={setSelectedDate}
+                locale={th}
+                className="rounded-lg border-0 w-full"
+                disabled={(date) => {
+                  const today = new Date();
+                  today.setHours(0, 0, 0, 0);
+                  
+                  const maxDate = new Date(today);
+                  maxDate.setDate(today.getDate() + 14);
+                  
+                  return date < today || date > maxDate;
+                }}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Booking Form Card */}
+          <Card className="lg:col-span-2 shadow-xl border-0 bg-gradient-to-br from-white to-green-50 hover:shadow-2xl transition-all duration-300">
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-3 text-xl font-bold text-gray-800">
+                <div className="bg-green-100 rounded-full p-2">
+                  <MapPin className="h-6 w-6 text-green-600" />
+                </div>
+                เลือกสนามและเวลา
+              </CardTitle>
+              <p className="text-sm text-gray-600 mt-2">กรอกข้อมูลการจองให้ครบถ้วนเพื่อยืนยันการจอง</p>
+            </CardHeader>
+            <CardContent className="space-y-6">
            {/* Color Legend */}
            <div className="mb-3 p-3 bg-gray-50 rounded-lg border">
               <h3 className="text-sm font-medium mb-2">หมายเหตุ:</h3>
@@ -849,26 +939,72 @@ export default function BookingPage() {
               "ยืนยันการจอง"
             )}
           </Button>
+            </CardContent>
+          </Card>
         </div>
-      </div>
-      <div className="mt-8">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">รายการจองของคุณ</h2>
-        {userBookings.length === 0 ? (
-          <p className="text-gray-600">ยังไม่มีรายการจอง</p>
-        ) : (
-          <>
-            <div className="hidden sm:block overflow-x-auto bg-white p-4 rounded-lg shadow-md">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>สนาม</TableHead>
-                    <TableHead>วันที่</TableHead>
-                    <TableHead>เวลา</TableHead>
-                    <TableHead>สถานะ</TableHead>
-                    <TableHead>การจัดการ</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+        {/* Bookings Section */}
+        <div className="mt-12">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center gap-3 bg-gradient-to-r from-purple-100 to-pink-100 px-6 py-3 rounded-full mb-4">
+              <CreditCard className="h-6 w-6 text-purple-600" />
+              <span className="text-purple-800 font-semibold text-lg">รายการจองของคุณ</span>
+              <CreditCard className="h-6 w-6 text-pink-600" />
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
+              จัดการการจองและชำระเงิน
+            </h2>
+            <div className="w-24 h-1 bg-gradient-to-r from-purple-400 to-pink-400 mx-auto rounded-full"></div>
+          </div>
+
+          {userBookings.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="bg-gray-100 rounded-full p-8 w-32 h-32 mx-auto mb-6 flex items-center justify-center">
+                <CalendarDays className="h-16 w-16 text-gray-400" />
+              </div>
+              <h3 className="text-xl font-semibold text-gray-600 mb-2">ยังไม่มีรายการจอง</h3>
+              <p className="text-gray-500">เริ่มต้นจองสนามของคุณเลย!</p>
+            </div>
+          ) : (
+            <>
+              <div className="hidden sm:block overflow-x-auto">
+                <Card className="shadow-xl border-0 bg-white">
+                  <CardContent className="p-0">
+                    <Table>
+                      <TableHeader className="bg-gradient-to-r from-gray-50 to-gray-100">
+                        <TableRow className="border-b-2 border-gray-200">
+                          <TableHead className="min-w-[120px] text-center font-bold text-gray-700">
+                            <div className="flex items-center justify-center gap-2">
+                              <MapPin className="h-4 w-4 text-green-600" />
+                              สนาม
+                            </div>
+                          </TableHead>
+                          <TableHead className="min-w-[150px] text-center font-bold text-gray-700">
+                            <div className="flex items-center justify-center gap-2">
+                              <CalendarDays className="h-4 w-4 text-blue-600" />
+                              วันที่
+                            </div>
+                          </TableHead>
+                          <TableHead className="min-w-[150px] text-center font-bold text-gray-700">
+                            <div className="flex items-center justify-center gap-2">
+                              <Clock className="h-4 w-4 text-purple-600" />
+                              เวลา
+                            </div>
+                          </TableHead>
+                          <TableHead className="min-w-[120px] text-center font-bold text-gray-700">
+                            <div className="flex items-center justify-center gap-2">
+                              <Users className="h-4 w-4 text-orange-600" />
+                              สถานะ
+                            </div>
+                          </TableHead>
+                          <TableHead className="min-w-[220px] text-center font-bold text-gray-700">
+                            <div className="flex items-center justify-center gap-2">
+                              <CreditCard className="h-4 w-4 text-pink-600" />
+                              การจัดการ
+                            </div>
+                          </TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
                   {paginatedBookings.map((booking) => (
                     <TableRow key={booking.id}>
                       <TableCell>
@@ -1103,12 +1239,14 @@ export default function BookingPage() {
                   ))}
                 </TableBody>
               </Table>
-            </div>
+            </CardContent>
+          </Card>
+        </div>
 
-            <div className="block sm:hidden space-y-4">
-              {paginatedBookings.map((booking) => (
-                <div
-                  key={booking.id}
+        <div className="block sm:hidden space-y-4">
+          {paginatedBookings.map((booking) => (
+            <div
+              key={booking.id}
                   className="bg-white p-4 rounded-lg shadow-md border border-gray-200"
                 >
                   <div className="space-y-2">
@@ -1308,6 +1446,7 @@ export default function BookingPage() {
             )}
           </>
         )}
+        </div>
       </div>
     </div>
   );

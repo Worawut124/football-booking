@@ -452,15 +452,15 @@ export default function HomePage() {
         {/* Contact Section */}
         <div className="mb-12">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-3 bg-gradient-to-r from-pink-100 to-rose-100 px-6 py-3 rounded-full mb-4">
-              <Phone className="h-6 w-6 text-pink-600" />
-              <span className="text-pink-800 font-semibold text-lg">ติดต่อเรา</span>
-              <MapPin className="h-6 w-6 text-rose-600" />
+            <div className="inline-flex items-center gap-3 bg-gradient-to-r from-green-100 to-emerald-100 px-6 py-3 rounded-full mb-4">
+              <Phone className="h-6 w-6 text-green-600" />
+              <span className="text-green-800 font-semibold text-lg">ติดต่อเรา</span>
+              <MapPin className="h-6 w-6 text-emerald-600" />
             </div>
-            <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-4">
               ข้อมูลการติดต่อและที่ตั้งสนาม
             </h2>
-            <div className="w-24 h-1 bg-gradient-to-r from-pink-400 to-rose-400 mx-auto rounded-full"></div>
+            <div className="w-24 h-1 bg-gradient-to-r from-green-400 to-emerald-400 mx-auto rounded-full"></div>
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
