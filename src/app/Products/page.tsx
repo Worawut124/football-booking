@@ -88,9 +88,9 @@ export default function ProductDisplay() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-purple-50 to-pink-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-50 to-emerald-50">
       {/* Hero Header */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-purple-600 via-pink-600 to-orange-600 text-white">
+      <div className="relative overflow-hidden bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 text-white">
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="absolute inset-0 opacity-30">
           <div className="w-full h-full bg-repeat" style={{
@@ -146,10 +146,10 @@ export default function ProductDisplay() {
         {/* Filter Section */}
         <div className="mb-8">
           <div className="text-center mb-6">
-            <div className="inline-flex items-center gap-3 bg-gradient-to-r from-purple-100 to-pink-100 px-6 py-3 rounded-full mb-4">
-              <Filter className="h-5 w-5 text-purple-600" />
-              <span className="text-purple-800 font-semibold">กรองตามหมวดหมู่</span>
-              <Filter className="h-5 w-5 text-pink-600" />
+            <div className="inline-flex items-center gap-3 bg-gradient-to-r from-green-100 to-emerald-100 px-6 py-3 rounded-full mb-4">
+              <Filter className="h-5 w-5 text-green-600" />
+              <span className="text-green-800 font-semibold">กรองตามหมวดหมู่</span>
+              <Filter className="h-5 w-5 text-emerald-600" />
             </div>
           </div>
           <div className="flex flex-wrap justify-center gap-3">
@@ -159,8 +159,8 @@ export default function ProductDisplay() {
                 variant={selectedCategory === category ? "default" : "outline"}
                 className={`transition-all duration-200 ${
                   selectedCategory === category 
-                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg' 
-                    : 'hover:bg-purple-50 hover:border-purple-300 hover:text-purple-700'
+                    ? 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg' 
+                    : 'hover:bg-green-50 hover:border-green-300 hover:text-green-700'
                 }`}
                 onClick={() => {
                   setSelectedCategory(category === selectedCategory ? null : category);
@@ -219,15 +219,15 @@ export default function ProductDisplay() {
                 </div>
                 
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-lg font-bold text-gray-800 group-hover:text-purple-600 transition-colors duration-300 line-clamp-2">
+                  <CardTitle className="text-lg font-bold text-gray-800 group-hover:text-green-600 transition-colors duration-300 line-clamp-2">
                     {product.name}
                   </CardTitle>
                 </CardHeader>
                 
                 <CardContent className="space-y-3 pb-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-2xl font-bold text-purple-600">
-                      ₹{product.price.toLocaleString()}
+                    <span className="text-2xl font-bold text-green-600">
+                      ราคา{product.price.toLocaleString()}
                     </span>
                     <div className="flex items-center gap-1">
                       <Star className="h-4 w-4 text-yellow-400 fill-current" />
@@ -247,9 +247,9 @@ export default function ProductDisplay() {
                   </div>
                   
                   <div className="flex items-center gap-2 text-sm text-gray-600">
-                    <Tag className="h-4 w-4 text-purple-500" />
+                    <Tag className="h-4 w-4 text-green-500" />
                     <span className="font-medium">หมวดหมู่:</span>
-                    <Badge variant="outline" className="text-purple-600 border-purple-200 bg-purple-50">
+                    <Badge variant="outline" className="text-green-600 border-green-200 bg-green-50">
                       {product.category?.name || "ไม่ระบุ"}
                     </Badge>
                   </div>
@@ -273,7 +273,7 @@ export default function ProductDisplay() {
                     <div className="grid grid-cols-2 gap-2 w-full">
                       <Button
                         variant="outline"
-                        className="hover:bg-purple-50 hover:border-purple-300 hover:text-purple-700 transition-colors"
+                        className="hover:bg-green-50 hover:border-green-300 hover:text-green-700 transition-colors"
                         onClick={() =>
                           addItem(
                             {
@@ -305,7 +305,7 @@ export default function ProductDisplay() {
                         passHref
                       >
                         <Button 
-                          className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                          className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
                         >
                           <Zap className="h-4 w-4 mr-1" />
                           ซื้อทันที
@@ -335,7 +335,7 @@ export default function ProductDisplay() {
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1}
                 variant="ghost"
-                className="hover:bg-purple-50"
+                className="hover:bg-green-50"
               >
                 ก่อนหน้า
               </Button>
@@ -345,8 +345,8 @@ export default function ProductDisplay() {
                   onClick={() => handlePageChange(page)}
                   variant={currentPage === page ? "default" : "ghost"}
                   className={currentPage === page 
-                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white' 
-                    : 'hover:bg-purple-50'
+                    ? 'bg-gradient-to-r from-green-600 to-emerald-600 text-white' 
+                    : 'hover:bg-green-50'
                   }
                 >
                   {page}
@@ -356,7 +356,7 @@ export default function ProductDisplay() {
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
                 variant="ghost"
-                className="hover:bg-purple-50"
+                className="hover:bg-green-50"
               >
                 ถัดไป
               </Button>
