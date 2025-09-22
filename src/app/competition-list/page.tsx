@@ -17,7 +17,9 @@ import {
   ArrowRight,
   Target,
   Award,
-  Zap
+  Zap,
+  Shield,
+  TrendingUp
 } from "lucide-react";
 
 interface Competition {
@@ -26,6 +28,9 @@ interface Competition {
   description: string;
   category: string;
   imageName?: string;
+  ageCategory?: string;
+  maxTeams?: number;
+  registeredTeams?: number;
 }
 
 export default function CompetitionListPage() {
@@ -141,25 +146,94 @@ export default function CompetitionListPage() {
               </CardHeader>
               
               <CardContent className="space-y-4">
-                <p className="text-gray-600 leading-relaxed line-clamp-3">
+                <p className="text-gray-600 leading-relaxed line-clamp-2">
                   {competition.description}
                 </p>
                 
-                <div className="flex items-center gap-2 text-sm text-gray-500">
-                  <Users className="h-4 w-4 text-blue-500" />
-                  <span className="font-medium">หมวดหมู่:</span>
-                  <Badge variant="outline" className="text-blue-600 border-blue-200 bg-blue-50">
-                    {competition.category}
-                  </Badge>
+                {/* Competition Details */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Shield className="h-4 w-4 text-purple-500" />
+                    <span className="font-medium text-gray-700">หมวดหมู่:</span>
+                    <Badge variant="outline" className="text-purple-600 border-purple-200 bg-purple-50">
+                      {competition.category}
+                    </Badge>
+                  </div>
+                  
+                  {competition.ageCategory && (
+                    <div className="flex items-center gap-2 text-sm">
+                      <Users className="h-4 w-4 text-blue-500" />
+                      <span className="font-medium text-gray-700">รุ่นอายุ:</span>
+                      <Badge variant="outline" className="text-blue-600 border-blue-200 bg-blue-50">
+                        {competition.ageCategory}
+                      </Badge>
+                    </div>
+                  )}
+                  
+                  {competition.maxTeams && (
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-2">
+                          <TrendingUp className="h-4 w-4 text-green-500" />
+                          <span className="font-medium text-gray-700">ทีมที่สมัคร:</span>
+                        </div>
+                        <span className="text-sm font-bold text-gray-800">
+                          {competition.registeredTeams || 0}/{competition.maxTeams} ทีม
+                        </span>
+                      </div>
+                      
+                      {/* Progress Bar */}
+                      <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
+                        <div 
+                          className={`h-full rounded-full transition-all duration-500 ${
+                            ((competition.registeredTeams || 0) / competition.maxTeams) >= 0.8 
+                              ? 'bg-gradient-to-r from-red-400 to-red-600' 
+                              : ((competition.registeredTeams || 0) / competition.maxTeams) >= 0.6 
+                              ? 'bg-gradient-to-r from-yellow-400 to-orange-500'
+                              : 'bg-gradient-to-r from-green-400 to-blue-500'
+                          }`}
+                          style={{ 
+                            width: `${Math.min(((competition.registeredTeams || 0) / competition.maxTeams) * 100, 100)}%` 
+                          }}
+                        ></div>
+                      </div>
+                      
+                      {/* Status Text */}
+                      <div className="text-xs text-center">
+                        {((competition.registeredTeams || 0) / competition.maxTeams) >= 1 ? (
+                          <span className="text-red-600 font-semibold">🔴 เต็มแล้ว</span>
+                        ) : ((competition.registeredTeams || 0) / competition.maxTeams) >= 0.8 ? (
+                          <span className="text-orange-600 font-semibold">🟡 ใกล้เต็ม</span>
+                        ) : (
+                          <span className="text-green-600 font-semibold">🟢 เปิดรับสมัคร</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
                 
                 <Button
-                  className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 group"
-                  onClick={() => router.push(`/football-competition-public?competitionId=${competition.id}`)}
+                  className={`w-full shadow-lg hover:shadow-xl transition-all duration-200 group ${
+                    competition.maxTeams && (competition.registeredTeams || 0) >= competition.maxTeams
+                      ? 'bg-gray-400 hover:bg-gray-500 cursor-not-allowed'
+                      : 'bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700'
+                  } text-white`}
+                  onClick={() => {
+                    if (competition.maxTeams && (competition.registeredTeams || 0) >= competition.maxTeams) {
+                      return;
+                    }
+                    router.push(`/football-competition-public?competitionId=${competition.id}`);
+                  }}
+                  disabled={!!(competition.maxTeams && (competition.registeredTeams || 0) >= competition.maxTeams)}
                 >
                   <span className="flex items-center justify-center gap-2">
-                    สมัครแข่งขัน
-                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    {competition.maxTeams && (competition.registeredTeams || 0) >= competition.maxTeams 
+                      ? 'เต็มแล้ว' 
+                      : 'สมัครแข่งขัน'
+                    }
+                    {!(competition.maxTeams && (competition.registeredTeams || 0) >= competition.maxTeams) && (
+                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    )}
                   </span>
                 </Button>
               </CardContent>

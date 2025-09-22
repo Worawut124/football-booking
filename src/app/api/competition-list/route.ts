@@ -31,7 +31,20 @@ export async function GET(request: Request) {
     const competitions = await prisma.competition.findMany({
       include: { registrations: true },
     });
-    return NextResponse.json(competitions);
+
+    // Transform data to include additional fields for frontend
+    const transformedCompetitions = competitions.map(competition => ({
+      id: competition.id,
+      title: competition.title,
+      description: competition.description,
+      category: competition.category,
+      imageName: competition.imageName,
+      ageCategory: competition.category, // Use category as ageCategory for display
+      maxTeams: competition.maxTeams || 16, // Default to 16 if not set
+      registeredTeams: competition.registrations.length,
+    }));
+
+    return NextResponse.json(transformedCompetitions);
   } catch (error) {
     console.error("Error fetching competitions:", error);
     return NextResponse.json({ error: "เกิดข้อผิดพลาดในการดึงข้อมูล" }, { status: 500 });
