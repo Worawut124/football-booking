@@ -13,6 +13,7 @@ type Player = {
   id: string;
   name: string;
   jerseyNumber: string;
+  age: string;
   birthYear: string;
 };
 
@@ -22,7 +23,7 @@ export default function SubmitPlayers() {
   const registrationId = params.id as string;
   
   const [players, setPlayers] = useState<Player[]>([
-    { id: "1", name: "", jerseyNumber: "", birthYear: "" }
+    { id: "1", name: "", jerseyNumber: "", age: "", birthYear: "" }
   ]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -31,6 +32,7 @@ export default function SubmitPlayers() {
       id: Date.now().toString(),
       name: "",
       jerseyNumber: "",
+      age: "",
       birthYear: ""
     };
     setPlayers([...players, newPlayer]);
@@ -42,16 +44,33 @@ export default function SubmitPlayers() {
     }
   };
 
+  // ฟังก์ชันคำนวณปีเกิด พ.ศ. จากอายุ
+  const calculateBirthYear = (age: number): string => {
+    const currentYear = new Date().getFullYear() + 543; // แปลงเป็น พ.ศ.
+    return (currentYear - age).toString();
+  };
+
   const updatePlayer = (id: string, field: keyof Player, value: string) => {
-    setPlayers(players.map(player => 
-      player.id === id ? { ...player, [field]: value } : player
-    ));
+    setPlayers(players.map(player => {
+      if (player.id === id) {
+        const updatedPlayer = { ...player, [field]: value };
+        
+        // ถ้าแก้ไขอายุ ให้คำนวณปีเกิดอัตโนมัติ
+        if (field === 'age' && value && !isNaN(Number(value))) {
+          updatedPlayer.birthYear = calculateBirthYear(Number(value));
+        }
+        
+        return updatedPlayer;
+      }
+      return player;
+    }));
   };
 
   const validatePlayers = () => {
     return players.every(player => 
       player.name.trim() !== "" && 
       player.jerseyNumber.trim() !== "" && 
+      player.age.trim() !== "" &&
       player.birthYear.trim() !== ""
     );
   };
@@ -130,7 +149,7 @@ export default function SubmitPlayers() {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor={`name-${player.id}`}>ชื่อ-นามสกุล</Label>
                   <Input
@@ -156,6 +175,19 @@ export default function SubmitPlayers() {
                   />
                 </div>
                 <div className="space-y-2">
+                  <Label htmlFor={`age-${player.id}`}>อายุ (ปี)</Label>
+                  <Input
+                    id={`age-${player.id}`}
+                    type="number"
+                    min="10"
+                    max="60"
+                    value={player.age}
+                    onChange={(e) => updatePlayer(player.id, "age", e.target.value)}
+                    placeholder="กรอกอายุ"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
                   <Label htmlFor={`birthYear-${player.id}`}>ปีเกิด (พ.ศ.)</Label>
                   <Input
                     id={`birthYear-${player.id}`}
@@ -164,8 +196,9 @@ export default function SubmitPlayers() {
                     max="2570"
                     value={player.birthYear}
                     onChange={(e) => updatePlayer(player.id, "birthYear", e.target.value)}
-                    placeholder="เช่น 2545"
-                    required
+                    placeholder="คำนวณอัตโนมัติ"
+                    readOnly
+                    className="bg-gray-50 text-gray-600"
                   />
                 </div>
               </div>

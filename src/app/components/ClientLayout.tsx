@@ -15,7 +15,7 @@ export default function ClientLayout({
   
   // หน้าที่ไม่ต้องแสดง Footer
   const hideFooterPages = ['/Competition-history', '/user-orders'];
-  const shouldHideFooter = hideFooterPages.includes(pathname);
+  const shouldHideFooter = hideFooterPages.includes(pathname) || pathname.startsWith('/submit-players/');
 
   return (
     <SessionProvider>
