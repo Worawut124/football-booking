@@ -118,7 +118,7 @@ export default function HomePage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "paid":
-        return "bg-green-100 text-green-800 border-green-200";
+        return "bg-green-200 text-green-900 border-green-300";
       case "pending":
       case "pending_confirmation":
       case "deposit_paid":
@@ -149,10 +149,10 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-50 to-emerald-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-100 to-emerald-100">
       {/* Hero Section */}
       <div className="relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-green-600 via-emerald-600 to-teal-600 opacity-90"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-green-700 via-emerald-700 to-teal-700 opacity-95"></div>
         <div className="relative container mx-auto px-4 sm:px-6 py-16 sm:py-24">
           <div className="text-center text-white">
             <div className="flex justify-center mb-6">
@@ -178,15 +178,15 @@ export default function HomePage() {
             )}
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/booking">
-                <Button size="lg" className="bg-white text-green-600 hover:bg-gray-100 font-semibold px-8 py-3 rounded-full shadow-lg transform hover:scale-105 transition-all duration-200">
+                <Button size="lg" className="bg-white text-green-700 hover:bg-gray-100 font-semibold px-8 py-3 rounded-full shadow-lg transform hover:scale-105 transition-all duration-200">
                   <Clock className="mr-2 h-5 w-5" />
                   จองสนามตอนนี้
                 </Button>
               </Link>
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-green-600 font-semibold px-8 py-3 rounded-full">
+              {/* <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-green-600 font-semibold px-8 py-3 rounded-full">
                 <Star className="mr-2 h-5 w-5" />
                 ดูข่าวสาร
-              </Button>
+              </Button> */}
             </div>
           </div>
         </div>
@@ -200,15 +200,15 @@ export default function HomePage() {
       {featuredAnnouncements.length > 0 ? (
         <div className="mb-12">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-3 bg-gradient-to-r from-green-100 to-emerald-100 px-6 py-3 rounded-full mb-4">
-              <Star className="h-6 w-6 text-green-600" />
-              <span className="text-green-800 font-semibold text-lg">ข่าวเด่น</span>
-              <Star className="h-6 w-6 text-emerald-600" />
+            <div className="inline-flex items-center gap-3 bg-gradient-to-r from-green-200 to-emerald-200 px-6 py-3 rounded-full mb-4">
+              <Star className="h-6 w-6 text-green-700" />
+              <span className="text-green-900 font-semibold text-lg">ข่าวเด่น</span>
+              <Star className="h-6 w-6 text-emerald-700" />
             </div>
-            <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-green-700 to-emerald-700 bg-clip-text text-transparent mb-4">
               ข่าวสารสำคัญและกิจกรรมพิเศษ
             </h2>
-            <div className="w-24 h-1 bg-gradient-to-r from-green-400 to-emerald-400 mx-auto rounded-full"></div>
+            <div className="w-24 h-1 bg-gradient-to-r from-green-600 to-emerald-600 mx-auto rounded-full"></div>
           </div>
           <Carousel setApi={setApi} className="w-full max-w-6xl mx-auto">
             <CarouselContent>
@@ -230,7 +230,7 @@ export default function HomePage() {
                         }}
                       />
                     ) : (
-                      <div className="h-64 sm:h-96 w-full bg-gradient-to-br from-green-100 to-emerald-100 flex items-center justify-center">
+                      <div className="h-64 sm:h-96 w-full bg-gradient-to-br from-green-200 to-emerald-200 flex items-center justify-center">
                         <div className="text-center">
                           <Star className="h-16 w-16 text-gray-400 mx-auto mb-4" />
                           <p className="text-gray-600 text-lg">ไม่มีภาพสำหรับข่าวนี้</p>
@@ -280,15 +280,15 @@ export default function HomePage() {
         {bookingsToday.length > 0 && (
           <div className="mb-12">
             <div className="text-center mb-8">
-              <div className="inline-flex items-center gap-3 bg-gradient-to-r from-green-100 to-emerald-100 px-6 py-3 rounded-full mb-4">
-                <Clock className="h-6 w-6 text-green-600" />
-                <span className="text-green-800 font-semibold text-lg">การจองวันนี้</span>
-                <Clock className="h-6 w-6 text-green-600" />
+              <div className="inline-flex items-center gap-3 bg-gradient-to-r from-green-200 to-emerald-200 px-6 py-3 rounded-full mb-4">
+                <Clock className="h-6 w-6 text-green-700" />
+                <span className="text-green-900 font-semibold text-lg">การจองวันนี้</span>
+                <Clock className="h-6 w-6 text-green-700" />
               </div>
-              <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-4">
+              <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-green-700 to-emerald-700 bg-clip-text text-transparent mb-4">
                 {todayLabel}
               </h2>
-              <div className="w-24 h-1 bg-gradient-to-r from-green-400 to-emerald-400 mx-auto rounded-full"></div>
+              <div className="w-24 h-1 bg-gradient-to-r from-green-600 to-emerald-600 mx-auto rounded-full"></div>
             </div>
             {/* Group by field */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
@@ -354,19 +354,19 @@ export default function HomePage() {
         {/* News Section */}
         <div className="mb-12">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center gap-3 bg-gradient-to-r from-green-100 to-emerald-100 px-6 py-3 rounded-full mb-4">
-              <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="inline-flex items-center gap-3 bg-gradient-to-r from-green-200 to-emerald-200 px-6 py-3 rounded-full mb-4">
+              <svg className="h-6 w-6 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
               </svg>
-              <span className="text-green-800 font-semibold text-lg">ข่าวประชาสัมพันธ์</span>
-              <svg className="h-6 w-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <span className="text-green-900 font-semibold text-lg">ข่าวประชาสัมพันธ์</span>
+              <svg className="h-6 w-6 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
               </svg>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-green-700 to-emerald-700 bg-clip-text text-transparent mb-4">
               ติดตามข่าวสารและกิจกรรมของเรา
             </h2>
-            <div className="w-24 h-1 bg-gradient-to-r from-green-400 to-emerald-400 mx-auto rounded-full"></div>
+            <div className="w-24 h-1 bg-gradient-to-r from-green-600 to-emerald-600 mx-auto rounded-full"></div>
           </div>
           {announcements.length === 0 ? (
             <div className="text-center py-12">
@@ -392,14 +392,14 @@ export default function HomePage() {
                           }}
                         />
                       ) : (
-                        <div className="w-full h-48 bg-gradient-to-br from-green-100 to-emerald-100 flex items-center justify-center">
+                        <div className="w-full h-48 bg-gradient-to-br from-green-200 to-emerald-200 flex items-center justify-center">
                           <Star className="h-16 w-16 text-gray-400" />
                         </div>
                       )}
                       <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     </div>
                     <CardHeader className="pb-2">
-                      <CardTitle className="text-lg font-bold line-clamp-2 group-hover:text-green-600 transition-colors">{ann.title}</CardTitle>
+                      <CardTitle className="text-lg font-bold line-clamp-2 group-hover:text-green-700 transition-colors">{ann.title}</CardTitle>
                       <p className="text-sm text-gray-500">
                         {format(new Date(ann.createdAt), "dd MMMM yyyy", { locale: th })}
                       </p>
@@ -407,7 +407,7 @@ export default function HomePage() {
                     <CardContent>
                       <p className="text-gray-600 line-clamp-3 mb-4">{ann.content}</p>
                       <Link href={`/announcements/${ann.id}`}>
-                        <Button className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold rounded-full transition-all duration-200">
+                        <Button className="w-full bg-gradient-to-r from-green-700 to-emerald-700 hover:from-green-800 hover:to-emerald-800 text-white font-semibold rounded-full transition-all duration-200">
                           อ่านเพิ่มเติม
                         </Button>
                       </Link>
@@ -422,7 +422,7 @@ export default function HomePage() {
                     <PaginationItem>
                       <PaginationPrevious
                         onClick={() => handlePageChange(currentPage - 1)}
-                        className={`${currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer hover:bg-green-50"}`}
+                        className={`${currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer hover:bg-green-100"}`}
                       />
                     </PaginationItem>
                     {[...Array(totalPages)].map((_, index) => (
@@ -430,7 +430,7 @@ export default function HomePage() {
                         <PaginationLink
                           onClick={() => handlePageChange(index + 1)}
                           isActive={currentPage === index + 1}
-                          className="cursor-pointer hover:bg-green-50"
+                          className="cursor-pointer hover:bg-green-100"
                         >
                           {index + 1}
                         </PaginationLink>
@@ -439,7 +439,7 @@ export default function HomePage() {
                     <PaginationItem>
                       <PaginationNext
                         onClick={() => handlePageChange(currentPage + 1)}
-                        className={`${currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer hover:bg-green-50"}`}
+                        className={`${currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer hover:bg-green-100"}`}
                       />
                     </PaginationItem>
                   </PaginationContent>
