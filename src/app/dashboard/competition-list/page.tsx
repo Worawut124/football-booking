@@ -69,9 +69,12 @@ export default function CompetitionListPage() {
       const response = await fetch("/api/competition-list");
       if (!response.ok) throw new Error("ไม่สามารถดึงข้อมูลได้");
       const data = await response.json();
-      setCompetitions(data);
-      setFilteredCompetitions(data);
+      setCompetitions(Array.isArray(data) ? data : []);
+      setFilteredCompetitions(Array.isArray(data) ? data : []);
     } catch (error) {
+      console.error("Error fetching competitions:", error);
+      setCompetitions([]);
+      setFilteredCompetitions([]);
       Swal.fire({
         icon: "error",
         title: "เกิดข้อผิดพลาด",
@@ -86,8 +89,10 @@ export default function CompetitionListPage() {
       const response = await fetch("/api/competition-list?categories=true");
       if (!response.ok) throw new Error("ไม่สามารถดึงหมวดหมู่ได้");
       const data = await response.json();
-      setCategories(data);
+      setCategories(Array.isArray(data) ? data : []);
     } catch (error) {
+      console.error("Error fetching categories:", error);
+      setCategories([]);
       Swal.fire({
         icon: "error",
         title: "เกิดข้อผิดพลาด",
@@ -114,18 +119,29 @@ export default function CompetitionListPage() {
 
   // Filter competitions based on search term and category
   useEffect(() => {
+    if (!Array.isArray(competitions)) {
+      setFilteredCompetitions([]);
+      return;
+    }
+
     let filtered = competitions;
 
     if (searchTerm) {
-      filtered = filtered.filter((competition) =>
-        competition.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        competition.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        competition.category.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+      filtered = filtered.filter((competition) => {
+        if (!competition) return false;
+        const title = competition.title || "";
+        const description = competition.description || "";
+        const category = competition.category || "";
+        return (
+          title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          category.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      });
     }
 
     if (selectedCategory) {
-      filtered = filtered.filter((competition) => competition.category === selectedCategory);
+      filtered = filtered.filter((competition) => competition?.category === selectedCategory);
     }
 
     setFilteredCompetitions(filtered);
@@ -135,21 +151,16 @@ export default function CompetitionListPage() {
     e.preventDefault();
     if (!editCompetition) return;
 
-    const formData = new FormData();
-    formData.append("title", editCompetition.title);
-    formData.append("description", editCompetition.description);
-    formData.append("category", editCompetition.category);
-    formData.append("maxTeams", editCompetition.maxTeams.toString());
-    if (editCompetition.imageName && !editCompetition.imageName.startsWith("public/uploads/")) {
-      formData.append("imageFile", new File([], editCompetition.imageName)); // ใช้ไฟล์เดิมถ้าไม่มีการอัปโหลดใหม่
-    } else if (editCompetition.imageName) {
-      formData.append("imageFile", new File([], editCompetition.imageName.split("/").pop() || ""));
-    }
-
     try {
       const response = await fetch(`/api/competition-list?id=${editCompetition.id}`, {
         method: "PUT",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: editCompetition.title,
+          description: editCompetition.description,
+          category: editCompetition.category,
+          maxTeams: editCompetition.maxTeams
+        }),
       });
 
       if (response.ok) {
@@ -273,13 +284,19 @@ export default function CompetitionListPage() {
     });
   };
 
-  // Calculate statistics
-  const totalCompetitions = filteredCompetitions.length;
-  const totalRegistrations = filteredCompetitions.reduce((sum, comp) => sum + comp.registrations.length, 0);
+  // Calculate statistics with safety checks
+  const totalCompetitions = Array.isArray(filteredCompetitions) ? filteredCompetitions.length : 0;
+  const totalRegistrations = Array.isArray(filteredCompetitions) 
+    ? filteredCompetitions.reduce((sum, comp) => sum + (Array.isArray(comp?.registrations) ? comp.registrations.length : 0), 0) 
+    : 0;
   const avgRegistrationsPerCompetition = totalCompetitions > 0 ? Math.round(totalRegistrations / totalCompetitions) : 0;
-  const mostPopularCompetition = filteredCompetitions.reduce((max, comp) => 
-    comp.registrations.length > (max?.registrations.length || 0) ? comp : max, null as Competition | null
-  );
+  const mostPopularCompetition = Array.isArray(filteredCompetitions) 
+    ? filteredCompetitions.reduce((max, comp) => {
+        const compRegistrations = Array.isArray(comp?.registrations) ? comp.registrations.length : 0;
+        const maxRegistrations = Array.isArray(max?.registrations) ? max.registrations.length : 0;
+        return compRegistrations > maxRegistrations ? comp : max;
+      }, null as Competition | null)
+    : null;
 
   if (status === "loading") {
     return <LoadingCrescent text="กำลังโหลดข้อมูลการแข่งขัน..." />;
@@ -649,7 +666,7 @@ export default function CompetitionListPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredCompetitions.map((competition) => (
+                      {Array.isArray(filteredCompetitions) && filteredCompetitions.map((competition) => competition && (
                         <TableRow key={competition.id} className="hover:bg-blue-50 transition-colors">
                           <TableCell className="text-center p-4 font-medium">
                             {competition.title}
@@ -671,10 +688,10 @@ export default function CompetitionListPage() {
                           </TableCell>
                           <TableCell className="text-center p-4">
                             <Badge 
-                              variant={competition.registrations.length >= competition.maxTeams ? "destructive" : "default"}
-                              className={competition.registrations.length >= competition.maxTeams ? "bg-red-100 text-red-800" : "bg-green-100 text-green-800"}
+                              variant={(Array.isArray(competition.registrations) ? competition.registrations.length : 0) >= competition.maxTeams ? "destructive" : "default"}
+                              className={(Array.isArray(competition.registrations) ? competition.registrations.length : 0) >= competition.maxTeams ? "bg-red-100 text-red-800" : "bg-green-100 text-green-800"}
                             >
-                              {competition.registrations.length}/{competition.maxTeams}
+                              {Array.isArray(competition.registrations) ? competition.registrations.length : 0}/{competition.maxTeams}
                             </Badge>
                           </TableCell>
                           <TableCell className="text-center p-4">
@@ -688,7 +705,15 @@ export default function CompetitionListPage() {
                                     variant="outline" 
                                     size="sm"
                                     onClick={() => {
-                                      setEditCompetition(competition);
+                                      setEditCompetition({
+                                        id: competition.id,
+                                        title: competition.title,
+                                        description: competition.description,
+                                        category: competition.category,
+                                        maxTeams: competition.maxTeams,
+                                        imageName: competition.imageName,
+                                        registrations: competition.registrations
+                                      });
                                       setIsEditDialogOpen(true);
                                     }}
                                     className="bg-yellow-50 border-yellow-200 text-yellow-700 hover:bg-yellow-100"
@@ -714,8 +739,8 @@ export default function CompetitionListPage() {
                                         </label>
                                         <Input
                                           type="text"
-                                          value={editCompetition?.title || competition.title}
-                                          onChange={(e) => setEditCompetition({ ...competition, title: e.target.value })}
+                                          value={editCompetition?.title || ""}
+                                          onChange={(e) => setEditCompetition(prev => prev ? ({ ...prev, title: e.target.value }) : null)}
                                           className="border-2 border-slate-300 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                                           required
                                         />
@@ -727,8 +752,8 @@ export default function CompetitionListPage() {
                                         </label>
                                         <Input
                                           type="number"
-                                          value={editCompetition?.maxTeams || competition.maxTeams}
-                                          onChange={(e) => setEditCompetition({ ...competition, maxTeams: parseInt(e.target.value) || 1 })}
+                                          value={editCompetition?.maxTeams || 1}
+                                          onChange={(e) => setEditCompetition(prev => prev ? ({ ...prev, maxTeams: parseInt(e.target.value) || 1 }) : null)}
                                           className="border-2 border-slate-300 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                                           min="1"
                                           required
@@ -743,8 +768,8 @@ export default function CompetitionListPage() {
                                       </label>
                                       <Input
                                         type="text"
-                                        value={editCompetition?.description || competition.description}
-                                        onChange={(e) => setEditCompetition({ ...competition, description: e.target.value })}
+                                        value={editCompetition?.description || ""}
+                                        onChange={(e) => setEditCompetition(prev => prev ? ({ ...prev, description: e.target.value }) : null)}
                                         className="border-2 border-slate-300 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                                         required
                                       />
@@ -756,8 +781,8 @@ export default function CompetitionListPage() {
                                         หมวดหมู่
                                       </label>
                                       <Select 
-                                        value={editCompetition?.category || competition.category} 
-                                        onValueChange={(value) => setEditCompetition({ ...competition, category: value })}
+                                        value={editCompetition?.category || ""} 
+                                        onValueChange={(value) => setEditCompetition(prev => prev ? ({ ...prev, category: value }) : null)}
                                       >
                                         <SelectTrigger className="border-2 border-slate-300 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
                                           <SelectValue placeholder="เลือกหมวดหมู่" />
@@ -779,7 +804,7 @@ export default function CompetitionListPage() {
                                         type="file"
                                         onChange={(e) => {
                                           if (e.target.files && e.target.files[0]) {
-                                            setEditCompetition({ ...competition, imageName: e.target.files[0].name });
+                                            setEditCompetition(prev => prev ? ({ ...prev, imageName: e.target.files![0].name }) : null);
                                           }
                                         }}
                                         className="border-2 border-slate-300 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"

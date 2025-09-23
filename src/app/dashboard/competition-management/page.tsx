@@ -78,9 +78,12 @@ export default function CompetitionManagementPage() {
       const response = await fetch("/api/competition-list");
       if (!response.ok) throw new Error("ไม่สามารถดึงข้อมูลได้");
       const data = await response.json();
-      setCompetitions(data);
-      setFilteredCompetitions(data);
+      setCompetitions(Array.isArray(data) ? data : []);
+      setFilteredCompetitions(Array.isArray(data) ? data : []);
     } catch (error) {
+      console.error("Error fetching competitions:", error);
+      setCompetitions([]);
+      setFilteredCompetitions([]);
       Swal.fire({
         icon: "error",
         title: "เกิดข้อผิดพลาด",
@@ -108,17 +111,27 @@ export default function CompetitionManagementPage() {
 
   // Filter competitions based on search term and category
   useEffect(() => {
+    if (!Array.isArray(competitions)) {
+      setFilteredCompetitions([]);
+      return;
+    }
+
     let filtered = competitions;
 
     if (searchTerm) {
-      filtered = filtered.filter((competition) =>
-        competition.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        competition.description.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+      filtered = filtered.filter((competition) => {
+        if (!competition) return false;
+        const title = competition.title || "";
+        const description = competition.description || "";
+        return (
+          title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          description.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      });
     }
 
     if (categoryFilter) {
-      filtered = filtered.filter((competition) => competition.category === categoryFilter);
+      filtered = filtered.filter((competition) => competition?.category === categoryFilter);
     }
 
     setFilteredCompetitions(filtered);
@@ -257,11 +270,19 @@ export default function CompetitionManagementPage() {
     );
   }
 
-  // Calculate statistics
-  const totalCompetitions = filteredCompetitions.length;
-  const totalRegistrations = filteredCompetitions.reduce((sum, comp) => sum + comp.registrations.length, 0);
-  const availableSlots = filteredCompetitions.reduce((sum, comp) => sum + (comp.maxTeams - comp.registrations.length), 0);
-  const categories = [...new Set(competitions.map(comp => comp.category))];
+  // Calculate statistics with safety checks
+  const totalCompetitions = Array.isArray(filteredCompetitions) ? filteredCompetitions.length : 0;
+  const totalRegistrations = Array.isArray(filteredCompetitions) 
+    ? filteredCompetitions.reduce((sum, comp) => sum + (Array.isArray(comp?.registrations) ? comp.registrations.length : 0), 0) 
+    : 0;
+  const availableSlots = Array.isArray(filteredCompetitions) 
+    ? filteredCompetitions.reduce((sum, comp) => {
+        const registrations = Array.isArray(comp?.registrations) ? comp.registrations.length : 0;
+        const maxTeams = comp?.maxTeams || 0;
+        return sum + Math.max(0, maxTeams - registrations);
+      }, 0) 
+    : 0;
+  const categories = Array.isArray(competitions) ? [...new Set(competitions.map(comp => comp?.category).filter(Boolean))] : [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-green-50">
@@ -468,9 +489,12 @@ export default function CompetitionManagementPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredCompetitions.map((competition) => {
-                        const registrationPercentage = (competition.registrations.length / competition.maxTeams) * 100;
-                        const availableSlots = competition.maxTeams - competition.registrations.length;
+                      {Array.isArray(filteredCompetitions) && filteredCompetitions.map((competition) => {
+                        if (!competition) return null;
+                        const registrations = Array.isArray(competition.registrations) ? competition.registrations.length : 0;
+                        const maxTeams = competition.maxTeams || 0;
+                        const registrationPercentage = maxTeams > 0 ? (registrations / maxTeams) * 100 : 0;
+                        const availableSlots = Math.max(0, maxTeams - registrations);
                         
                         return (
                           <TableRow key={competition.id} className="hover:bg-blue-50 transition-colors">
@@ -537,7 +561,7 @@ export default function CompetitionManagementPage() {
                                       "border-green-200 text-green-700 bg-green-50"
                                     }`}
                                   >
-                                    {competition.registrations.length}/{competition.maxTeams}
+                                    {registrations}/{maxTeams}
                                   </Badge>
                                   {registrationPercentage >= 100 && (
                                     <Badge className="bg-red-100 text-red-800">เต็ม</Badge>
