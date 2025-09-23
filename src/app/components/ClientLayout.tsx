@@ -13,9 +13,9 @@ export default function ClientLayout({
 }) {
   const pathname = usePathname();
   
-  // หน้าที่ไม่ต้องแสดง Footer
-  const hideFooterPages = ['/Competition-history', '/user-orders'];
-  const shouldHideFooter = hideFooterPages.includes(pathname) || pathname.startsWith('/submit-players/');
+  // แสดง Footer เฉพาะหน้าแรกเท่านั้น
+  const showFooterPages = ['/'];
+  const shouldShowFooter = showFooterPages.includes(pathname);
 
   return (
     <SessionProvider>
@@ -25,7 +25,7 @@ export default function ClientLayout({
           <main className="flex-1">
             {children}
           </main>
-          {!shouldHideFooter && <Footer />}
+          {shouldShowFooter && <Footer />}
         </div>
       </CartProvider>
     </SessionProvider>
