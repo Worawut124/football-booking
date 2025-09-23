@@ -43,8 +43,8 @@ export async function POST(request: Request) {
     const qrCodeDataURL = await generatePromptPayQR(paymentConfig.promptPayId, depositAmount);
     console.log("[promptpay-qr] QR generated length:", qrCodeDataURL?.length || 0);
 
-    // Update booking with expiration time (30 minutes from now)
-    const expiresAt = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
+    // Update booking with expiration time (10 minutes from now)
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
     await prisma.booking.update({
       where: { id: bookingId },
       data: { expiresAt }
