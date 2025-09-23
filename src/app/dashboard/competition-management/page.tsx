@@ -75,9 +75,10 @@ export default function CompetitionManagementPage() {
   const fetchCompetitions = async () => {
     setLoading(true);
     try {
-      const response = await fetch("/api/competition-list");
+      const response = await fetch("/api/competition-management");
       if (!response.ok) throw new Error("ไม่สามารถดึงข้อมูลได้");
       const data = await response.json();
+      console.log("Competition data received:", data);
       setCompetitions(Array.isArray(data) ? data : []);
       setFilteredCompetitions(Array.isArray(data) ? data : []);
     } catch (error) {
@@ -491,6 +492,7 @@ export default function CompetitionManagementPage() {
                     <TableBody>
                       {Array.isArray(filteredCompetitions) && filteredCompetitions.map((competition) => {
                         if (!competition) return null;
+                        console.log("Competition:", competition.title, "Registrations:", competition.registrations);
                         const registrations = Array.isArray(competition.registrations) ? competition.registrations.length : 0;
                         const maxTeams = competition.maxTeams || 0;
                         const registrationPercentage = maxTeams > 0 ? (registrations / maxTeams) * 100 : 0;

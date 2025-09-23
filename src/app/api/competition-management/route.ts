@@ -13,10 +13,14 @@ export async function GET(request: Request) {
   }
 
   try {
-    const registrations = await prisma.competitionRegistration.findMany();
-    return NextResponse.json(registrations);
+    const competitions = await prisma.competition.findMany({
+      include: {
+        registrations: true
+      }
+    });
+    return NextResponse.json(competitions);
   } catch (error) {
-    console.error("Error fetching registrations:", error);
+    console.error("Error fetching competitions:", error);
     return NextResponse.json({ error: "เกิดข้อผิดพลาดในการดึงข้อมูล" }, { status: 500 });
   }
 }
