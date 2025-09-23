@@ -38,6 +38,26 @@ import {
 } from "@/components/ui/pagination";
 import { format, parse, startOfDay, addMinutes } from "date-fns";
 import { th } from "date-fns/locale";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { 
+  Plus, 
+  Search, 
+  Calendar, 
+  Clock, 
+  MapPin, 
+  User, 
+  Phone, 
+  Edit, 
+  Trash2, 
+  CheckCircle, 
+  AlertCircle, 
+  XCircle,
+  Image,
+  Filter,
+  RefreshCw,
+  Trophy,
+  Sparkles
+} from "lucide-react";
 
 // กำหนด Type สำหรับโครงสร้างข้อมูล
 interface User {
@@ -132,6 +152,7 @@ export default function BookingsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [filteredBookings, setFilteredBookings] = useState<Booking[]>([]);
   const [searchDate, setSearchDate] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>("");
   const [editBooking, setEditBooking] = useState<{
     id: number;
     userId: number;
@@ -202,27 +223,31 @@ export default function BookingsPage() {
   }, [status, router, session]);
 
   useEffect(() => {
+    let filtered = [...bookings];
+
+    // Filter by date
     if (searchDate) {
-      const filtered = bookings.filter((booking) => {
+      filtered = filtered.filter((booking) => {
         const bookingDate = format(new Date(booking.startTime), "yyyy-MM-dd");
         return bookingDate === searchDate;
       });
-      const sortedFiltered = filtered.sort((a: Booking, b: Booking) => {
-        const dateA = new Date(a.startTime);
-        const dateB = new Date(b.startTime);
-        return dateA.getTime() - dateB.getTime();
-      });
-      setFilteredBookings(sortedFiltered);
-      setCurrentPage(1);
-    } else {
-      const sortedBookings = [...bookings].sort((a: Booking, b: Booking) => {
-        const dateA = new Date(a.startTime);
-        const dateB = new Date(b.startTime);
-        return dateA.getTime() - dateB.getTime();
-      });
-      setFilteredBookings(sortedBookings);
     }
-  }, [searchDate, bookings]);
+
+    // Filter by status
+    if (statusFilter) {
+      filtered = filtered.filter((booking) => booking.status === statusFilter);
+    }
+
+    // Sort by date
+    const sortedFiltered = filtered.sort((a: Booking, b: Booking) => {
+      const dateA = new Date(a.startTime);
+      const dateB = new Date(b.startTime);
+      return dateA.getTime() - dateB.getTime();
+    });
+
+    setFilteredBookings(sortedFiltered);
+    setCurrentPage(1);
+  }, [searchDate, statusFilter, bookings]);
 
   const fetchOverlappingTimes = async (fieldId: number, date: string, excludeId?: number) => {
     try {
@@ -468,28 +493,54 @@ export default function BookingsPage() {
   }
 
   return (
-    <div className="container mx-auto p-4 bg-gray-50">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">จัดการการจอง</h1>
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <div className="mb-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-          <Dialog open={newBooking !== null} onOpenChange={(open) => !open && setNewBooking(null)}>
-            <DialogTrigger asChild>
-              <Button
-                onClick={() =>
-                  setNewBooking({
-                    userId: null,
-                    fieldId: null,
-                    date: "",
-                    startTime: "",
-                    endTime: "",
-                    status: "pending",
-                  })
-                }
-                className="bg-green-600 hover:bg-green-700 text-white w-full sm:w-auto"
-              >
-                เพิ่มการจอง
-              </Button>
-            </DialogTrigger>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-green-50">
+      {/* Header Section */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-blue-600 via-purple-600 to-green-600 text-white rounded-2xl p-8 mb-8">
+        <div className="absolute inset-0 bg-black/10"></div>
+        <div className="absolute inset-0 opacity-20">
+          <div className="w-full h-full bg-repeat" style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`
+          }}></div>
+        </div>
+        <div className="relative">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="bg-white/20 backdrop-blur-sm rounded-full p-3">
+              <Trophy className="h-8 w-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-4xl font-bold">จัดการการจอง</h1>
+              <p className="text-white/90 text-lg">ระบบจัดการการจองสนามฟุตบอล</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-yellow-300" />
+            <span className="text-white/90">รายการทั้งหมด: {filteredBookings.length} รายการ</span>
+          </div>
+        </div>
+      </div>
+
+      <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm">
+        <CardContent className="p-8">
+          <div className="mb-8 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-6">
+            <Dialog open={newBooking !== null} onOpenChange={(open) => !open && setNewBooking(null)}>
+              <DialogTrigger asChild>
+                <Button
+                  onClick={() =>
+                    setNewBooking({
+                      userId: null,
+                      fieldId: null,
+                      date: "",
+                      startTime: "",
+                      endTime: "",
+                      status: "pending",
+                    })
+                  }
+                  className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white w-full sm:w-auto shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 flex items-center gap-2 px-6 py-3"
+                >
+                  <Plus className="h-5 w-5" />
+                  เพิ่มการจองใหม่
+                </Button>
+              </DialogTrigger>
             <DialogContent className="max-h-[80vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>เพิ่มการจองใหม่</DialogTitle>
@@ -629,41 +680,168 @@ export default function BookingsPage() {
             </DialogContent>
           </Dialog>
 
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-gray-100 p-3 rounded-lg shadow-sm w-full sm:w-auto">
-            <label className="text-sm font-medium text-gray-700 whitespace-nowrap">ค้นหาด้วยวันที่:</label>
-            <Input
-              type="date"
-              value={searchDate}
-              onChange={(e) => setSearchDate(e.target.value)}
-              className="w-full sm:w-48 border-gray-300 focus:ring-blue-500 focus:border-blue-500 rounded-md"
-            />
-            <Button
-              onClick={() => setSearchDate("")}
-              className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md transition-colors w-full sm:w-auto"
-            >
-              ล้างวันที่
-            </Button>
+            <div className="flex flex-col lg:flex-row items-start lg:items-center gap-6 bg-gradient-to-r from-slate-50 to-blue-50 p-6 rounded-xl shadow-lg border border-slate-200 w-full">
+              <div className="flex items-center gap-2">
+                <Filter className="h-5 w-5 text-slate-600" />
+                <label className="text-sm font-semibold text-slate-700 whitespace-nowrap">ตัวกรอง:</label>
+              </div>
+              
+              {/* Date Filter */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                <label className="text-sm font-medium text-slate-600 whitespace-nowrap">วันที่:</label>
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-500" />
+                    <Input
+                      type="date"
+                      value={searchDate}
+                      onChange={(e) => setSearchDate(e.target.value)}
+                      className="w-full sm:w-48 pl-10 border-2 border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-lg shadow-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Status Filter */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                <label className="text-sm font-medium text-slate-600 whitespace-nowrap">สถานะ:</label>
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <CheckCircle className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-500" />
+                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                      <SelectTrigger className="w-full sm:w-48 pl-10 border-2 border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 rounded-lg shadow-sm">
+                        <SelectValue placeholder="เลือกสถานะ" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pending">
+                          <div className="flex items-center gap-2">
+                            <AlertCircle className="h-4 w-4 text-yellow-600" />
+                            รอชำระเงิน
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="pending_confirmation">
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-4 w-4 text-blue-600" />
+                            รอดำเนินการ
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="paid">
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="h-4 w-4 text-green-600" />
+                            ชำระแล้ว
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="cancelled">
+                          <div className="flex items-center gap-2">
+                            <XCircle className="h-4 w-4 text-red-600" />
+                            ยกเลิก
+                          </div>
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Clear Filters Button */}
+              <Button
+                onClick={() => {
+                  setSearchDate("");
+                  setStatusFilter("");
+                }}
+                className="bg-gradient-to-r from-slate-500 to-slate-600 hover:from-slate-600 hover:to-slate-700 text-white px-6 py-2 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2"
+              >
+                <RefreshCw className="h-4 w-4" />
+                ล้างตัวกรอง
+              </Button>
+            </div>
           </div>
-        </div>
 
         {filteredBookings.length === 0 ? (
-          <p className="text-gray-600 text-center">ยังไม่มีรายการจองสำหรับวันที่เลือก</p>
+          <div className="text-center py-12">
+            <div className="bg-slate-100 rounded-full p-8 w-32 h-32 mx-auto mb-6 flex items-center justify-center">
+              <Search className="h-16 w-16 text-slate-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-slate-600 mb-2">ไม่พบรายการจอง</h3>
+            <p className="text-slate-500">
+              {searchDate || statusFilter 
+                ? "ไม่มีรายการจองที่ตรงกับเงื่อนไขการค้นหา" 
+                : "ยังไม่มีรายการจองในระบบ"
+              }
+            </p>
+            {(searchDate || statusFilter) && (
+              <Button
+                onClick={() => {
+                  setSearchDate("");
+                  setStatusFilter("");
+                }}
+                className="mt-4 bg-blue-600 hover:bg-blue-700 text-white"
+              >
+                แสดงรายการทั้งหมด
+              </Button>
+            )}
+          </div>
         ) : (
           <>
             {/* ตารางสำหรับ Desktop */}
-            <div className="hidden sm:block overflow-x-auto">
+            <div className="hidden sm:block overflow-x-auto bg-white rounded-xl shadow-lg border border-slate-200">
               <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="min-w-[150px] text-center">ผู้จอง</TableHead>
-                    <TableHead className="min-w-[150px] text-center">เบอร์โทร</TableHead>
-                    <TableHead className="min-w-[150px] text-center">สนาม</TableHead>
-                    <TableHead className="min-w-[150px] text-center">วันที่</TableHead>
-                    <TableHead className="min-w-[150px] text-center">เวลา</TableHead>
-                    <TableHead className="min-w-[150px] text-center">สถานะ</TableHead>
-                    <TableHead className="min-w-[150px] text-center">สลิปมัดจำ</TableHead>
-                    <TableHead className="min-w-[150px] text-center">สลิปชำระเต็ม</TableHead>
-                    <TableHead className="min-w-[220px] text-center">การจัดการ</TableHead>
+                <TableHeader className="bg-gradient-to-r from-slate-50 to-blue-50">
+                  <TableRow className="border-b-2 border-slate-200">
+                    <TableHead className="min-w-[150px] text-center font-bold text-slate-700">
+                      <div className="flex items-center justify-center gap-2">
+                        <User className="h-4 w-4 text-blue-600" />
+                        ผู้จอง
+                      </div>
+                    </TableHead>
+                    <TableHead className="min-w-[150px] text-center font-bold text-slate-700">
+                      <div className="flex items-center justify-center gap-2">
+                        <Phone className="h-4 w-4 text-green-600" />
+                        เบอร์โทร
+                      </div>
+                    </TableHead>
+                    <TableHead className="min-w-[150px] text-center font-bold text-slate-700">
+                      <div className="flex items-center justify-center gap-2">
+                        <MapPin className="h-4 w-4 text-purple-600" />
+                        สนาม
+                      </div>
+                    </TableHead>
+                    <TableHead className="min-w-[150px] text-center font-bold text-slate-700">
+                      <div className="flex items-center justify-center gap-2">
+                        <Calendar className="h-4 w-4 text-orange-600" />
+                        วันที่
+                      </div>
+                    </TableHead>
+                    <TableHead className="min-w-[150px] text-center font-bold text-slate-700">
+                      <div className="flex items-center justify-center gap-2">
+                        <Clock className="h-4 w-4 text-indigo-600" />
+                        เวลา
+                      </div>
+                    </TableHead>
+                    <TableHead className="min-w-[150px] text-center font-bold text-slate-700">
+                      <div className="flex items-center justify-center gap-2">
+                        <CheckCircle className="h-4 w-4 text-emerald-600" />
+                        สถานะ
+                      </div>
+                    </TableHead>
+                    <TableHead className="min-w-[150px] text-center font-bold text-slate-700">
+                      <div className="flex items-center justify-center gap-2">
+                        <Image className="h-4 w-4 text-yellow-600" />
+                        สลิปมัดจำ
+                      </div>
+                    </TableHead>
+                    <TableHead className="min-w-[150px] text-center font-bold text-slate-700">
+                      <div className="flex items-center justify-center gap-2">
+                        <Image className="h-4 w-4 text-pink-600" />
+                        สลิปชำระเต็ม
+                      </div>
+                    </TableHead>
+                    <TableHead className="min-w-[220px] text-center font-bold text-slate-700">
+                      <div className="flex items-center justify-center gap-2">
+                        <Edit className="h-4 w-4 text-cyan-600" />
+                        การจัดการ
+                      </div>
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -755,7 +933,7 @@ export default function BookingsPage() {
                         )}
                       </TableCell>
                       <TableCell className="min-w-[150px] text-center">
-                        <div className="flex gap-2 justify-center flex-wrap">
+                        <div className="flex gap-3 justify-center flex-wrap">
                           <Dialog open={editBooking?.id === booking.id} onOpenChange={(open) => !open && setEditBooking(null)}>
                             <DialogTrigger asChild>
                               <Button
@@ -774,8 +952,9 @@ export default function BookingsPage() {
                                   });
                                   fetchOverlappingTimes(booking.fieldId, date, booking.id);
                                 }}
-                                className="bg-yellow-600 hover:bg-yellow-700 text-white"
+                                className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105 flex items-center gap-2 px-4 py-2"
                               >
+                                <Edit className="h-4 w-4" />
                                 แก้ไข
                               </Button>
                             </DialogTrigger>
@@ -901,8 +1080,9 @@ export default function BookingsPage() {
                           </Dialog>
                           <Button
                             onClick={() => handleDeleteBooking(booking.id)}
-                            className="bg-red-600 hover:bg-red-700 text-white"
+                            className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105 flex items-center gap-2 px-4 py-2"
                           >
+                            <Trash2 className="h-4 w-4" />
                             ลบ
                           </Button>
                         </div>
@@ -914,37 +1094,55 @@ export default function BookingsPage() {
             </div>
 
             {/* การ์ดสำหรับ Mobile */}
-            <div className="block sm:hidden space-y-4">
+            <div className="block sm:hidden space-y-6">
               {paginatedBookings.map((booking) => (
-                <div key={booking.id} className="bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200">
-                  <div className="space-y-2">
-                    <div>
-                      <span className="font-medium text-gray-700">ผู้จอง:</span>{" "}
-                      {booking.user?.name || "ไม่ระบุ"} ({booking.user?.email || "ไม่ระบุ"})
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-700">เบอร์โทร:</span>{" "}
-                      {booking.user?.phone || "ไม่ระบุ"}
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-700">สนาม:</span>{" "}
-                      {booking.field?.name || "ไม่ระบุ"} ({booking.field?.location || "ไม่ระบุ"})
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-700">วันที่:</span>{" "}
-                      {format(new Date(booking.startTime), "dd MMMM yyyy", { locale: th })}
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-700">เวลา:</span>{" "}
-                      {format(new Date(booking.startTime), "HH:mm", { locale: th })} -{" "}
-                      {format(new Date(booking.endTime), "HH:mm", { locale: th })}
-                    </div>
-                    <div>
-                      <span className="font-medium text-gray-700">สถานะ:</span>{" "}
-                      <span className={`px-2 py-1 rounded ${getStatusColor(booking.status)}`}>
-                        {getStatusLabel(booking.status)}
-                      </span>
-                    </div>
+                <Card key={booking.id} className="shadow-xl border-0 bg-gradient-to-br from-white to-slate-50 hover:shadow-2xl transition-all duration-300 transform hover:scale-102">
+                  <CardContent className="p-6">
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
+                        <User className="h-5 w-5 text-blue-600" />
+                        <div>
+                          <span className="font-semibold text-slate-700">ผู้จอง:</span>
+                          <p className="text-slate-600">{booking.user?.name || "ไม่ระบุ"} ({booking.user?.email || "ไม่ระบุ"})</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+                        <Phone className="h-5 w-5 text-green-600" />
+                        <div>
+                          <span className="font-semibold text-slate-700">เบอร์โทร:</span>
+                          <p className="text-slate-600">{booking.user?.phone || "ไม่ระบุ"}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
+                        <MapPin className="h-5 w-5 text-purple-600" />
+                        <div>
+                          <span className="font-semibold text-slate-700">สนาม:</span>
+                          <p className="text-slate-600">{booking.field?.name || "ไม่ระบุ"} ({booking.field?.location || "ไม่ระบุ"})</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg">
+                        <Calendar className="h-5 w-5 text-orange-600" />
+                        <div>
+                          <span className="font-semibold text-slate-700">วันที่:</span>
+                          <p className="text-slate-600">{format(new Date(booking.startTime), "dd MMMM yyyy", { locale: th })}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 p-3 bg-indigo-50 rounded-lg">
+                        <Clock className="h-5 w-5 text-indigo-600" />
+                        <div>
+                          <span className="font-semibold text-slate-700">เวลา:</span>
+                          <p className="text-slate-600">{format(new Date(booking.startTime), "HH:mm", { locale: th })} - {format(new Date(booking.endTime), "HH:mm", { locale: th })}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 p-3 bg-emerald-50 rounded-lg">
+                        <CheckCircle className="h-5 w-5 text-emerald-600" />
+                        <div>
+                          <span className="font-semibold text-slate-700">สถานะ:</span>
+                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(booking.status)}`}>
+                            {getStatusLabel(booking.status)}
+                          </span>
+                        </div>
+                      </div>
                     <div>
                       <span className="font-medium text-gray-700">หลักฐานการชำระเงิน:</span>{" "}
                       {booking.payments && booking.payments.length > 0 ? (
@@ -1016,30 +1214,31 @@ export default function BookingsPage() {
                         "-"
                       )}
                     </div>
-                    <div className="flex gap-2 pt-2 flex-wrap">
-                      <Dialog open={editBooking?.id === booking.id} onOpenChange={(open) => !open && setEditBooking(null)}>
-                        <DialogTrigger asChild>
-                          <Button
-                            onClick={() => {
-                              const startTime = new Date(booking.startTime);
-                              const endTime = new Date(booking.endTime);
-                              const date = format(startTime, "yyyy-MM-dd");
-                              setEditBooking({
-                                id: booking.id,
-                                userId: booking.userId,
-                                fieldId: booking.fieldId,
-                                date,
-                                startTime: format(startTime, "HH:mm"),
-                                endTime: format(endTime, "HH:mm"),
-                                status: booking.status,
-                              });
-                              fetchOverlappingTimes(booking.fieldId, date, booking.id);
-                            }}
-                            className="bg-yellow-600 hover:bg-yellow-700 text-white flex-1"
-                          >
-                            แก้ไข
-                          </Button>
-                        </DialogTrigger>
+                      <div className="flex gap-3 pt-4 border-t border-slate-200">
+                        <Dialog open={editBooking?.id === booking.id} onOpenChange={(open) => !open && setEditBooking(null)}>
+                          <DialogTrigger asChild>
+                            <Button
+                              onClick={() => {
+                                const startTime = new Date(booking.startTime);
+                                const endTime = new Date(booking.endTime);
+                                const date = format(startTime, "yyyy-MM-dd");
+                                setEditBooking({
+                                  id: booking.id,
+                                  userId: booking.userId,
+                                  fieldId: booking.fieldId,
+                                  date,
+                                  startTime: format(startTime, "HH:mm"),
+                                  endTime: format(endTime, "HH:mm"),
+                                  status: booking.status,
+                                });
+                                fetchOverlappingTimes(booking.fieldId, date, booking.id);
+                              }}
+                              className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white flex-1 shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105 flex items-center gap-2 py-3"
+                            >
+                              <Edit className="h-4 w-4" />
+                              แก้ไข
+                            </Button>
+                          </DialogTrigger>
                         <DialogContent className="max-h-[80vh] overflow-y-auto">
                           <DialogHeader>
                             <DialogTitle>แก้ไขการจอง</DialogTitle>
@@ -1160,15 +1359,17 @@ export default function BookingsPage() {
                           </div>
                         </DialogContent>
                       </Dialog>
-                      <Button
-                        onClick={() => handleDeleteBooking(booking.id)}
-                        className="bg-red-600 hover:bg-red-700 text-white flex-1"
-                      >
-                        ลบ
-                      </Button>
+                        <Button
+                          onClick={() => handleDeleteBooking(booking.id)}
+                          className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white flex-1 shadow-md hover:shadow-lg transition-all duration-200 transform hover:scale-105 flex items-center gap-2 py-3"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          ลบ
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
 
@@ -1202,7 +1403,8 @@ export default function BookingsPage() {
             )}
           </>
         )}
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
