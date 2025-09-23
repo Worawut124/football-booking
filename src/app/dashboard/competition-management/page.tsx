@@ -489,7 +489,7 @@ export default function CompetitionManagementPage() {
                                 <div className="flex items-center justify-center gap-2">
                                   <Input
                                     type="number"
-                                    value={editMaxTeams.maxTeams}
+                                    value={editMaxTeams?.maxTeams || competition.maxTeams}
                                     onChange={(e) => setEditMaxTeams({ id: competition.id, maxTeams: parseInt(e.target.value) || 1 })}
                                     min="1"
                                     className="w-20 text-center border-2 border-purple-300 focus:ring-2 focus:ring-purple-500"

@@ -10,7 +10,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import LoadingCrescent from "@/components/ui/loading-crescent";
 import Swal from "sweetalert2";
+import Link from "next/link";
 import {
   Trophy,
   Plus,
@@ -28,7 +30,9 @@ import {
   Star,
   TrendingUp,
   Activity,
-  FileText
+  FileText,
+  ArrowLeft,
+  XCircle
 } from "lucide-react";
 
 interface Competition {
@@ -278,11 +282,29 @@ export default function CompetitionListPage() {
   );
 
   if (status === "loading") {
-    return <div className="container mx-auto p-4">กำลังโหลด...</div>;
+    return <LoadingCrescent text="กำลังโหลดข้อมูลการแข่งขัน..." />;
   }
 
   if (session?.user?.role !== "ADMIN" && session?.user?.role !== "OWNER") {
-    return <div className="container mx-auto p-4 text-center text-red-600">คุณไม่มีสิทธิ์เข้าถึงหน้านี้</div>;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-green-50 flex items-center justify-center">
+        <Card className="shadow-2xl border-0 bg-white/80 backdrop-blur-sm p-8">
+          <CardContent className="text-center">
+            <div className="bg-red-100 rounded-full p-8 w-32 h-32 mx-auto mb-6 flex items-center justify-center">
+              <XCircle className="h-16 w-16 text-red-500" />
+            </div>
+            <h3 className="text-xl font-semibold text-red-600 mb-2">ไม่มีสิทธิ์เข้าถึง</h3>
+            <p className="text-slate-500 mb-4">คุณไม่มีสิทธิ์เข้าถึงหน้านี้</p>
+            <Link href="/dashboard">
+              <Button className="bg-blue-600 hover:bg-blue-700 text-white">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                กลับแดชบอร์ด
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
@@ -692,7 +714,7 @@ export default function CompetitionListPage() {
                                         </label>
                                         <Input
                                           type="text"
-                                          value={editCompetition?.id === competition.id ? editCompetition.title : competition.title}
+                                          value={editCompetition?.title || competition.title}
                                           onChange={(e) => setEditCompetition({ ...competition, title: e.target.value })}
                                           className="border-2 border-slate-300 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                                           required
@@ -705,7 +727,7 @@ export default function CompetitionListPage() {
                                         </label>
                                         <Input
                                           type="number"
-                                          value={editCompetition?.id === competition.id ? editCompetition.maxTeams : competition.maxTeams}
+                                          value={editCompetition?.maxTeams || competition.maxTeams}
                                           onChange={(e) => setEditCompetition({ ...competition, maxTeams: parseInt(e.target.value) || 1 })}
                                           className="border-2 border-slate-300 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                                           min="1"
@@ -721,7 +743,7 @@ export default function CompetitionListPage() {
                                       </label>
                                       <Input
                                         type="text"
-                                        value={editCompetition?.id === competition.id ? editCompetition.description : competition.description}
+                                        value={editCompetition?.description || competition.description}
                                         onChange={(e) => setEditCompetition({ ...competition, description: e.target.value })}
                                         className="border-2 border-slate-300 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500"
                                         required
@@ -734,7 +756,7 @@ export default function CompetitionListPage() {
                                         หมวดหมู่
                                       </label>
                                       <Select 
-                                        value={editCompetition?.id === competition.id ? editCompetition.category : competition.category} 
+                                        value={editCompetition?.category || competition.category} 
                                         onValueChange={(value) => setEditCompetition({ ...competition, category: value })}
                                       >
                                         <SelectTrigger className="border-2 border-slate-300 focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500">
