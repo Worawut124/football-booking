@@ -440,7 +440,7 @@ function PageInner() {
                   ) : (
                     <>
                       <CheckCircle className="h-5 w-5" />
-                      ยืนยันการสมัครทีม
+                      ยืนยันการสมัคร
                     </>
                   )}
                 </Button>
