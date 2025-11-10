@@ -1,12 +1,14 @@
-# สรุปการเปลี่ยนแปลงจาก Local Storage ไป Supabase Storage
+# สรุปการเปลี่ยนแปลงจาก Supabase ไป PostgreSQL + Local Storage
 
 ## ไฟล์ที่ถูกแก้ไข
 
-### 1. ไฟล์ใหม่ที่สร้าง
-- `src/lib/supabaseStorage.ts` - Utility functions สำหรับจัดการไฟล์ใน Supabase
-- `SUPABASE_SETUP.md` - คู่มือการตั้งค่า Supabase storage
-- `scripts/migrate-to-supabase.js` - Script สำหรับ migrate ข้อมูลเก่า
-- `MIGRATION_SUMMARY.md` - ไฟล์สรุปการเปลี่ยนแปลงนี้
+### 1. ไฟล์ที่ถูกแก้ไข/สร้างใหม่
+- `src/lib/supabaseStorage.ts` - แก้ไขเป็น Local file storage functions
+- `src/lib/supabaseClient.ts` - แก้ไขเป็น PostgreSQL client
+- `src/lib/fileStorage.ts` - ไฟล์ใหม่สำหรับ local file storage
+- `scripts/create-supabase-buckets.js` - แก้ไขเป็น local directory creation
+- `scripts/migrate-to-supabase.js` - แก้ไขเป็น local storage migration
+- `package.json` - อัพเดท scripts
 
 ### 2. ไฟล์ API Routes ที่แก้ไข
 

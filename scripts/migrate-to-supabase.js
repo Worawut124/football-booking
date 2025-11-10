@@ -151,6 +151,7 @@ async function migrateProducts() {
         // แปลง base64 เป็น buffer
         const buffer = Buffer.from(product.imageData, 'base64');
         const fileName = `product-${product.id}-${Date.now()}.jpg`;
+        
         const fullPath = `images/${fileName}`;
 
         const { data, error } = await supabase.storage
@@ -303,6 +304,7 @@ async function migrateOrders() {
         // แปลง base64 เป็น buffer
         const buffer = Buffer.from(order.slipImage, 'base64');
         const fileName = `order-${order.id}-${Date.now()}.jpg`;
+        
         const fullPath = `slips/${fileName}`;
 
         const { data, error } = await supabase.storage
