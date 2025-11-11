@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Payment Config API</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .result { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+        .error { background-color: #ffebee; border-color: #f44336; }
+        .success { background-color: #e8f5e8; border-color: #4caf50; }
+        button { margin: 5px; padding: 10px 15px; }
+    </style>
+</head>
+<body>
+    <h1>Test Payment Config API</h1>
+    
+    <button onclick="testGetPaymentConfig()">Test GET /api/payment-config</button>
+    <button onclick="testUploadQR()">Test Upload QR Code</button>
+    
+    <div id="results"></div>
+
+    <script>
+        const resultsDiv = document.getElementById('results');
+        
+        function addResult(message, isError = false) {
+            const div = document.createElement('div');
+            div.className = `result ${isError ? 'error' : 'success'}`;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}:</strong> ${message}`;
+            resultsDiv.appendChild(div);
+        }
+        
+        async function testGetPaymentConfig() {
+            try {
+                addResult('Testing GET /api/payment-config...');
+                const response = await fetch('/api/payment-config');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addResult(`✅ GET Success: ${JSON.stringify(data, null, 2)}`);
+                } else {
+                    addResult(`❌ GET Error: ${data.error}`, true);
+                }
+            } catch (error) {
+                addResult(`❌ GET Exception: ${error.message}`, true);
+            }
+        }
+        
+        async function testUploadQR() {
+            try {
+                addResult('Testing PUT /api/payment-config with sample data...');
+                
+                const formData = new FormData();
+                formData.append('pricePerHour', '600');
+                formData.append('pricePerHalfHour', '300');
+                formData.append('depositAmount', '100');
+                formData.append('accountName', 'Test Account');
+                formData.append('bankName', 'Test Bank');
+                formData.append('accountNumber', '123-456-789');
+                
+                const response = await fetch('/api/payment-config', {
+                    method: 'PUT',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addResult(`✅ PUT Success: ${JSON.stringify(data, null, 2)}`);
+                } else {
+                    addResult(`❌ PUT Error: ${data.error}`, true);
+                }
+            } catch (error) {
+                addResult(`❌ PUT Exception: ${error.message}`, true);
+            }
+        }
+        
+        // Auto-test on load
+        window.onload = function() {
+            testGetPaymentConfig();
+        };
+    </script>
+</body>
+</html>

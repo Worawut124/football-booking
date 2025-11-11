@@ -23,13 +23,13 @@ export async function GET(req: NextRequest) {
       });
       const normalized = {
         ...defaultConfig,
-        qrCode: defaultConfig.qrCode?.startsWith('http') ? defaultConfig.qrCode : `${origin}${defaultConfig.qrCode || ''}`,
+        qrCode: defaultConfig.qrCode?.startsWith('http') ? defaultConfig.qrCode : defaultConfig.qrCode,
       };
       return NextResponse.json(normalized, { status: 200 });
     }
     const normalized = {
       ...paymentConfig,
-      qrCode: paymentConfig.qrCode?.startsWith('http') ? paymentConfig.qrCode : (paymentConfig.qrCode ? `${origin}${paymentConfig.qrCode}` : null),
+      qrCode: paymentConfig.qrCode,
     };
     return NextResponse.json(normalized, { status: 200 });
   } catch (error) {
@@ -120,7 +120,6 @@ export async function PUT(req: NextRequest) {
 
     return NextResponse.json(updatedConfig, { status: 200 });
   } catch (error) {
-    console.error("Error in PUT /api/payment-config:", error);
     return NextResponse.json({ error: "ไม่สามารถอัพเดทการตั้งค่าการชำระเงินได้" }, { status: 500 });
   }
 }
