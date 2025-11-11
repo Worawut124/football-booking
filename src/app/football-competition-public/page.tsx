@@ -213,7 +213,7 @@ function PageInner() {
         <Card className="mb-8 shadow-2xl border-0 bg-white/80 backdrop-blur-sm overflow-hidden">
           <div className="relative">
             <img
-              src={competitionDetails.imageName ? (competitionDetails.imageName.startsWith('http') ? competitionDetails.imageName : `/uploads/${encodeURIComponent(competitionDetails.imageName)}`) : "/placeholder.jpg"}
+              src={competitionDetails.imageName || "/placeholder.jpg"}
               alt={competitionDetails.title}
               className="w-full h-80 object-cover"
               onError={(e) => {

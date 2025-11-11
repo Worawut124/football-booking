@@ -202,25 +202,15 @@ export default function AdminOrders() {
       return;
     }
 
-    // ตรวจสอบว่า slipImage เป็น URL หรือ base64 หรือ path
+    // ใช้ URL โดยตรงจาก Supabase
     let imageUrl = slipImage;
     
-    // ถ้าเป็น URL ภายนอก (http/https) ใช้ตามปกติ
-    if (slipImage.startsWith('http://') || slipImage.startsWith('https://')) {
-      imageUrl = slipImage;
-    }
-    // ถ้าเป็น path ของไฟล์ที่อัพโหลดในระบบ (เริ่มต้นด้วย /uploads/)
-    else if (slipImage.startsWith('/uploads/') || slipImage.startsWith('uploads/')) {
-      // สร้าง URL สำหรับไฟล์ที่อัพโหลด
-      const baseUrl = window.location.origin;
-      imageUrl = `${baseUrl}${slipImage.startsWith('/') ? '' : '/'}${slipImage}`;
-    }
     // ถ้าเป็น base64 string (เริ่มต้นด้วย data:)
-    else if (slipImage.startsWith('data:')) {
+    if (slipImage.startsWith('data:')) {
       imageUrl = slipImage;
     }
     // ถ้าเป็น base64 string ที่ไม่มี prefix
-    else {
+    else if (!slipImage.startsWith('http')) {
       imageUrl = `data:image/jpeg;base64,${slipImage}`;
     }
 

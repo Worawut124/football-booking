@@ -66,7 +66,7 @@ export default function AnnouncementDetail({ params }: { params: Promise<{ id: s
         <CardContent>
           {announcement.image ? (
             <img
-              src={announcement.image.startsWith('http') ? announcement.image : `/uploads/${announcement.image}`}
+              src={announcement.image}
               alt={announcement.title}
               className="w-full max-w-full object-cover rounded-md mb-4 sm:mb-6"
               onError={(e) => {

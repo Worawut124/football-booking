@@ -280,15 +280,15 @@ export default function PaymentConfigPage() {
                 </div>
                 <div>
                   <Label htmlFor="qrCode">QR Code ปัจจุบัน</Label>
-                  {paymentConfig?.qrCode && (
+                  {paymentConfig?.qrCode && paymentConfig.qrCode !== "/qrcode-placeholder.png" && (
                     <img
-                      src={
-                        paymentConfig.qrCode.startsWith("http")
-                          ? paymentConfig.qrCode
-                          : `/uploads/${paymentConfig.qrCode}`
-                      }
+                      src={paymentConfig.qrCode}
                       alt="QR Code"
                       className="w-40 h-40 mx-auto mt-2 rounded-md"
+                      onError={(e) => {
+                        console.error("Failed to load QR Code image:", paymentConfig.qrCode);
+                        e.currentTarget.style.display = 'none';
+                      }}
                     />
                   )}
                   {/* PromptPay Live Preview */}

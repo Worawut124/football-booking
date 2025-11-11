@@ -217,7 +217,7 @@ export default function HomePage() {
                   <div className="relative rounded-2xl overflow-hidden shadow-2xl">
                     {ann.image ? (
                       <img
-                        src={ann.image.startsWith('http') ? ann.image : `/uploads/${ann.image}`}
+                        src={ann.image}
                         alt={ann.title}
                         className="h-64 sm:h-96 w-full object-cover"
                         onError={(e) => {
@@ -383,7 +383,7 @@ export default function HomePage() {
                     <div className="relative overflow-hidden rounded-t-lg">
                       {ann.image ? (
                         <img
-                          src={ann.image.startsWith('http') ? ann.image : `/uploads/${ann.image}`}
+                          src={ann.image}
                           alt={ann.title}
                           className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
                           onError={(e) => {

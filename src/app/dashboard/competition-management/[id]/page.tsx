@@ -684,12 +684,7 @@ export default function CompetitionDetailPage() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => window.open(
-                                  reg.depositFileName!.startsWith('http') 
-                                    ? reg.depositFileName! 
-                                    : `/uploads/${encodeURIComponent(reg.depositFileName!)}`,
-                                  '_blank'
-                                )}
+                                onClick={() => window.open(reg.depositFileName!, '_blank')}
                                 className="bg-teal-50 border-teal-200 text-teal-700 hover:bg-teal-100 flex items-center gap-2"
                               >
                                 <Download className="h-4 w-4" />

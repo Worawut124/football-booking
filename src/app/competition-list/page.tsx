@@ -125,7 +125,7 @@ export default function CompetitionListPage() {
             <Card key={competition.id} className="group overflow-hidden shadow-xl border-0 bg-white hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2">
               <div className="relative overflow-hidden">
                 <img
-                  src={competition.imageName ? (competition.imageName.startsWith('http') ? competition.imageName : `/uploads/${competition.imageName}`) : "/placeholder.jpg"}
+                  src={competition.imageName || "/placeholder.jpg"}
                   alt={competition.title}
                   className="w-full h-56 object-cover transition-transform duration-300 group-hover:scale-110"
                 />

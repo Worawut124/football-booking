@@ -118,7 +118,7 @@ function PageInner() {
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-gray-800 mb-2">{competitionDetails.title}</h2>
           <img
-            src={competitionDetails.imageName ? (competitionDetails.imageName.startsWith('http') ? competitionDetails.imageName : `/uploads/${competitionDetails.imageName}`) : "/placeholder.jpg"}
+            src={competitionDetails.imageName || "/placeholder.jpg"}
             alt={competitionDetails.title}
             className="w-full h-64 object-cover mb-4 rounded"
           />
