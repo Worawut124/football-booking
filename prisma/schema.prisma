@@ -84,13 +84,14 @@ model PaymentConfig {
   id               Int      @id @default(autoincrement())
   qrCode           String?
   pricePerHour     Int
-  updatedAt        DateTime @updatedAt
   pricePerHalfHour Int      @default(0)
   accountName      String?
   accountNumber    String?
   bankName         String?
   promptPayId      String?  // PromptPay ID for QR code generation
   depositAmount    Int      @default(100) // Fixed deposit amount
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 }
 
 model Competition {
